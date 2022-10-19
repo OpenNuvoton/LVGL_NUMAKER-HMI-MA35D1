@@ -194,8 +194,8 @@ You can run windows batch script to download rtthread.bin into Raw NAND flash, t
 
 |Connector on board|Wiring|Usage|
 |-|-|-|
-|VCOM(CON21)|Use an USB line| rt-thread@RTP Console |
-|RS232_16(CON14)|Using an USB to RS232 convert| rt-thread@CA35 Console |
+|VCOM(CON21)|Use an USB line| rt-thread@CA35 Console |
+|RS232_16(CON14)|Using an USB to RS232 convert| rt-thread@RTP Console |
 
 You can use Tera Term terminate emulator (or other software) to type commands of RTT. All parameters of serial communication are shown in below image. Here, you can find out the corresponding port number of Nuvoton Virtual Com Port in window device manager.
 
