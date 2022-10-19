@@ -1,0 +1,22 @@
+[
+ {
+  "path": "/packages/multimedia/LVGL/LVGL", 
+  "ver": "latest", 
+  "name": "LVGL"
+ }, 
+ {
+  "path": "/packages/multimedia/wavplayer", 
+  "ver": "latest", 
+  "name": "WAVPLAYER"
+ }, 
+ {
+  "path": "/packages/system/ramdisk", 
+  "ver": "latest", 
+  "name": "RAMDISK"
+ }, 
+ {
+  "path": "/packages/misc/optparse", 
+  "ver": "latest", 
+  "name": "OPTPARSE"
+ }
+]

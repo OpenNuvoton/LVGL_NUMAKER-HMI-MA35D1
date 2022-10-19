@@ -1,0 +1,27 @@
+&bin_path="..\Debug\rtthread.bin"
+&image_path="..\Debug\rtthread.elf"
+=========================================================
+sys.res
+winclear
+TITLE "rtthread@MA35D1-AARCH32"
+do script\ca35_config.csf
+DEBUG.ShowDebugWindowTop ON
+screen.on
+sys.u
+
+;Init DDR
+do script\DDR3_256MB_1066MBPS_WINBOND_INIT_BY_DDR32PHY_1.csf
+b.res   ; Reset break point
+
+print "Start load rtthread elf..."
+data.load.elf &image_path /verify
+
+; Unlock
+data.set 0x404601A0 %long 0x00000059  
+data.set 0x404601A0 %long 0x00000016
+data.set 0x404601A0 %long 0x00000088
+
+print "Set PC..."
+SetPC 0x80400000
+
+print "Ready..."
