@@ -1,6 +1,6 @@
 board:
-  buy_url_cn: https://direct.nuvoton.com/tw/numaker-m467hj
-  buy_url_global: https://direct.nuvoton.com/tw/numaker-m467hj
+  buy_url_cn: https://direct.nuvoton.com/en/numaker-hmi-ma35d1-s1
+  buy_url_global: https://direct.nuvoton.com/en/numaker-hmi-ma35d1-s1
   debug_interface: SWD
   debugger: NU-LINK
   description_en: The NuMaker-HMI-MA35D1 is an evaluation board for Nuvoton NuMicro MA35D1 series microprocessors, 
@@ -14,7 +14,7 @@ board:
   sale_contact_global: https://www.nuvoton.com
   small_image: documents/images/small.png
   vendor: Nuvoton
-  version: v1.0
+  version: v2.0
 chip:
   chip_name: MA35D16A887C
   clock_source: HXT
@@ -37,7 +37,7 @@ features_zh:
 - 256MB DDR3L
 pkg_type: Board_Support_Packages
 pkg_vendor: Nuvoton
-pkg_version: 1.0.0
+pkg_version: 1.0.1
 template_projects:
 - builtin_files:
   - files_and_folders:
