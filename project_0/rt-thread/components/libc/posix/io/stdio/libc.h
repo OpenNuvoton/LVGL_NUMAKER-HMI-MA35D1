@@ -20,7 +20,7 @@ extern "C" {
 int libc_system_init(void);
 #ifdef RT_USING_POSIX_STDIO
 int libc_stdio_get_console(void);
-int libc_stdio_set_console(const char *device_name, int mode);
+int libc_stdio_set_console(const char* device_name, int mode);
 #endif /* RT_USING_POSIX_STDIO */
 
 #ifdef __cplusplus

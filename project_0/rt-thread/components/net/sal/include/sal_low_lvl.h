@@ -16,7 +16,7 @@
 #include <rtdevice.h>
 
 #ifdef SAL_USING_POSIX
-    #include <dfs_file.h>
+#include <dfs_file.h>
 #endif
 
 #ifdef __cplusplus
@@ -65,32 +65,32 @@ struct sal_socket
 /* network interface socket opreations */
 struct sal_socket_ops
 {
-    int (*socket)(int domain, int type, int protocol);
+    int (*socket)     (int domain, int type, int protocol);
     int (*closesocket)(int s);
-    int (*bind)(int s, const struct sockaddr *name, socklen_t namelen);
-    int (*listen)(int s, int backlog);
-    int (*connect)(int s, const struct sockaddr *name, socklen_t namelen);
-    int (*accept)(int s, struct sockaddr *addr, socklen_t *addrlen);
-    int (*sendto)(int s, const void *data, size_t size, int flags, const struct sockaddr *to, socklen_t tolen);
-    int (*recvfrom)(int s, void *mem, size_t len, int flags, struct sockaddr *from, socklen_t *fromlen);
-    int (*getsockopt)(int s, int level, int optname, void *optval, socklen_t *optlen);
-    int (*setsockopt)(int s, int level, int optname, const void *optval, socklen_t optlen);
-    int (*shutdown)(int s, int how);
+    int (*bind)       (int s, const struct sockaddr *name, socklen_t namelen);
+    int (*listen)     (int s, int backlog);
+    int (*connect)    (int s, const struct sockaddr *name, socklen_t namelen);
+    int (*accept)     (int s, struct sockaddr *addr, socklen_t *addrlen);
+    int (*sendto)     (int s, const void *data, size_t size, int flags, const struct sockaddr *to, socklen_t tolen);
+    int (*recvfrom)   (int s, void *mem, size_t len, int flags, struct sockaddr *from, socklen_t *fromlen);
+    int (*getsockopt) (int s, int level, int optname, void *optval, socklen_t *optlen);
+    int (*setsockopt) (int s, int level, int optname, const void *optval, socklen_t optlen);
+    int (*shutdown)   (int s, int how);
     int (*getpeername)(int s, struct sockaddr *name, socklen_t *namelen);
     int (*getsockname)(int s, struct sockaddr *name, socklen_t *namelen);
     int (*ioctlsocket)(int s, long cmd, void *arg);
 #ifdef SAL_USING_POSIX
-    int (*poll)(struct dfs_fd *file, struct rt_pollreq *req);
+    int (*poll)       (struct dfs_fd *file, struct rt_pollreq *req);
 #endif
 };
 
 /* sal network database name resolving */
 struct sal_netdb_ops
 {
-    struct hostent *(*gethostbyname)(const char *name);
-    int (*gethostbyname_r)(const char *name, struct hostent *ret, char *buf, size_t buflen, struct hostent **result, int *h_errnop);
-    int (*getaddrinfo)(const char *nodename, const char *servname, const struct addrinfo *hints, struct addrinfo **res);
-    void (*freeaddrinfo)(struct addrinfo *ai);
+    struct hostent* (*gethostbyname)  (const char *name);
+    int             (*gethostbyname_r)(const char *name, struct hostent *ret, char *buf, size_t buflen, struct hostent **result, int *h_errnop);
+    int             (*getaddrinfo)    (const char *nodename, const char *servname, const struct addrinfo *hints, struct addrinfo **res);
+    void            (*freeaddrinfo)   (struct addrinfo *ai);
 };
 
 struct sal_proto_family

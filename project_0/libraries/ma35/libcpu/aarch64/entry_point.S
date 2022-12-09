@@ -1,212 +1,182 @@
 /*
- * Copyright (c) 2006-2020, RT-Thread Development Team
+ * Copyright (c) 2006-2022, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Date           Author       Notes
- * 2021-06-29     Wayne        the first version
+ * 2020-01-15     bigmagic     the first version
+ * 2020-08-10     SummerGift   support clang compiler
+ * 2021-11-04     GuEe-GUI     set sp with SP_ELx
+ * 2021-12-28     GuEe-GUI     add smp support
  */
 
-/* GICv2 - Distributor Registers */
-#define GICD_CTLR        0x0000
-#define GICD_TYPER       0x0004
-#define GICD_IIDR        0x0008
-#define GICD_STATUSR     0x0010
-#define GICD_SETSPI_NSR  0x0040
-#define GICD_CLRSPI_NSR  0x0048
-#define GICD_SETSPI_SR   0x0050
-#define GICD_CLRSPI_SR   0x0058
-#define GICD_SEIR        0x0068
-#define GICD_IGROUPRn    0x0080
-#define GICD_ISENABLERn  0x0100
-#define GICD_ICENABLERn  0x0180
-#define GICD_ISPENDRn    0x0200
-#define GICD_ICPENDRn    0x0280
-#define GICD_ISACTIVERn  0x0300
-#define GICD_ICACTIVERn  0x0380
-#define GICD_IPRIORITYRn 0x0400
-#define GICD_ITARGETSRn  0x0800
-#define GICD_ICFGR       0x0c00
-#define GICD_IGROUPMODRn 0x0d00
-#define GICD_NSACRn      0x0e00
-#define GICD_SGIR        0x0f00
-#define GICD_CPENDSGIRn  0x0f10
-#define GICD_SPENDSGIRn  0x0f20
-#define GICD_IROUTERn    0x6000
+#include "rtconfig.h"
 
-/* GICv2 - CPU Interface Memory Mapped Registers */
-#define GICC_CTLR        0x0000
-#define GICC_PMR         0x0004
-#define GICC_BPR         0x0008
-#define GICC_IAR         0x000C
-#define GICC_EOIR        0x0010
-#define GICC_RPR         0x0014
-#define GICC_HPPIR       0x0018
-#define GICC_ABPR        0x001c
-#define GICC_AIAR        0x0020
-#define GICC_AEOIR       0x0024
-#define GICC_AHPPIR      0x0028
-#define GICC_APRn        0x00d0
-#define GICC_NSAPRn      0x00e0
-#define GICC_IIDR        0x00fc
-#define GICC_DIR         0x1000
+#define SECONDARY_STACK_SIZE 4096
 
-.section ".text.entrypoint"
-.global _start
+.section ".text.entrypoint","ax"
 
+.globl _start
+.globl secondary_cpu_start
 _start:
-    /*=============================================================*/
-    /*      Read CPU id                                            */
-    /*      Primary core(id=0): Help Secondary core leaving.       */
-    /*      Secondary core(id>0): Notice 'Ready' to Primary core.  */
-    /*=============================================================*/
-    /* MPIDR_EL1: Multi-Processor Affinity Register */
+#ifdef RT_USING_SMP
     mrs     x1, mpidr_el1
-    and     x1, x1, #3
-    cbz     x1, .L__cpu_0
+    adr     x4, .boot_cpu_mpidr
+    str     x1, [x4]
+    dsb     sy
+#endif
 
-.L__current_cpu_idle:
-    /*=============================================================*/
-    /*      Secondary CPUs                                         */
-    /*=============================================================*/
-    wfe
-    b       .L__current_cpu_idle
+    bl      __asm_flush_dcache_all  /* The kernel and data must flush to DDR */
 
-.L__cpu_0:
+secondary_cpu_start:
+#ifdef RT_USING_SMP
+    adr     x4, .boot_cpu_mpidr
+    ldr     x4, [x4]
+    dsb     sy
+    /* Read cpu mpidr_el1 */
+    mrs     x1, mpidr_el1
 
-    /*=============================================================*/
-    /*      Initialize Gtimer. Set frequency to 12MHz.             */
-    /*=============================================================*/
-    mov     x0, #0x1B00
-    movk    x0, #0xB7, LSL #16
-    msr     CNTFRQ_EL0, x0
+    /* Read cpu id */
+    ldr     x0, =rt_cpu_mpidr_early /* BSP must be defined `rt_cpu_mpidr_early' table in smp */
+    mov     x2, #0
 
-    /*=============================================================*/
-    /*      Enable GICv2.                                          */
-    /*      Assign all IRQs to secure group.                       */
-    /*=============================================================*/
-    /* Route to secure Group */
-    mov     x0, #0x1000
-    movk    x0, #0x5080, LSL #16
-    mov     w9, #0x3
-    str     w9, [x0, GICD_CTLR]
-    ldr     w9, [x0, GICD_TYPER]
-    and     w10, w9, #0x1f
-    cbz     w10, 1f
-    add     x11, x0, GICD_IGROUPRn
-    mov     w9, #0
-    str     w9, [x11], #0x04
-0:  str     w9, [x11], #0x04
-    sub     w10,  w10, #0x1
-    cbnz    w10,  0b
+cpu_id_confirm:
+    add     x2, x2, #1              /* Next cpu id inc */
+    ldr     x3, [x0], #8
+    dsb     sy
+    cmp     x3, #0
+    beq     cpu_idle                /* Mean that `rt_cpu_mpidr_early' table is end */
+    cmp     x3, x1
+    bne     cpu_id_confirm
 
-    mov     x1, #0x2000
-    movk    x1, #0x5080, LSL #16
-    mov     w0,  #3
-    str     w0,  [x1]
+    /* Get cpu id success */
+    sub     x0, x2, #1
+    msr     tpidr_el1, x0           /* Save cpu id global */
+    cmp     x3, x4                  /* If it is boot cpu */
+    beq     boot_cpu_setup
 
-    mov     w0, #1 << 7
-    str     w0, [x1, #4]
-1:
-    mov     x0, #0x1000
-    movk    x0, #0x5080, LSL #16
-    mov     x1, #0x2000
-    movk    x1, #0x5080, LSL #16
+    /* Set current cpu's stack top */
+    sub     x0, x0, #1
+    mov     x1, #SECONDARY_STACK_SIZE
+    adr     x2, .secondary_cpu_stack_top
+    msub    x1, x0, x1, x2
 
-    mov     w9, #0
-    str     w9, [x0, GICD_IGROUPRn]
-    mov     w9, #0x1
-    str     w9, [x0, GICD_ISENABLERn]
+    b       cpu_check_el
+#else
+    msr     tpidr_el1, xzr
+#endif /* RT_USING_SMP */
 
-    mov     w9, #0x1e7
-    str     w9, [x1, GICC_CTLR]
+boot_cpu_setup:
+    ldr     x1, =_start
 
-    mov     w9, #0x1 << 7
-    str     w9, [x1, GICC_PMR]
+cpu_check_el:
+    mrs     x0, CurrentEL           /* CurrentEL Register. bit 2, 3. Others reserved */
+    and     x0, x0, #12             /* Clear reserved bits */
 
-    /*=============================================================*/
-    /*      Enable the SMP bit.                                    */
-    /*=============================================================*/
-    mrs x0, S3_1_C15_C2_1
-    orr x0, x0, #(1<<6)
-    msr S3_1_C15_C2_1, x0
+    /* Running at EL3? */
+    cmp     x0, #12                 /* EL3 value is 0b1100 */
+    bne     cpu_not_in_el3
 
-    /*=============================================================*/
-    /*      Enable FP/SIMD at EL1                                  */
-    /*=============================================================*/
-    mov	x0, #(3 << 20)
-    msr	cpacr_el1, x0               /* Enable FP/SIMD at EL1 */
+    /* Should never be executed, just for completeness. (EL3) */
+    mov     x2, #(1 << 0)           /* EL0 and EL1 are in Non-Secure state */
+    orr     x2, x2, #(1 << 4)       /* RES1 */
+    orr     x2, x2, #(1 << 5)       /* RES1 */
+    bic     x2, x2, #(1 << 7)       /* SMC instructions are enabled at EL1 and above */
+    orr     x2, x2, #(1 << 8)       /* HVC instructions are enabled at EL1 and above */
+    orr     x2, x2, #(1 << 10)      /* The next lower level is AArch64 */
+    msr     scr_el3, x2
 
-    /*=============================================================*/
-    /*      Initialize sctlr_el1                                   */
-    /*=============================================================*/
-    mov x0, xzr
-    orr x0, x0, #(1 << 29)          /* Enable LSMAOE at EL1 */
-    orr x0, x0, #(1 << 28)          /* Enable nTLSMD at EL1 */
-    orr x0, x0, #(1 << 23)          /* Enable SPAN at EL1 */
-    orr x0, x0, #(1 << 22)          /* Enable EIS at EL1 */
-    orr x0, x0, #(1 << 20)          /* Enable TSCXT at EL1 */
-    orr x0, x0, #(1 << 11)          /* Enable EOS at EL1 */
-    msr sctlr_el1, x0
-
-    /*=============================================================*/
-    /*      Initialize scr_el3                                     */
-    /*=============================================================*/
-    mov x0, xzr
-    orr x0, x0, #(1 << 10)          /* Enable AARCH64 */
-    orr x0, x0, #(1 << 9)           /* Enable SIF */
-    orr x0, x0, #(1 << 8)           /* Enable HCE */
-    orr x0, x0, #(1 << 7)           /* Enable SMD */
-    orr x0, x0, #(1 << 5)           /* RES1[5:4] */
-    orr x0, x0, #(1 << 4)
-    /* Disable FIQ routing */
-    /* Disable IRQ routing */
-    /* Disable NS */
-    msr scr_el3, x0
-
-    /*=============================================================*/
-    /*      Initialize spsr_el3                                    */
-    /*=============================================================*/
-    mov x0, xzr
-    mov x0, #0b00101          /* AARCH64_EL1 */
-    orr x0, x0, #(1 << 8)     /* Enable SError and External Abort. */
-    orr x0, x0, #(1 << 7)     /* IRQ interrupt Process state mask. */
-    orr x0, x0, #(1 << 6)     /* FIQ interrupt Process state mask. */
-    msr spsr_el3, x0
-
-    /*=============================================================*/
-    /*      Initialize elr_el3                                     */
-    /*      Jump to Secure EL1 from EL3.                   */
-    /*=============================================================*/
-    adr x0, .aarch64_code     /* Exception return to aarch64_code  */
-    msr elr_el3, x0
+    mov     x2, #9                  /* Next level is 0b1001->EL2h */
+    orr     x2, x2, #(1 << 6)       /* Mask FIQ */
+    orr     x2, x2, #(1 << 7)       /* Mask IRQ */
+    orr     x2, x2, #(1 << 8)       /* Mask SError */
+    orr     x2, x2, #(1 << 9)       /* Mask Debug Exception */
+    msr     spsr_el3, x2
+    adr     x2, cpu_in_el2
+    msr     elr_el3, x2
     eret
 
-.aarch64_code:
+cpu_not_in_el3:                     /* Running at EL2 or EL1 */
+    cmp     x0, #4                  /* EL1 = 0100 */
+    beq     cpu_in_el1
+
+cpu_in_el2:
+    /* Enable CNTP for EL1 */
+    mrs     x0, cnthctl_el2         /* Counter-timer Hypervisor Control register */
+    orr     x0, x0, #3
+    msr     cnthctl_el2, x0
+    msr     cntvoff_el2, xzr
+
+    mov     x0, #(1 << 31)          /* Enable AArch64 in EL1 */
+    orr     x0, x0, #(1 << 1)       /* SWIO hardwired on Pi3 */
+    msr     hcr_el2, x0
+
+    mov     x2, #5                  /* Next level is 0b0101->EL1h */
+    orr     x2, x2, #(1 << 6)       /* Mask FIQ */
+    orr     x2, x2, #(1 << 7)       /* Mask IRQ */
+    orr     x2, x2, #(1 << 8)       /* Mask SError */
+    orr     x2, x2, #(1 << 9)       /* Mask Debug Exception */
+    msr     spsr_el2, x2
+    adr     x2, cpu_in_el1
+    msr     elr_el2, x2
+    eret
+
+cpu_in_el1:
+    msr     spsel, #1
+    mov     sp, x1                  /* Set sp in el1 */
+
+    /* Avoid trap from SIMD or float point instruction */
+    mov     x1, #0x00300000         /* Don't trap any SIMD/FP instructions in both EL0 and EL1 */
+    msr     cpacr_el1, x1
+
+    mrs     x1, sctlr_el1
+    orr     x1, x1, #(1 << 12)      /* Enable Instruction */
+    bic     x1, x1, #(3 << 3)       /* Disable SP Alignment check */
+    bic     x1, x1, #(1 << 1)       /* Disable Alignment check */
+    msr     sctlr_el1, x1
+
+#ifdef RT_USING_SMP
     ldr     x1, =_start
-    mov     sp, x1
+    cmp     sp, x1
+    bne     secondary_cpu_c_start
+#endif /* RT_USING_SMP */
 
-    /*=============================================================*/
-    /*      clear bbs                                             */
-    /*=============================================================*/
-    ldr     x1, =__bss_start
-    ldr     w2, =__bss_size
+    ldr     x0, =__bss_start
+    ldr     x1, =__bss_end
+    sub     x2, x1, x0
+    mov     x3, x1
+    cmp     x2, #7
+    bls     clean_bss_check
 
-.L__clean_bss_loop:
-    cbz     w2, .L__jump_to_entry
-    str     xzr, [x1], #8
-    sub     w2, w2, #1
-    cbnz    w2, .L__clean_bss_loop
+clean_bss_loop_quad:
+    str     xzr, [x0], #8
+    sub     x2, x3, x0
+    cmp     x2, #7
+    bhi     clean_bss_loop_quad
+    cmp     x1, x0
+    bls     jump_to_entry
 
-    /*=============================================================*/
-    /*     jump to C code                                          */
-    /*=============================================================*/
-.L__jump_to_entry:
+clean_bss_loop_byte:
+    str     xzr, [x0], #1
 
-    bl      entry
+clean_bss_check:
+    cmp     x1, x0
+    bhi     clean_bss_loop_byte
 
-    /*=============================================================*/
-    /*     for failsafe, halt this core too                        */
-    /*=============================================================*/
+jump_to_entry:
+    b       rtthread_startup
 
-    b       .L__current_cpu_idle
+cpu_idle:
+    wfe
+    b       cpu_idle
+
+#ifdef RT_USING_SMP
+.align 3
+.boot_cpu_mpidr:
+    .quad 0x0
+
+.align 12
+.secondary_cpu_stack:
+.space (SECONDARY_STACK_SIZE * (RT_CPUS_NR - 1))
+.secondary_cpu_stack_top:
+#endif

@@ -31,7 +31,7 @@ struct part_flash_info
 
 /* check partition table definition */
 #if !defined(FAL_PART_TABLE)
-    #error "You must defined FAL_PART_TABLE on 'fal_cfg.h'"
+#error "You must defined FAL_PART_TABLE on 'fal_cfg.h'"
 #endif
 
 /* partition table definition */
@@ -43,12 +43,12 @@ static struct part_flash_info part_flash_cache[sizeof(partition_table_def) / siz
 #else /* FAL_PART_HAS_TABLE_CFG */
 
 #if !defined(FAL_PART_TABLE_FLASH_DEV_NAME)
-    #error "You must defined FAL_PART_TABLE_FLASH_DEV_NAME on 'fal_cfg.h'"
+#error "You must defined FAL_PART_TABLE_FLASH_DEV_NAME on 'fal_cfg.h'"
 #endif
 
 /* check partition table end offset address definition */
 #if !defined(FAL_PART_TABLE_END_OFFSET)
-    #error "You must defined FAL_PART_TABLE_END_OFFSET on 'fal_cfg.h'"
+#error "You must defined FAL_PART_TABLE_END_OFFSET on 'fal_cfg.h'"
 #endif
 
 static struct fal_partition *partition_table = NULL;
@@ -84,7 +84,7 @@ void fal_show_part_table(void)
     }
     log_i("==================== FAL partition table ====================");
     log_i("| %-*.*s | %-*.*s |   offset   |    length  |", part_name_max, FAL_DEV_NAME_MAX, item1, flash_dev_name_max,
-          FAL_DEV_NAME_MAX, item2);
+            FAL_DEV_NAME_MAX, item2);
     log_i("-------------------------------------------------------------");
     for (i = 0; i < partition_table_len; i++)
     {
@@ -96,7 +96,7 @@ void fal_show_part_table(void)
 #endif
 
         log_i("| %-*.*s | %-*.*s | 0x%08lx | 0x%08x |", part_name_max, FAL_DEV_NAME_MAX, part->name, flash_dev_name_max,
-              FAL_DEV_NAME_MAX, part->flash_name, part->offset, part->len);
+                FAL_DEV_NAME_MAX, part->flash_name, part->offset, part->len);
     }
     log_i("=============================================================");
 }
@@ -131,7 +131,7 @@ static int check_and_update_part_cache(const struct fal_partition *table, size_t
         if (table[i].offset >= (long)flash_dev->len)
         {
             log_e("Initialize failed! Partition(%s) offset address(%ld) out of flash bound(<%d).",
-                  table[i].name, table[i].offset, flash_dev->len);
+                    table[i].name, table[i].offset, flash_dev->len);
             partition_table_len = 0;
 
             return -1;
@@ -209,7 +209,7 @@ int fal_partition_init(void)
                         part_table_find_ok = 1;
                         part_table_offset += i;
                         log_d("Find the partition table on '%s' offset @0x%08lx.", FAL_PART_TABLE_FLASH_DEV_NAME,
-                              part_table_offset);
+                                part_table_offset);
                         break;
                     }
                 }
@@ -250,7 +250,7 @@ int fal_partition_init(void)
     {
         memset(new_part, 0x00, table_num);
         if (flash_dev->ops.read(part_table_offset - table_item_size * (table_num), (uint8_t *) new_part,
-                                table_item_size) < 0)
+                table_item_size) < 0)
         {
             log_e("Initialize failed! Flash device (%s) read error!", flash_dev->name);
             table_num = 0;
@@ -278,7 +278,7 @@ int fal_partition_init(void)
     if (table_num == 0)
     {
         log_e("Partition table NOT found on flash: %s (len: %d) from offset: 0x%08x.", FAL_PART_TABLE_FLASH_DEV_NAME,
-              FAL_DEV_NAME_MAX, FAL_PART_TABLE_END_OFFSET);
+                FAL_DEV_NAME_MAX, FAL_PART_TABLE_END_OFFSET);
         goto _exit;
     }
     else

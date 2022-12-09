@@ -24,8 +24,7 @@ typedef unsigned int tcflag_t;
 
 #define NCCS 32
 
-struct termios
-{
+struct termios {
     tcflag_t c_iflag;
     tcflag_t c_oflag;
     tcflag_t c_cflag;
@@ -188,20 +187,20 @@ struct termios
 
 #define XTABS  0014000
 
-speed_t cfgetospeed(const struct termios *);
-speed_t cfgetispeed(const struct termios *);
-int cfsetospeed(struct termios *, speed_t);
-int cfsetispeed(struct termios *, speed_t);
+speed_t cfgetospeed (const struct termios *);
+speed_t cfgetispeed (const struct termios *);
+int cfsetospeed (struct termios *, speed_t);
+int cfsetispeed (struct termios *, speed_t);
 
-int tcgetattr(int, struct termios *);
-int tcsetattr(int, int, const struct termios *);
+int tcgetattr (int, struct termios *);
+int tcsetattr (int, int, const struct termios *);
 
-int tcsendbreak(int, int);
-int tcdrain(int);
-int tcflush(int, int);
-int tcflow(int, int);
+int tcsendbreak (int, int);
+int tcdrain (int);
+int tcflush (int, int);
+int tcflow (int, int);
 
-pid_t tcgetsid(int);
+pid_t tcgetsid (int);
 
 void cfmakeraw(struct termios *);
 int cfsetspeed(struct termios *, speed_t);

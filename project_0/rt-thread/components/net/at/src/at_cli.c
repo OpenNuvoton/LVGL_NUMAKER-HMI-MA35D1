@@ -25,8 +25,8 @@ static struct rt_ringbuffer *console_rx_fifo = RT_NULL;
 static rt_err_t (*odev_rx_ind)(rt_device_t dev, rt_size_t size) = RT_NULL;
 
 #ifdef AT_USING_CLIENT
-    static struct rt_semaphore client_rx_notice;
-    static struct rt_ringbuffer *client_rx_fifo = RT_NULL;
+static struct rt_semaphore client_rx_notice;
+static struct rt_ringbuffer *client_rx_fifo = RT_NULL;
 #endif
 
 static char console_getchar(void)
@@ -113,7 +113,7 @@ static void server_cli_parser(void)
     at_server_t server = at_get_server();
     rt_base_t level;
     static rt_device_t device_bak;
-    static rt_err_t (*getchar_bak)(struct at_server * server, char *ch, rt_int32_t timeout);
+    static rt_err_t (*getchar_bak)(struct at_server *server, char *ch, rt_int32_t timeout);
     static char endmark_back[AT_END_MARK_LEN];
 
     /* backup server device and getchar function */
@@ -177,7 +177,7 @@ static void at_client_entry(void *param)
 {
     char ch;
 
-    while (1)
+    while(1)
     {
         ch = client_getchar();
         rt_kprintf("%c", ch);
@@ -264,7 +264,7 @@ static void client_cli_parser(at_client_t  client)
                 }
                 else
                 {
-                    if (cur_line_len >= FINSH_CMD_SIZE)
+                    if(cur_line_len >= FINSH_CMD_SIZE)
                     {
                         continue;
                     }
@@ -350,6 +350,6 @@ static void at(int argc, char **argv)
 
     at_cli_deinit();
 }
-MSH_CMD_EXPORT(at, RT - Thread AT component cli: at < server | client [dev_name] >);
+MSH_CMD_EXPORT(at, RT-Thread AT component cli: at <server|client [dev_name]>);
 
 #endif /* AT_USING_CLI */

@@ -22,16 +22,16 @@ static rt_err_t _pwm_control(rt_device_t dev, int cmd, void *args)
 
     switch (cmd)
     {
-    case PWMN_CMD_ENABLE:
-        configuration->complementary = RT_TRUE;
-        break;
-    case PWMN_CMD_DISABLE:
-        configuration->complementary = RT_FALSE;
-        break;
-    default:
-        if (pwm->ops->control)
-            result = pwm->ops->control(pwm, cmd, args);
-        break;
+        case PWMN_CMD_ENABLE:
+            configuration->complementary = RT_TRUE;
+            break;
+        case PWMN_CMD_DISABLE:
+            configuration->complementary = RT_FALSE;
+            break;
+        default:
+            if(pwm->ops->control)
+                result = pwm->ops->control(pwm, cmd, args);
+            break;
     }
 
     return result;
@@ -153,7 +153,7 @@ rt_err_t rt_pwm_enable(struct rt_device_pwm *device, int channel)
 
     /* If channel is a positive number (0 ~ n), it means using normal output pin.
      * If channel is a negative number (0 ~ -n), it means using complementary output pin. */
-    if (channel > 0)
+    if(channel > 0)
     {
         result = rt_device_control(&device->parent, PWMN_CMD_DISABLE, &configuration);
     }
@@ -182,7 +182,7 @@ rt_err_t rt_pwm_disable(struct rt_device_pwm *device, int channel)
 
     /* If channel is a positive number (0 ~ n), it means using normal output pin.
      * If channel is a negative number (0 ~ -n), it means using complementary output pin. */
-    if (channel > 0)
+    if(channel > 0)
     {
         result = rt_device_control(&device->parent, PWMN_CMD_DISABLE, &configuration);
     }
@@ -308,11 +308,11 @@ static int pwm(int argc, char **argv)
     static struct rt_device_pwm *pwm_device = RT_NULL;
     struct rt_pwm_configuration cfg = {0};
 
-    if (argc > 1)
+    if(argc > 1)
     {
-        if (!strcmp(argv[1], "probe"))
+        if(!strcmp(argv[1], "probe"))
         {
-            if (argc == 3)
+            if(argc == 3)
             {
                 pwm_device = (struct rt_device_pwm *)rt_device_find(argv[2]);
                 result_str = (pwm_device == RT_NULL) ? "failure" : "success";
@@ -325,14 +325,14 @@ static int pwm(int argc, char **argv)
         }
         else
         {
-            if (pwm_device == RT_NULL)
+            if(pwm_device == RT_NULL)
             {
                 rt_kprintf("Please using 'pwm probe <device name>' first.\n");
                 return -RT_ERROR;
             }
-            if (!strcmp(argv[1], "enable"))
+            if(!strcmp(argv[1], "enable"))
             {
-                if (argc == 3)
+                if(argc == 3)
                 {
                     result = rt_pwm_enable(pwm_device, atoi(argv[2]));
                     result_str = (result == RT_EOK) ? "success" : "failure";
@@ -345,9 +345,9 @@ static int pwm(int argc, char **argv)
                     rt_kprintf("    e.g. MSH >pwm enable -1              - PWM_CH1N complememtary\n");
                 }
             }
-            else if (!strcmp(argv[1], "disable"))
+            else if(!strcmp(argv[1], "disable"))
             {
-                if (argc == 3)
+                if(argc == 3)
                 {
                     result = rt_pwm_disable(pwm_device, atoi(argv[2]));
                 }
@@ -356,16 +356,16 @@ static int pwm(int argc, char **argv)
                     rt_kprintf("pwm disable <channel>                    - disable pwm channel\n");
                 }
             }
-            else if (!strcmp(argv[1], "get"))
+            else if(!strcmp(argv[1], "get"))
             {
                 cfg.channel = atoi(argv[2]);
                 result = rt_pwm_get(pwm_device, &cfg);
-                if (result == RT_EOK)
+                if(result == RT_EOK)
                 {
-                    rt_kprintf("Info of device [%s] channel [%d]:\n", pwm_device, atoi(argv[2]));
+                    rt_kprintf("Info of device [%s] channel [%d]:\n",pwm_device, atoi(argv[2]));
                     rt_kprintf("period      : %d\n", cfg.period);
                     rt_kprintf("pulse       : %d\n", cfg.pulse);
-                    rt_kprintf("Duty cycle  : %d%%\n", (int)(((double)(cfg.pulse) / (cfg.period)) * 100));
+                    rt_kprintf("Duty cycle  : %d%%\n",(int)(((double)(cfg.pulse)/(cfg.period)) * 100));
                 }
                 else
                 {
@@ -374,10 +374,10 @@ static int pwm(int argc, char **argv)
             }
             else if (!strcmp(argv[1], "set"))
             {
-                if (argc == 5)
+                if(argc == 5)
                 {
                     result = rt_pwm_set(pwm_device, atoi(argv[2]), atoi(argv[3]), atoi(argv[4]));
-                    rt_kprintf("pwm info set on %s at channel %d\n", pwm_device, (rt_base_t)atoi(argv[2]));
+                    rt_kprintf("pwm info set on %s at channel %d\n",pwm_device,(rt_base_t)atoi(argv[2]));
                 }
                 else
                 {
@@ -385,20 +385,20 @@ static int pwm(int argc, char **argv)
                     rt_kprintf("Usage: pwm set <channel> <period> <pulse>\n");
                 }
             }
-            else if (!strcmp(argv[1], "phase"))
+            else if(!strcmp(argv[1], "phase"))
             {
-                if (argc == 4)
+                if(argc == 4)
                 {
-                    result = rt_pwm_set_phase(pwm_device, atoi(argv[2]), atoi(argv[3]));
+                    result = rt_pwm_set_phase(pwm_device, atoi(argv[2]),atoi(argv[3]));
                     result_str = (result == RT_EOK) ? "success" : "failure";
                     rt_kprintf("%s phase is set %d \n", pwm_device->parent.parent.name, (rt_base_t)atoi(argv[3]));
                 }
             }
-            else if (!strcmp(argv[1], "dead_time"))
+            else if(!strcmp(argv[1], "dead_time"))
             {
-                if (argc == 4)
+                if(argc == 4)
                 {
-                    result = rt_pwm_set_dead_time(pwm_device, atoi(argv[2]), atoi(argv[3]));
+                    result = rt_pwm_set_dead_time(pwm_device, atoi(argv[2]),atoi(argv[3]));
                     result_str = (result == RT_EOK) ? "success" : "failure";
                     rt_kprintf("%s dead_time is set %d \n", pwm_device->parent.parent.name, (rt_base_t)atoi(argv[3]));
                 }

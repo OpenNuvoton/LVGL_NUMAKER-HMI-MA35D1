@@ -15,8 +15,7 @@
 
 #include <rtthread.h>
 
-namespace rtthread
-{
+namespace rtthread {
 
 /**
  * The Mail class allow to control, send, receive, or wait for mail.
@@ -26,8 +25,7 @@ namespace rtthread
  */
 
 template<typename T, uint32_t queue_sz>
-class Mail
-{
+class Mail {
 public:
     /** Create and Initialise Mail queue. */
     Mail(const char *name = "")
@@ -60,7 +58,7 @@ public:
       @param   millisec  timeout value or 0 in case of no time-out. (default: osWaitForever).
       @return  event that contains mail information or error code.
     */
-    T *get(int32_t millisec = -1)
+    T* get(int32_t millisec = -1)
     {
         T *t = NULL;
         rt_int32_t tick;
@@ -77,7 +75,7 @@ public:
 
 private:
     struct rt_mailbox mID;
-    T *mPool[queue_sz];
+    T* mPool[queue_sz];
 };
 
 }

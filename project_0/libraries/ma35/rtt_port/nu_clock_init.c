@@ -191,11 +191,11 @@ static void nu_clock_i2s_init(void)
 {
 #if defined(BSP_USING_I2S0)
     CLK_EnableModuleClock(I2S0_MODULE);
-    CLK_SetModuleClock(I2S0_MODULE, CLK_CLKSEL4_I2S0SEL_SYSCLK1_DIV2, MODULE_NoMsk);
+    CLK_SetModuleClock(I2S0_MODULE, CLK_CLKSEL4_I2S0SEL_APLL, MODULE_NoMsk);
 #endif
 #if defined(BSP_USING_I2S1)
     CLK_EnableModuleClock(I2S1_MODULE);
-    CLK_SetModuleClock(I2S1_MODULE, CLK_CLKSEL4_I2S1SEL_SYSCLK1_DIV2, MODULE_NoMsk);
+    CLK_SetModuleClock(I2S1_MODULE, CLK_CLKSEL4_I2S1SEL_APLL, MODULE_NoMsk);
 #endif
 }
 

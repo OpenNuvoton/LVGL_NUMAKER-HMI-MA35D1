@@ -29,7 +29,7 @@
 #include <rthw.h>
 
 #ifdef RT_USING_MODULE
-    #include <dlmodule.h>
+#include <dlmodule.h>
 #endif /* RT_USING_MODULE */
 
 /* use precision */
@@ -45,17 +45,17 @@
 static volatile int __rt_errno;
 
 #if defined(RT_USING_DEVICE) && defined(RT_USING_CONSOLE)
-    static rt_device_t _console_device = RT_NULL;
+static rt_device_t _console_device = RT_NULL;
 #endif
 
 RT_WEAK void rt_hw_us_delay(rt_uint32_t us)
 {
     (void) us;
     RT_DEBUG_LOG(RT_DEBUG_DEVICE, ("rt_hw_us_delay() doesn't support for this board."
-                                   "Please consider implementing rt_hw_us_delay() in another file.\n"));
+        "Please consider implementing rt_hw_us_delay() in another file.\n"));
 }
 
-static const char *rt_errno_strs[] =
+static const char* rt_errno_strs[] =
 {
     "OK",
     "ERROR",
@@ -207,7 +207,7 @@ RT_WEAK void *rt_memset(void *s, int c, rt_ubase_t count)
          */
         for (i = 0; i < LBLOCKSIZE; i++)
         {
-            *(((unsigned char *)&buffer) + i) = d;
+            *(((unsigned char *)&buffer)+i) = d;
         }
 
         while (count >= LBLOCKSIZE * 4)
@@ -479,8 +479,7 @@ char *rt_strncpy(char *dst, const char *src, rt_size_t n)
                     *d++ = 0;
                 break;
             }
-        }
-        while (--n != 0);
+        } while (--n != 0);
     }
 
     return (dst);
@@ -659,20 +658,20 @@ RTM_EXPORT(rt_show_version);
  * @return the duplicated string pointer.
  */
 #ifdef RT_KPRINTF_USING_LONGLONG
-    rt_inline int divide(long long *n, int base)
+rt_inline int divide(long long *n, int base)
 #else
-    rt_inline int divide(long *n, int base)
+rt_inline int divide(long *n, int base)
 #endif /* RT_KPRINTF_USING_LONGLONG */
 {
     int res;
 
     /* optimized for processor which does not support divide instructions. */
 #ifdef RT_KPRINTF_USING_LONGLONG
-    res = (int)(((unsigned long long) * n) % base);
-    *n = (long long)(((unsigned long long) * n) / base);
+    res = (int)(((unsigned long long)*n) % base);
+    *n = (long long)(((unsigned long long)*n) / base);
 #else
-    res = (int)(((unsigned long) * n) % base);
-    *n = (long)(((unsigned long) * n) / base);
+    res = (int)(((unsigned long)*n) % base);
+    *n = (long)(((unsigned long)*n) / base);
 #endif
 
     return res;
@@ -698,14 +697,14 @@ rt_inline int skip_atoi(const char **s)
 static char *print_number(char *buf,
                           char *end,
 #ifdef RT_KPRINTF_USING_LONGLONG
-    long long  num,
+                          long long  num,
 #else
-    long  num,
+                          long  num,
 #endif /* RT_KPRINTF_USING_LONGLONG */
                           int   base,
                           int   s,
 #ifdef RT_PRINTF_PRECISION
-    int   precision,
+                          int   precision,
 #endif /* RT_PRINTF_PRECISION */
                           int   type)
 {
@@ -1369,7 +1368,7 @@ void rt_free_sethook(void (*hook)(void *ptr))
 
 #if defined(RT_USING_HEAP_ISR)
 #elif defined(RT_USING_MUTEX)
-    static struct rt_mutex _lock;
+static struct rt_mutex _lock;
 #endif
 
 rt_inline void _heap_lock_init(void)
@@ -1411,7 +1410,7 @@ rt_inline void _heap_unlock(rt_base_t level)
 #if defined(RT_USING_SMALL_MEM_AS_HEAP)
 static rt_smem_t system_heap;
 rt_inline void _smem_info(rt_size_t *total,
-                          rt_size_t *used, rt_size_t *max_used)
+    rt_size_t *used, rt_size_t *max_used)
 {
     if (total)
         *total = system_heap->total;
@@ -1448,7 +1447,7 @@ void *_memheap_realloc(struct rt_memheap *heap, void *rmem, rt_size_t newsize);
 #elif defined(RT_USING_SLAB_AS_HEAP)
 static rt_slab_t system_heap;
 rt_inline void _slab_info(rt_size_t *total,
-                          rt_size_t *used, rt_size_t *max_used)
+    rt_size_t *used, rt_size_t *max_used)
 {
     if (total)
         *total = system_heap->total;
@@ -1663,7 +1662,7 @@ RT_WEAK void *rt_malloc_align(rt_size_t size, rt_size_t align)
     rt_size_t align_size;
 
     /* sizeof pointer */
-    uintptr_size = sizeof(void *);
+    uintptr_size = sizeof(void*);
     uintptr_size -= 1;
 
     /* align the alignment size to uintptr size byte */

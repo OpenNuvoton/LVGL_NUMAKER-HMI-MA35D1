@@ -19,7 +19,7 @@
 #ifdef RT_USING_SIGNALS
 
 #ifndef RT_SIG_INFO_MAX
-    #define RT_SIG_INFO_MAX 32
+#define RT_SIG_INFO_MAX 32
 #endif /* RT_SIG_INFO_MAX */
 
 #define DBG_TAG     "SIGN"
@@ -54,7 +54,7 @@ static void _signal_entry(void *parameter)
 
 #ifdef RT_USING_SMP
     {
-        struct rt_cpu *pcpu = rt_cpu_self();
+        struct rt_cpu* pcpu = rt_cpu_self();
 
         pcpu->current_thread->cpus_lock_nest--;
         if (pcpu->current_thread->cpus_lock_nest == 0)
@@ -75,7 +75,7 @@ static void _signal_entry(void *parameter)
 #ifdef RT_USING_SMP
     rt_hw_context_switch_to((rt_base_t)&parameter, tid);
 #else
-    rt_hw_context_switch_to((rt_ubase_t) & (tid->sp));
+    rt_hw_context_switch_to((rt_ubase_t)&(tid->sp));
 #endif /* RT_USING_SMP */
 }
 
@@ -169,11 +169,11 @@ static void _signal_deliver(rt_thread_t tid)
 }
 
 #ifdef RT_USING_SMP
-void *rt_signal_check(void *context)
+void *rt_signal_check(void* context)
 {
     rt_base_t level;
     int cpu_id;
-    struct rt_cpu *pcpu;
+    struct rt_cpu* pcpu;
     struct rt_thread *current_thread;
 
     level = rt_hw_interrupt_disable();
@@ -197,7 +197,7 @@ void *rt_signal_check(void *context)
 
             rt_hw_interrupt_enable(level);
             sig_context = rt_hw_stack_init((void *)_signal_entry, context,
-                                           (void *)(context - 32), RT_NULL);
+                    (void *)(context - 32), RT_NULL);
             return sig_context;
         }
     }
@@ -329,7 +329,7 @@ int rt_signal_wait(const rt_sigset_t *set, rt_siginfo_t *si, rt_int32_t timeout)
     RT_DEBUG_IN_THREAD_CONTEXT;
 
     /* parameters check */
-    if (set == NULL || *set == 0 || si == NULL)
+    if (set == NULL || *set == 0 || si == NULL )
     {
         ret = -RT_EINVAL;
         goto __done_return;
@@ -428,7 +428,7 @@ __done:
         {
             si_node = RT_NULL;
         }
-    }
+     }
 
 __done_int:
     rt_hw_interrupt_enable(level);
@@ -540,8 +540,7 @@ void rt_thread_free_sig(rt_thread_t tid)
             node = node->next;
             si_node = rt_slist_entry(node_to_free, struct siginfo_node, list);
             rt_mp_free(si_node);
-        }
-        while (node);
+        } while (node);
     }
 
     if (sig_vectors)

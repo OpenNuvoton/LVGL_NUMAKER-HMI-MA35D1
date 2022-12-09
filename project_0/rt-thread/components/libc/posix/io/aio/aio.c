@@ -16,7 +16,7 @@
 #include <sys/errno.h>
 #include "aio.h"
 
-struct rt_workqueue *aio_queue = NULL;
+struct rt_workqueue* aio_queue = NULL;
 
 /**
  * The aio_cancel() function shall attempt to cancel one or more asynchronous I/O
@@ -63,7 +63,7 @@ int aio_cancel(int fd, struct aiocb *cb)
  * asynchronous I/O operation is the errno value that would be set by the corresponding
  * read(), write(),
  */
-int aio_error(const struct aiocb *cb)
+int aio_error (const struct aiocb *cb)
 {
     if (cb)
     {
@@ -114,11 +114,11 @@ int aio_error(const struct aiocb *cb)
  * If the aio_fsync() function fails or aiocbp indicates an error condition,
  * data is not guaranteed to have been successfully transferred.
  */
-static void aio_fync_work(struct rt_work *work, void *work_data)
+static void aio_fync_work(struct rt_work* work, void* work_data)
 {
     int result;
     rt_base_t level;
-    struct aiocb *cb = (struct aiocb *)work_data;
+    struct aiocb *cb = (struct aiocb*)work_data;
 
     RT_ASSERT(cb != RT_NULL);
 
@@ -149,14 +149,14 @@ int aio_fsync(int op, struct aiocb *cb)
     return 0;
 }
 
-static void aio_read_work(struct rt_work *work, void *work_data)
+static void aio_read_work(struct rt_work* work, void* work_data)
 {
     int len;
     rt_base_t level;
     uint8_t *buf_ptr;
-    struct aiocb *cb = (struct aiocb *)work_data;
+    struct aiocb *cb = (struct aiocb*)work_data;
 
-    buf_ptr = (uint8_t *)cb->aio_buf;
+    buf_ptr = (uint8_t*)cb->aio_buf;
 
     /* seek to offset */
     lseek(cb->aio_fildes, cb->aio_offset, SEEK_SET);
@@ -285,19 +285,19 @@ ssize_t  aio_return(struct aiocb *cb)
  * aio_suspend() shall return with an error.
  */
 int aio_suspend(const struct aiocb *const list[], int nent,
-                const struct timespec *timeout)
+             const struct timespec *timeout)
 {
     return -ENOSYS;
 }
 
-static void aio_write_work(struct rt_work *work, void *work_data)
+static void aio_write_work(struct rt_work* work, void* work_data)
 {
     rt_base_t level;
     int len, oflags;
     uint8_t *buf_ptr;
-    struct aiocb *cb = (struct aiocb *)work_data;
+    struct aiocb *cb = (struct aiocb*)work_data;
 
-    buf_ptr = (uint8_t *)cb->aio_buf;
+    buf_ptr = (uint8_t*)cb->aio_buf;
 
     /* whether seek offset */
     oflags = fcntl(cb->aio_fildes, F_GETFL, 0);
@@ -369,7 +369,7 @@ int aio_write(struct aiocb *cb)
     /* check access mode */
     oflags = fcntl(cb->aio_fildes, F_GETFL, 0);
     if ((oflags & O_ACCMODE) != O_WRONLY ||
-            (oflags & O_ACCMODE) != O_RDWR)
+        (oflags & O_ACCMODE) != O_RDWR)
         return -EINVAL;
 
     level = rt_hw_interrupt_disable();
@@ -447,15 +447,15 @@ int aio_write(struct aiocb *cb)
  * address prior to all asynchronous I/O being completed, then the behavior is
  * undefined.
  */
-int lio_listio(int mode, struct aiocb *const list[], int nent,
-               struct sigevent *sig)
+int lio_listio(int mode, struct aiocb * const list[], int nent,
+            struct sigevent *sig)
 {
     return -ENOSYS;
 }
 
 int aio_system_init(void)
 {
-    aio_queue = rt_workqueue_create("aio", 2048, RT_THREAD_PRIORITY_MAX / 2);
+    aio_queue = rt_workqueue_create("aio", 2048, RT_THREAD_PRIORITY_MAX/2);
     RT_ASSERT(aio_queue != NULL);
 
     return 0;

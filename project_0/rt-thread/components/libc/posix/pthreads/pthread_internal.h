@@ -32,7 +32,7 @@ struct _pthread_key_data
 typedef struct _pthread_key_data _pthread_key_data_t;
 
 #ifndef PTHREAD_NUM_MAX
-    #define PTHREAD_NUM_MAX 32
+#define PTHREAD_NUM_MAX 32
 #endif
 
 #define PTHREAD_MAGIC   0x70746873
@@ -42,7 +42,7 @@ struct _pthread_data
     pthread_attr_t attr;
     rt_thread_t tid;
 
-    void *(*thread_entry)(void *parameter);
+    void* (*thread_entry)(void *parameter);
     void *thread_parameter;
 
     /* return value */
@@ -57,7 +57,7 @@ struct _pthread_data
     volatile rt_uint8_t canceled;
 
     _pthread_cleanup_t *cleanup;
-    void **tls; /* thread-local storage area */
+    void** tls; /* thread-local storage area */
 };
 typedef struct _pthread_data _pthread_data_t;
 

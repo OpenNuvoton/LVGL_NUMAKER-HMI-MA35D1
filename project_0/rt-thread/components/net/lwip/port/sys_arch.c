@@ -365,7 +365,7 @@ err_t sys_mbox_trypost(sys_mbox_t *mbox, void *msg)
 #if (LWIP_VERSION_MAJOR * 100 + LWIP_VERSION_MINOR) >= 201 /* >= v2.1.0 */
 err_t sys_mbox_trypost_fromisr(sys_mbox_t *q, void *msg)
 {
-    return sys_mbox_trypost(q, msg);
+  return sys_mbox_trypost(q, msg);
 }
 #endif /* (LWIP_VERSION_MAJOR * 100 + LWIP_VERSION_MINOR) >= 201 */
 
@@ -388,7 +388,7 @@ u32_t sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout)
     /* get the begin tick */
     tick = rt_tick_get();
 
-    if (timeout == 0)
+    if(timeout == 0)
     {
         t = RT_WAITING_FOREVER;
     }
@@ -402,7 +402,7 @@ u32_t sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout)
     }
 
     ret = rt_mb_recv(*mbox, (rt_ubase_t *)msg, t);
-    if (ret != RT_EOK)
+    if(ret != RT_EOK)
     {
         return SYS_ARCH_TIMEOUT;
     }
@@ -439,7 +439,7 @@ u32_t sys_arch_mbox_tryfetch(sys_mbox_t *mbox, void **msg)
     int ret;
 
     ret = rt_mb_recv(*mbox, (rt_ubase_t *)msg, 0);
-    if (ret == -RT_ETIMEOUT)
+    if(ret == -RT_ETIMEOUT)
     {
         return SYS_ARCH_TIMEOUT;
     }
@@ -605,38 +605,34 @@ void ppp_trace(int level, const char *format, ...)
 void mem_overflow_check_raw(void *p, size_t size, const char *descr1, const char *descr2)
 {
 #if MEM_SANITY_REGION_AFTER_ALIGNED || MEM_SANITY_REGION_BEFORE_ALIGNED
-    u16_t k;
-    u8_t *m;
+  u16_t k;
+  u8_t *m;
 
 #if MEM_SANITY_REGION_AFTER_ALIGNED > 0
-    m = (u8_t *)p + size;
-    for (k = 0; k < MEM_SANITY_REGION_AFTER_ALIGNED; k++)
-    {
-        if (m[k] != 0xcd)
-        {
-            char errstr[128];
-            rt_snprintf(errstr, sizeof(errstr), "detected mem overflow in %s%s", descr1, descr2);
-            LWIP_ASSERT(errstr, 0);
-        }
+  m = (u8_t *)p + size;
+  for (k = 0; k < MEM_SANITY_REGION_AFTER_ALIGNED; k++) {
+    if (m[k] != 0xcd) {
+      char errstr[128];
+      rt_snprintf(errstr, sizeof(errstr), "detected mem overflow in %s%s", descr1, descr2);
+      LWIP_ASSERT(errstr, 0);
     }
+  }
 #endif /* MEM_SANITY_REGION_AFTER_ALIGNED > 0 */
 
 #if MEM_SANITY_REGION_BEFORE_ALIGNED > 0
-    m = (u8_t *)p - MEM_SANITY_REGION_BEFORE_ALIGNED;
-    for (k = 0; k < MEM_SANITY_REGION_BEFORE_ALIGNED; k++)
-    {
-        if (m[k] != 0xcd)
-        {
-            char errstr[128];
-            rt_snprintf(errstr, sizeof(errstr), "detected mem underflow in %s%s", descr1, descr2);
-            LWIP_ASSERT(errstr, 0);
-        }
+  m = (u8_t *)p - MEM_SANITY_REGION_BEFORE_ALIGNED;
+  for (k = 0; k < MEM_SANITY_REGION_BEFORE_ALIGNED; k++) {
+    if (m[k] != 0xcd) {
+      char errstr[128];
+      rt_snprintf(errstr, sizeof(errstr), "detected mem underflow in %s%s", descr1, descr2);
+      LWIP_ASSERT(errstr, 0);
     }
+  }
 #endif /* MEM_SANITY_REGION_BEFORE_ALIGNED > 0 */
 #else
-    LWIP_UNUSED_ARG(p);
-    LWIP_UNUSED_ARG(descr1);
-    LWIP_UNUSED_ARG(descr2);
+  LWIP_UNUSED_ARG(p);
+  LWIP_UNUSED_ARG(descr1);
+  LWIP_UNUSED_ARG(descr2);
 #endif /* MEM_SANITY_REGION_AFTER_ALIGNED || MEM_SANITY_REGION_BEFORE_ALIGNED */
 }
 
@@ -646,18 +642,18 @@ void mem_overflow_check_raw(void *p, size_t size, const char *descr1, const char
 void mem_overflow_init_raw(void *p, size_t size)
 {
 #if MEM_SANITY_REGION_BEFORE_ALIGNED > 0 || MEM_SANITY_REGION_AFTER_ALIGNED > 0
-    u8_t *m;
+  u8_t *m;
 #if MEM_SANITY_REGION_BEFORE_ALIGNED > 0
-    m = (u8_t *)p - MEM_SANITY_REGION_BEFORE_ALIGNED;
-    rt_memset(m, 0xcd, MEM_SANITY_REGION_BEFORE_ALIGNED);
+  m = (u8_t *)p - MEM_SANITY_REGION_BEFORE_ALIGNED;
+  rt_memset(m, 0xcd, MEM_SANITY_REGION_BEFORE_ALIGNED);
 #endif
 #if MEM_SANITY_REGION_AFTER_ALIGNED > 0
-    m = (u8_t *)p + size;
-    rt_memset(m, 0xcd, MEM_SANITY_REGION_AFTER_ALIGNED);
+  m = (u8_t *)p + size;
+  rt_memset(m, 0xcd, MEM_SANITY_REGION_AFTER_ALIGNED);
 #endif
 #else /* MEM_SANITY_REGION_BEFORE_ALIGNED > 0 || MEM_SANITY_REGION_AFTER_ALIGNED > 0 */
-    LWIP_UNUSED_ARG(p);
-    LWIP_UNUSED_ARG(size);
+  LWIP_UNUSED_ARG(p);
+  LWIP_UNUSED_ARG(size);
 #endif /* MEM_SANITY_REGION_BEFORE_ALIGNED > 0 || MEM_SANITY_REGION_AFTER_ALIGNED > 0 */
 }
 #endif /* MEM_OVERFLOW_CHECK || MEMP_OVERFLOW_CHECK */
@@ -690,57 +686,57 @@ struct netif *lwip_ip4_route_src(const ip4_addr_t *dest, const ip4_addr_t *src)
 #endif /*LWIP_VERSION_MAJOR >= 2 */
 
 #if LWIP_SOCKET
-    #include <lwip/sockets.h>
-    RTM_EXPORT(lwip_accept);
-    RTM_EXPORT(lwip_bind);
-    RTM_EXPORT(lwip_shutdown);
-    RTM_EXPORT(lwip_getpeername);
-    RTM_EXPORT(lwip_getsockname);
-    RTM_EXPORT(lwip_getsockopt);
-    RTM_EXPORT(lwip_setsockopt);
-    RTM_EXPORT(lwip_close);
-    RTM_EXPORT(lwip_connect);
-    RTM_EXPORT(lwip_listen);
-    RTM_EXPORT(lwip_recv);
-    RTM_EXPORT(lwip_read);
-    RTM_EXPORT(lwip_recvfrom);
-    RTM_EXPORT(lwip_send);
-    RTM_EXPORT(lwip_sendto);
-    RTM_EXPORT(lwip_socket);
-    RTM_EXPORT(lwip_write);
-    RTM_EXPORT(lwip_select);
-    RTM_EXPORT(lwip_ioctl);
-    RTM_EXPORT(lwip_fcntl);
-    RTM_EXPORT(lwip_htons);
-    RTM_EXPORT(lwip_htonl);
+#include <lwip/sockets.h>
+RTM_EXPORT(lwip_accept);
+RTM_EXPORT(lwip_bind);
+RTM_EXPORT(lwip_shutdown);
+RTM_EXPORT(lwip_getpeername);
+RTM_EXPORT(lwip_getsockname);
+RTM_EXPORT(lwip_getsockopt);
+RTM_EXPORT(lwip_setsockopt);
+RTM_EXPORT(lwip_close);
+RTM_EXPORT(lwip_connect);
+RTM_EXPORT(lwip_listen);
+RTM_EXPORT(lwip_recv);
+RTM_EXPORT(lwip_read);
+RTM_EXPORT(lwip_recvfrom);
+RTM_EXPORT(lwip_send);
+RTM_EXPORT(lwip_sendto);
+RTM_EXPORT(lwip_socket);
+RTM_EXPORT(lwip_write);
+RTM_EXPORT(lwip_select);
+RTM_EXPORT(lwip_ioctl);
+RTM_EXPORT(lwip_fcntl);
+RTM_EXPORT(lwip_htons);
+RTM_EXPORT(lwip_htonl);
 
-    #if LWIP_DNS
-        #include <lwip/netdb.h>
-        RTM_EXPORT(lwip_gethostbyname);
-        RTM_EXPORT(lwip_gethostbyname_r);
-        RTM_EXPORT(lwip_freeaddrinfo);
-        RTM_EXPORT(lwip_getaddrinfo);
-    #endif /* LWIP_DNS */
+#if LWIP_DNS
+#include <lwip/netdb.h>
+RTM_EXPORT(lwip_gethostbyname);
+RTM_EXPORT(lwip_gethostbyname_r);
+RTM_EXPORT(lwip_freeaddrinfo);
+RTM_EXPORT(lwip_getaddrinfo);
+#endif /* LWIP_DNS */
 #endif /* LWIP_SOCKET */
 
 #if LWIP_DHCP
-    #include <lwip/dhcp.h>
-    RTM_EXPORT(dhcp_start);
-    RTM_EXPORT(dhcp_renew);
-    RTM_EXPORT(dhcp_stop);
+#include <lwip/dhcp.h>
+RTM_EXPORT(dhcp_start);
+RTM_EXPORT(dhcp_renew);
+RTM_EXPORT(dhcp_stop);
 #endif /* LWIP_DHCP */
 
 #if LWIP_NETIF_API
-    #include <lwip/netifapi.h>
-    RTM_EXPORT(netifapi_netif_set_addr);
+#include <lwip/netifapi.h>
+RTM_EXPORT(netifapi_netif_set_addr);
 #endif /* LWIP_NETIF_API */
 
 #if LWIP_NETIF_LINK_CALLBACK
-    RTM_EXPORT(netif_set_link_callback);
+RTM_EXPORT(netif_set_link_callback);
 #endif /* LWIP_NETIF_LINK_CALLBACK */
 
 #if LWIP_NETIF_STATUS_CALLBACK
-    RTM_EXPORT(netif_set_status_callback);
+RTM_EXPORT(netif_set_status_callback);
 #endif /* LWIP_NETIF_STATUS_CALLBACK */
 
 RTM_EXPORT(netif_find);

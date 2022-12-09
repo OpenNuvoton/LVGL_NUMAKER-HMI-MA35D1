@@ -653,7 +653,7 @@ static int cmd_tail(int argc, char **argv)
 
     while ((read(fd, &c, sizeof(char))) > 0)
     {
-        if (total_lines == 0)
+        if(total_lines == 0)
         {
             total_lines++;
         }

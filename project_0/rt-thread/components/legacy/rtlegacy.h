@@ -21,7 +21,7 @@
 
 /* IPC */
 #ifdef RT_USING_DEVICE_IPC
-    #include "ipc/workqueue_legacy.h"
+#include "ipc/workqueue_legacy.h"
 #endif /* RT_USING_DEVICE_IPC */
 
 /* FinSH */

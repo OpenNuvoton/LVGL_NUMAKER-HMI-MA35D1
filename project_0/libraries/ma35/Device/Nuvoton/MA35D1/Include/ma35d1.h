@@ -472,6 +472,7 @@ typedef enum IRQn
 
 #include "sdh_reg.h"
 #include "ccap_reg.h"
+#include "nfi_reg.h"
 
 /** @addtogroup PERIPHERAL_MEM_MAP Peripheral Memory Base
   Memory Mapped Structure for Peripherals
@@ -785,6 +786,7 @@ typedef enum IRQn
 #define CCAP0                    ((CCAP_T*)   CCAP0_BASE)
 #define CCAP1                    ((CCAP_T*)   CCAP1_BASE)
 
+#define NFI                      ((NFI_T*)    NAND_BASE)
 /*@}*/ /* end of group ERIPHERAL_DECLARATION */
 
 /** @addtogroup IO_ROUTINE I/O Routines

@@ -232,8 +232,8 @@ void arm_gic_set_cpu(rt_uint32_t index, int irq, unsigned int cpumask)
 
     old_tgt = GIC_DIST_TARGET(_gic_table[index].dist_hw_base, irq);
 
-    old_tgt &= ~(0x0FFUL << ((irq % 4U) * 8U));
-    old_tgt |= cpumask << ((irq % 4U) * 8U);
+    old_tgt &= ~(0x0FFUL << ((irq % 4U)*8U));
+    old_tgt |= cpumask << ((irq % 4U)*8U);
 
     GIC_DIST_TARGET(_gic_table[index].dist_hw_base, irq) = old_tgt;
 }
@@ -352,7 +352,7 @@ void arm_gic_set_group(rt_uint32_t index, int irq, rt_uint32_t group)
     igroupr = GIC_DIST_IGROUP(_gic_table[index].dist_hw_base, irq);
     shift = (irq % 32U);
     igroupr &= (~(1U << shift));
-    igroupr |= ((group & 0x1U) << shift);
+    igroupr |= ( (group & 0x1U) << shift);
 
     GIC_DIST_IGROUP(_gic_table[index].dist_hw_base, irq) = igroupr;
 }

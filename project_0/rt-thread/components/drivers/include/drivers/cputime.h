@@ -15,7 +15,7 @@
 
 struct rt_clock_cputime_ops
 {
-    float (*cputime_getres)(void);
+    float    (*cputime_getres) (void);
     uint64_t (*cputime_gettime)(void);
 };
 

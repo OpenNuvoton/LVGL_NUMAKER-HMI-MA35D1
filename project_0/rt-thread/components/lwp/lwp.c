@@ -48,7 +48,7 @@ uint32_t *lwp_get_kernel_sp(void)
 
 static int lwp_argscopy(struct rt_lwp *lwp, int argc, char **argv)
 {
-    int size = sizeof(int) * 3; /* store argc, argv, NULL */
+    int size = sizeof(int)*3; /* store argc, argv, NULL */
     int *args;
     char *str;
     char **new_argv;
@@ -61,12 +61,12 @@ static int lwp_argscopy(struct rt_lwp *lwp, int argc, char **argv)
     }
     size  += (sizeof(int) * argc);
 
-    args = (int *)rt_malloc(size);
+    args = (int*)rt_malloc(size);
     if (args == RT_NULL)
         return -1;
 
-    str = (char *)((int)args + (argc + 3) * sizeof(int));
-    new_argv = (char **)&args[2];
+    str = (char*)((int)args + (argc + 3) * sizeof(int));
+    new_argv = (char**)&args[2];
     args[0] = argc;
     args[1] = (int)new_argv;
 

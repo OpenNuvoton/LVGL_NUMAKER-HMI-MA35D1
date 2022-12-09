@@ -15,18 +15,18 @@
 #ifdef RT_USING_FINSH
 
 #ifndef FINSH_ARG_MAX
-    #define FINSH_ARG_MAX    8
+#define FINSH_ARG_MAX    8
 #endif /* FINSH_ARG_MAX */
 
 #include "msh.h"
 #include "shell.h"
 #ifdef DFS_USING_POSIX
-    #include <dfs_file.h>
-    #include <unistd.h>
-    #include <fcntl.h>
+#include <dfs_file.h>
+#include <unistd.h>
+#include <fcntl.h>
 #endif /* DFS_USING_POSIX */
 #ifdef RT_USING_MODULE
-    #include <dlmodule.h>
+#include <dlmodule.h>
 #endif /* RT_USING_MODULE */
 
 typedef int (*cmd_function_t)(int argc, char **argv);
@@ -52,7 +52,7 @@ int msh_help(int argc, char **argv)
 
     return 0;
 }
-MSH_CMD_EXPORT_ALIAS(msh_help, help, RT - Thread shell help.);
+MSH_CMD_EXPORT_ALIAS(msh_help, help, RT-Thread shell help.);
 
 #ifdef MSH_USING_BUILT_IN_COMMANDS
 int cmd_ps(int argc, char **argv)

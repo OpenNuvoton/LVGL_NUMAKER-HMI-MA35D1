@@ -32,7 +32,7 @@ extern int pthread_setspecific(pthread_key_t key, const void *value);
  * can use thread local data without heavier POSIX memory allocators.
  */
 #ifndef EMUTLS_USE_POSIX_MEMALIGN
-    #define EMUTLS_USE_POSIX_MEMALIGN 0
+#define EMUTLS_USE_POSIX_MEMALIGN 0
 #endif
 
 /* For every TLS variable xyz,
@@ -151,7 +151,7 @@ static __inline uintptr_t emutls_get_index(__emutls_control *control)
 
 /* Updates newly allocated thread local emutls_address_array. */
 static __inline void emutls_check_array_set_size(emutls_address_array *array,
-        uintptr_t size)
+                                                 uintptr_t size)
 {
     if (array == NULL)
         abort();

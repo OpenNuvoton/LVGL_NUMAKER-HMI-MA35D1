@@ -29,24 +29,24 @@ static rt_list_t _timer_list[RT_TIMER_SKIP_LIST_LEVEL];
 
 #ifdef RT_USING_TIMER_SOFT
 
-    #define RT_SOFT_TIMER_IDLE              1
-    #define RT_SOFT_TIMER_BUSY              0
+#define RT_SOFT_TIMER_IDLE              1
+#define RT_SOFT_TIMER_BUSY              0
 
-    #ifndef RT_TIMER_THREAD_STACK_SIZE
-        #define RT_TIMER_THREAD_STACK_SIZE     512
-    #endif /* RT_TIMER_THREAD_STACK_SIZE */
+#ifndef RT_TIMER_THREAD_STACK_SIZE
+#define RT_TIMER_THREAD_STACK_SIZE     512
+#endif /* RT_TIMER_THREAD_STACK_SIZE */
 
-    #ifndef RT_TIMER_THREAD_PRIO
-        #define RT_TIMER_THREAD_PRIO           0
-    #endif /* RT_TIMER_THREAD_PRIO */
+#ifndef RT_TIMER_THREAD_PRIO
+#define RT_TIMER_THREAD_PRIO           0
+#endif /* RT_TIMER_THREAD_PRIO */
 
-    /* soft timer status */
-    static rt_uint8_t _soft_timer_status = RT_SOFT_TIMER_IDLE;
-    /* soft timer list */
-    static rt_list_t _soft_timer_list[RT_TIMER_SKIP_LIST_LEVEL];
-    static struct rt_thread _timer_thread;
-    ALIGN(RT_ALIGN_SIZE)
-    static rt_uint8_t _timer_thread_stack[RT_TIMER_THREAD_STACK_SIZE];
+/* soft timer status */
+static rt_uint8_t _soft_timer_status = RT_SOFT_TIMER_IDLE;
+/* soft timer list */
+static rt_list_t _soft_timer_list[RT_TIMER_SKIP_LIST_LEVEL];
+static struct rt_thread _timer_thread;
+ALIGN(RT_ALIGN_SIZE)
+static rt_uint8_t _timer_thread_stack[RT_TIMER_THREAD_STACK_SIZE];
 #endif /* RT_USING_TIMER_SOFT */
 
 #ifndef __on_rt_object_take_hook
@@ -224,8 +224,8 @@ void rt_timer_dump(rt_list_t timer_heads[])
     rt_list_t *list;
 
     for (list = timer_heads[RT_TIMER_SKIP_LIST_LEVEL - 1].next;
-            list != &timer_heads[RT_TIMER_SKIP_LIST_LEVEL - 1];
-            list = list->next)
+         list != &timer_heads[RT_TIMER_SKIP_LIST_LEVEL - 1];
+         list = list->next)
     {
         struct rt_timer *timer = rt_list_entry(list,
                                                struct rt_timer,
@@ -448,7 +448,7 @@ rt_err_t rt_timer_start(rt_timer_t timer)
     for (row_lvl = 0; row_lvl < RT_TIMER_SKIP_LIST_LEVEL; row_lvl++)
     {
         for (; row_head[row_lvl] != timer_list[row_lvl].prev;
-                row_head[row_lvl]  = row_head[row_lvl]->next)
+             row_head[row_lvl]  = row_head[row_lvl]->next)
         {
             struct rt_timer *t;
             rt_list_t *p = row_head[row_lvl]->next;
@@ -502,7 +502,7 @@ rt_err_t rt_timer_start(rt_timer_t timer)
     {
         /* check whether timer thread is ready */
         if ((_soft_timer_status == RT_SOFT_TIMER_IDLE) &&
-                ((_timer_thread.stat & RT_THREAD_STAT_MASK) == RT_THREAD_SUSPEND))
+           ((_timer_thread.stat & RT_THREAD_STAT_MASK) == RT_THREAD_SUSPEND))
         {
             /* resume timer thread to check soft timer */
             rt_thread_resume(&_timer_thread);
@@ -595,7 +595,7 @@ rt_err_t rt_timer_control(rt_timer_t timer, int cmd, void *arg)
         break;
 
     case RT_TIMER_CTRL_GET_STATE:
-        if (timer->parent.flag & RT_TIMER_FLAG_ACTIVATED)
+        if(timer->parent.flag & RT_TIMER_FLAG_ACTIVATED)
         {
             /*timer is start and run*/
             *(rt_uint32_t *)arg = RT_TIMER_FLAG_ACTIVATED;
@@ -679,7 +679,7 @@ void rt_timer_check(void)
             }
             rt_list_remove(&(t->row[RT_TIMER_SKIP_LIST_LEVEL - 1]));
             if ((t->parent.flag & RT_TIMER_FLAG_PERIODIC) &&
-                    (t->parent.flag & RT_TIMER_FLAG_ACTIVATED))
+                (t->parent.flag & RT_TIMER_FLAG_ACTIVATED))
             {
                 /* start it */
                 t->parent.flag &= ~RT_TIMER_FLAG_ACTIVATED;
@@ -729,7 +729,7 @@ void rt_soft_timer_check(void)
     while (!rt_list_isempty(&_soft_timer_list[RT_TIMER_SKIP_LIST_LEVEL - 1]))
     {
         t = rt_list_entry(_soft_timer_list[RT_TIMER_SKIP_LIST_LEVEL - 1].next,
-                          struct rt_timer, row[RT_TIMER_SKIP_LIST_LEVEL - 1]);
+                            struct rt_timer, row[RT_TIMER_SKIP_LIST_LEVEL - 1]);
 
         current_tick = rt_tick_get();
 
@@ -771,7 +771,7 @@ void rt_soft_timer_check(void)
             }
             rt_list_remove(&(t->row[RT_TIMER_SKIP_LIST_LEVEL - 1]));
             if ((t->parent.flag & RT_TIMER_FLAG_PERIODIC) &&
-                    (t->parent.flag & RT_TIMER_FLAG_ACTIVATED))
+                (t->parent.flag & RT_TIMER_FLAG_ACTIVATED))
             {
                 /* start it */
                 t->parent.flag &= ~RT_TIMER_FLAG_ACTIVATED;
@@ -851,8 +851,8 @@ void rt_system_timer_thread_init(void)
     int i;
 
     for (i = 0;
-            i < sizeof(_soft_timer_list) / sizeof(_soft_timer_list[0]);
-            i++)
+         i < sizeof(_soft_timer_list) / sizeof(_soft_timer_list[0]);
+         i++)
     {
         rt_list_init(_soft_timer_list + i);
     }

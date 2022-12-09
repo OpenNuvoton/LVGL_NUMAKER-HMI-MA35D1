@@ -56,9 +56,9 @@ static rt_err_t _adc_control(rt_device_t dev, int cmd, void *args)
     else if (cmd == RT_ADC_CMD_GET_RESOLUTION && adc->ops->get_resolution && args)
     {
         rt_uint8_t resolution = adc->ops->get_resolution(adc);
-        if (resolution != 0)
+        if(resolution != 0)
         {
-            *((rt_uint8_t *)args) = resolution;
+            *((rt_uint8_t*)args) = resolution;
             LOG_D("resolution: %d bits", resolution);
             result = RT_EOK;
         }
@@ -66,7 +66,7 @@ static rt_err_t _adc_control(rt_device_t dev, int cmd, void *args)
     else if (cmd == RT_ADC_CMD_GET_VREF && adc->ops->get_vref && args)
     {
         rt_int16_t value = adc->ops->get_vref(adc);
-        if (value != 0)
+        if(value != 0)
         {
             *((rt_int16_t *) args) = value;
             result = RT_EOK;
@@ -228,7 +228,7 @@ static int adc(int argc, char **argv)
                 {
                     result = rt_adc_enable(adc_device, atoi(argv[2]));
                     result_str = (result == RT_EOK) ? "success" : "failure";
-                    rt_kprintf("%s channel %d enables %s \n", adc_device->parent.parent.name, atoi(argv[2]), result_str);
+                    rt_kprintf("%s channel %d enables %s \n", adc_device->parent.parent.name, (rt_base_t)atoi(argv[2]), result_str);
                 }
                 else
                 {
@@ -240,7 +240,7 @@ static int adc(int argc, char **argv)
                 if (argc == 3)
                 {
                     value = rt_adc_read(adc_device, atoi(argv[2]));
-                    rt_kprintf("%s channel %d  read value is 0x%08X \n", adc_device->parent.parent.name, atoi(argv[2]), value);
+                    rt_kprintf("%s channel %d  read value is 0x%08X \n", adc_device->parent.parent.name, (rt_base_t)atoi(argv[2]), value);
                 }
                 else
                 {
@@ -253,7 +253,7 @@ static int adc(int argc, char **argv)
                 {
                     result = rt_adc_disable(adc_device, atoi(argv[2]));
                     result_str = (result == RT_EOK) ? "success" : "failure";
-                    rt_kprintf("%s channel %d disable %s \n", adc_device->parent.parent.name, atoi(argv[2]), result_str);
+                    rt_kprintf("%s channel %d disable %s \n", adc_device->parent.parent.name, (rt_base_t)atoi(argv[2]), result_str);
                 }
                 else
                 {
@@ -262,11 +262,11 @@ static int adc(int argc, char **argv)
             }
             else if (!strcmp(argv[1], "voltage"))
             {
-                if (argc == 3)
+                if(argc == 3)
                 {
                     voltage = rt_adc_voltage(adc_device, atoi(argv[2]));
                     result_str = (result == RT_EOK) ? "success" : "failure";
-                    rt_kprintf("%s channel %d voltage is %d.%03dV \n", adc_device->parent.parent.name, atoi(argv[2]), voltage / 1000, voltage % 1000);
+                    rt_kprintf("%s channel %d voltage is %d.%03dV \n", adc_device->parent.parent.name, (rt_base_t)atoi(argv[2]), voltage / 1000, voltage % 1000);
                 }
                 else
                 {

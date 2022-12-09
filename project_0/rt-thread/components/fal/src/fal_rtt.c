@@ -26,12 +26,12 @@ struct fal_blk_device
 
 /* RT-Thread device interface */
 #if RTTHREAD_VERSION >= 30000
-    static rt_err_t blk_dev_control(rt_device_t dev, int cmd, void *args)
+static rt_err_t blk_dev_control(rt_device_t dev, int cmd, void *args)
 #else
-    static rt_err_t blk_dev_control(rt_device_t dev, rt_uint8_t cmd, void *args)
+static rt_err_t blk_dev_control(rt_device_t dev, rt_uint8_t cmd, void *args)
 #endif
 {
-    struct fal_blk_device *part = (struct fal_blk_device *) dev;
+    struct fal_blk_device *part = (struct fal_blk_device*) dev;
 
     assert(part != RT_NULL);
 
@@ -74,10 +74,10 @@ struct fal_blk_device
     return RT_EOK;
 }
 
-static rt_size_t blk_dev_read(rt_device_t dev, rt_off_t pos, void *buffer, rt_size_t size)
+static rt_size_t blk_dev_read(rt_device_t dev, rt_off_t pos, void* buffer, rt_size_t size)
 {
     int ret = 0;
-    struct fal_blk_device *part = (struct fal_blk_device *) dev;
+    struct fal_blk_device *part = (struct fal_blk_device*) dev;
 
     assert(part != RT_NULL);
 
@@ -95,14 +95,14 @@ static rt_size_t blk_dev_read(rt_device_t dev, rt_off_t pos, void *buffer, rt_si
     return ret;
 }
 
-static rt_size_t blk_dev_write(rt_device_t dev, rt_off_t pos, const void *buffer, rt_size_t size)
+static rt_size_t blk_dev_write(rt_device_t dev, rt_off_t pos, const void* buffer, rt_size_t size)
 {
     int ret = 0;
     struct fal_blk_device *part;
     rt_off_t phy_pos;
     rt_size_t phy_size;
 
-    part = (struct fal_blk_device *) dev;
+    part = (struct fal_blk_device*) dev;
     assert(part != RT_NULL);
 
     /* change the block device's logic address to physical address */
@@ -166,7 +166,7 @@ struct rt_device *fal_blk_device_create(const char *parition_name)
         return NULL;
     }
 
-    blk_dev = (struct fal_blk_device *) rt_malloc(sizeof(struct fal_blk_device));
+    blk_dev = (struct fal_blk_device*) rt_malloc(sizeof(struct fal_blk_device));
     if (blk_dev)
     {
         blk_dev->fal_part = fal_part;
@@ -211,10 +211,10 @@ struct fal_mtd_nor_device
     const struct fal_partition     *fal_part;
 };
 
-static rt_size_t mtd_nor_dev_read(struct rt_mtd_nor_device *device, rt_off_t offset, rt_uint8_t *data, rt_uint32_t length)
+static rt_size_t mtd_nor_dev_read(struct rt_mtd_nor_device* device, rt_off_t offset, rt_uint8_t* data, rt_uint32_t length)
 {
     int ret = 0;
-    struct fal_mtd_nor_device *part = (struct fal_mtd_nor_device *) device;
+    struct fal_mtd_nor_device *part = (struct fal_mtd_nor_device*) device;
 
     assert(part != RT_NULL);
 
@@ -232,12 +232,12 @@ static rt_size_t mtd_nor_dev_read(struct rt_mtd_nor_device *device, rt_off_t off
     return ret;
 }
 
-static rt_size_t mtd_nor_dev_write(struct rt_mtd_nor_device *device, rt_off_t offset, const rt_uint8_t *data, rt_uint32_t length)
+static rt_size_t mtd_nor_dev_write(struct rt_mtd_nor_device* device, rt_off_t offset, const rt_uint8_t* data, rt_uint32_t length)
 {
     int ret = 0;
     struct fal_mtd_nor_device *part;
 
-    part = (struct fal_mtd_nor_device *) device;
+    part = (struct fal_mtd_nor_device*) device;
     assert(part != RT_NULL);
 
     ret = fal_partition_write(part->fal_part, offset, data, length);
@@ -254,12 +254,12 @@ static rt_size_t mtd_nor_dev_write(struct rt_mtd_nor_device *device, rt_off_t of
     return ret;
 }
 
-static rt_err_t mtd_nor_dev_erase(struct rt_mtd_nor_device *device, rt_off_t offset, rt_uint32_t length)
+static rt_err_t mtd_nor_dev_erase(struct rt_mtd_nor_device* device, rt_off_t offset, rt_uint32_t length)
 {
     int ret = 0;
     struct fal_mtd_nor_device *part;
 
-    part = (struct fal_mtd_nor_device *) device;
+    part = (struct fal_mtd_nor_device*) device;
     assert(part != RT_NULL);
 
     ret = fal_partition_erase(part->fal_part, offset, length);
@@ -308,7 +308,7 @@ struct rt_device *fal_mtd_nor_device_create(const char *parition_name)
         return NULL;
     }
 
-    mtd_nor_dev = (struct fal_mtd_nor_device *) rt_malloc(sizeof(struct fal_mtd_nor_device));
+    mtd_nor_dev = (struct fal_mtd_nor_device*) rt_malloc(sizeof(struct fal_mtd_nor_device));
     if (mtd_nor_dev)
     {
         mtd_nor_dev->fal_part = fal_part;
@@ -546,8 +546,7 @@ struct rt_device *fal_char_device_create(const char *parition_name)
 #include <finsh.h>
 extern int fal_init_check(void);
 
-static void fal(uint8_t argc, char **argv)
-{
+static void fal(uint8_t argc, char **argv) {
 
 #define __is_print(ch)                ((unsigned int)((ch) - ' ') < 127u - ' ')
 #define HEXDUMP_WIDTH                 16
@@ -562,13 +561,13 @@ static void fal(uint8_t argc, char **argv)
     static const struct fal_partition *part_dev = NULL;
     size_t i = 0, j = 0;
 
-    const char *help_info[] =
+    const char* help_info[] =
     {
-        [CMD_PROBE_INDEX]     = "fal probe [dev_name|part_name]   - probe flash device or partition by given name",
-        [CMD_READ_INDEX]      = "fal read addr size               - read 'size' bytes starting at 'addr'",
-        [CMD_WRITE_INDEX]     = "fal write addr data1 ... dataN   - write some bytes 'data' starting at 'addr'",
-        [CMD_ERASE_INDEX]     = "fal erase addr size              - erase 'size' bytes starting at 'addr'",
-        [CMD_BENCH_INDEX]     = "fal bench <blk_size>             - benchmark test with per block size",
+            [CMD_PROBE_INDEX]     = "fal probe [dev_name|part_name]   - probe flash device or partition by given name",
+            [CMD_READ_INDEX]      = "fal read addr size               - read 'size' bytes starting at 'addr'",
+            [CMD_WRITE_INDEX]     = "fal write addr data1 ... dataN   - write some bytes 'data' starting at 'addr'",
+            [CMD_ERASE_INDEX]     = "fal erase addr size              - erase 'size' bytes starting at 'addr'",
+            [CMD_BENCH_INDEX]     = "fal bench <blk_size>             - benchmark test with per block size",
     };
 
     if (fal_init_check() != 1)
@@ -580,7 +579,7 @@ static void fal(uint8_t argc, char **argv)
     if (argc < 2)
     {
         rt_kprintf("Usage:\n");
-        for (i = 0; i < sizeof(help_info) / sizeof(char *); i++)
+        for (i = 0; i < sizeof(help_info) / sizeof(char*); i++)
         {
             rt_kprintf("%s\n", help_info[i]);
         }
@@ -615,12 +614,12 @@ static void fal(uint8_t argc, char **argv)
             if (flash_dev)
             {
                 rt_kprintf("Probed a flash device | %s | addr: %ld | len: %d |.\n", flash_dev->name,
-                           flash_dev->addr, flash_dev->len);
+                        flash_dev->addr, flash_dev->len);
             }
             else if (part_dev)
             {
                 rt_kprintf("Probed a flash partition | %s | flash_dev: %s | offset: %ld | len: %d |.\n",
-                           part_dev->name, part_dev->flash_name, part_dev->offset, part_dev->len);
+                        part_dev->name, part_dev->flash_name, part_dev->offset, part_dev->len);
             }
             else
             {
@@ -661,7 +660,7 @@ static void fal(uint8_t argc, char **argv)
                         if (result >= 0)
                         {
                             rt_kprintf("Read data success. Start from 0x%08X, size is %ld. The data is:\n", addr,
-                                       size);
+                                    size);
                             rt_kprintf("Offset (h) 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n");
                             for (i = 0; i < size; i += HEXDUMP_WIDTH)
                             {
@@ -786,8 +785,7 @@ static void fal(uint8_t argc, char **argv)
 
                 if (write_data && read_data)
                 {
-                    for (i = 0; i < write_size; i ++)
-                    {
+                    for (i = 0; i < write_size; i ++) {
                         write_data[i] = i & 0xFF;
                     }
                     if (flash_dev)
@@ -813,7 +811,7 @@ static void fal(uint8_t argc, char **argv)
                     {
                         time_cast = rt_tick_get() - start_time;
                         rt_kprintf("Erase benchmark success, total time: %d.%03dS.\n", time_cast / RT_TICK_PER_SECOND,
-                                   time_cast % RT_TICK_PER_SECOND / ((RT_TICK_PER_SECOND * 1 + 999) / 1000));
+                                time_cast % RT_TICK_PER_SECOND / ((RT_TICK_PER_SECOND * 1 + 999) / 1000));
                     }
                     else
                     {
@@ -849,7 +847,7 @@ static void fal(uint8_t argc, char **argv)
                     {
                         time_cast = rt_tick_get() - start_time;
                         rt_kprintf("Write benchmark success, total time: %d.%03dS.\n", time_cast / RT_TICK_PER_SECOND,
-                                   time_cast % RT_TICK_PER_SECOND / ((RT_TICK_PER_SECOND * 1 + 999) / 1000));
+                                time_cast % RT_TICK_PER_SECOND / ((RT_TICK_PER_SECOND * 1 + 999) / 1000));
                     }
                     else
                     {
@@ -900,7 +898,7 @@ static void fal(uint8_t argc, char **argv)
                     {
                         time_cast = rt_tick_get() - start_time;
                         rt_kprintf("Read benchmark success, total time: %d.%03dS.\n", time_cast / RT_TICK_PER_SECOND,
-                                   time_cast % RT_TICK_PER_SECOND / ((RT_TICK_PER_SECOND * 1 + 999) / 1000));
+                                time_cast % RT_TICK_PER_SECOND / ((RT_TICK_PER_SECOND * 1 + 999) / 1000));
                     }
                     else
                     {
@@ -917,21 +915,20 @@ static void fal(uint8_t argc, char **argv)
             else
             {
                 rt_kprintf("Usage:\n");
-                for (i = 0; i < sizeof(help_info) / sizeof(char *); i++)
+                for (i = 0; i < sizeof(help_info) / sizeof(char*); i++)
                 {
                     rt_kprintf("%s\n", help_info[i]);
                 }
                 rt_kprintf("\n");
                 return;
             }
-            if (result < 0)
-            {
+            if (result < 0) {
                 rt_kprintf("This operate has an error. Error code: %d.\n", result);
             }
         }
     }
 }
-MSH_CMD_EXPORT(fal, FAL(Flash Abstraction Layer) operate.);
+MSH_CMD_EXPORT(fal, FAL (Flash Abstraction Layer) operate.);
 
 #endif /* defined(RT_USING_FINSH) && defined(FINSH_USING_MSH) */
 #endif /* RT_VER_NUM */

@@ -63,6 +63,6 @@ int sys_msgget(key_t key, int msgflg);
 int sys_msgsend(int msqid, const void *msgp, size_t msgsz, int msgflg);
 int sys_msgrcv(int msqid, void *msgp, size_t msgsz, long msgtyp, int msgflg);
 
-int sys_log(const char *log, int size);
+int sys_log(const char* log, int size);
 
 #endif

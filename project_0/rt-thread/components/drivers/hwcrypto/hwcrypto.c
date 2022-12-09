@@ -156,7 +156,7 @@ rt_err_t rt_hwcrypto_ctx_cpy(struct rt_hwcrypto_ctx *des, const struct rt_hwcryp
 
     /* The equipment is different or of different types and cannot be copied */
     if (des->device != src->device ||
-            (des->type & HWCRYPTO_MAIN_TYPE_MASK) != (src->type & HWCRYPTO_MAIN_TYPE_MASK))
+        (des->type & HWCRYPTO_MAIN_TYPE_MASK) != (src->type & HWCRYPTO_MAIN_TYPE_MASK))
     {
         return -RT_EINVAL;
     }

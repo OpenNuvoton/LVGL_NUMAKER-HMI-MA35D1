@@ -39,11 +39,11 @@
 #define STOP_BITS_4                     3
 
 #ifdef _WIN32
-    #include <windows.h>
+#include <windows.h>
 #else
-    #define PARITY_NONE                     0
-    #define PARITY_ODD                      1
-    #define PARITY_EVEN                     2
+#define PARITY_NONE                     0
+#define PARITY_ODD                      1
+#define PARITY_EVEN                     2
 #endif
 
 #define BIT_ORDER_LSB                   0
@@ -106,15 +106,15 @@ struct serial_configure
 {
     rt_uint32_t baud_rate;
 
-    rt_uint32_t data_bits               : 4;
-    rt_uint32_t stop_bits               : 2;
-    rt_uint32_t parity                  : 2;
-    rt_uint32_t bit_order               : 1;
-    rt_uint32_t invert                  : 1;
-    rt_uint32_t rx_bufsz                : 16;
-    rt_uint32_t tx_bufsz                : 16;
-    rt_uint32_t flowcontrol             : 1;
-    rt_uint32_t reserved                : 5;
+    rt_uint32_t data_bits               :4;
+    rt_uint32_t stop_bits               :2;
+    rt_uint32_t parity                  :2;
+    rt_uint32_t bit_order               :1;
+    rt_uint32_t invert                  :1;
+    rt_uint32_t rx_bufsz                :16;
+    rt_uint32_t tx_bufsz                :16;
+    rt_uint32_t flowcontrol             :1;
+    rt_uint32_t reserved                :5;
 };
 
 /*
@@ -169,23 +169,23 @@ struct rt_uart_ops
                           struct serial_configure       *cfg);
 
     rt_err_t (*control)(struct rt_serial_device         *serial,
-                        int          cmd,
-                        void        *arg);
+                                            int          cmd,
+                                            void        *arg);
 
     int (*putc)(struct rt_serial_device *serial, char c);
     int (*getc)(struct rt_serial_device *serial);
 
     rt_size_t (*transmit)(struct rt_serial_device       *serial,
-                          rt_uint8_t             *buf,
-                          rt_size_t               size,
-                          rt_uint32_t             tx_flag);
+                                 rt_uint8_t             *buf,
+                                 rt_size_t               size,
+                                 rt_uint32_t             tx_flag);
 };
 
 void rt_hw_serial_isr(struct rt_serial_device *serial, int event);
 
 rt_err_t rt_hw_serial_register(struct rt_serial_device      *serial,
                                const  char                  *name,
-                               rt_uint32_t            flag,
-                               void                  *data);
+                                      rt_uint32_t            flag,
+                                      void                  *data);
 
 #endif

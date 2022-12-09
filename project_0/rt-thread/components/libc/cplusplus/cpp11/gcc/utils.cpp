@@ -25,5 +25,5 @@ real_time_clock::time_point real_time_clock::now() noexcept
     clock_gettime(CLOCK_REALTIME, &tp);
 
     return time_point(duration(std::chrono::seconds(tp.tv_sec))
-                      + std::chrono::nanoseconds(tp.tv_nsec));
+                        + std::chrono::nanoseconds(tp.tv_nsec));
 }

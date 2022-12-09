@@ -28,8 +28,8 @@
 #include "msh.h"
 
 #ifdef DFS_USING_POSIX
-    #include <unistd.h>
-    #include <fcntl.h>
+#include <unistd.h>
+#include <fcntl.h>
 #endif /* DFS_USING_POSIX */
 
 /* finsh thread */
@@ -150,7 +150,7 @@ int finsh_getchar(void)
 #ifdef RT_USING_DEVICE
     char ch = 0;
 #ifdef RT_USING_POSIX_STDIO
-    if (read(STDIN_FILENO, &ch, 1) > 0)
+    if(read(STDIN_FILENO, &ch, 1) > 0)
     {
         return ch;
     }
@@ -417,7 +417,7 @@ static void shell_push_history(struct finsh_shell *shell)
                 for (index = 0; index < FINSH_HISTORY_LINES - 1; index ++)
                 {
                     rt_memcpy(&shell->cmd_history[index][0],
-                              &shell->cmd_history[index + 1][0], FINSH_CMD_SIZE);
+                           &shell->cmd_history[index + 1][0], FINSH_CMD_SIZE);
                 }
                 rt_memset(&shell->cmd_history[index][0], 0, FINSH_CMD_SIZE);
                 rt_memcpy(&shell->cmd_history[index][0], shell->line, shell->line_position);
@@ -530,7 +530,7 @@ void finsh_thread_entry(void *parameter)
 
                 /* copy the history command */
                 rt_memcpy(shell->line, &shell->cmd_history[shell->current_history][0],
-                          FINSH_CMD_SIZE);
+                       FINSH_CMD_SIZE);
                 shell->line_curpos = shell->line_position = (rt_uint16_t)strlen(shell->line);
                 shell_handle_history(shell);
 #endif
@@ -552,7 +552,7 @@ void finsh_thread_entry(void *parameter)
                 }
 
                 rt_memcpy(shell->line, &shell->cmd_history[shell->current_history][0],
-                          FINSH_CMD_SIZE);
+                       FINSH_CMD_SIZE);
                 shell->line_curpos = shell->line_position = (rt_uint16_t)strlen(shell->line);
                 shell_handle_history(shell);
 #endif

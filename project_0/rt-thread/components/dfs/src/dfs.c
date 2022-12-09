@@ -15,11 +15,11 @@
 #include <dfs_file.h>
 #include "dfs_private.h"
 #ifdef RT_USING_LWP
-    #include <lwp.h>
+#include <lwp.h>
 #endif
 
 #ifdef RT_USING_POSIX_STDIO
-    #include <libc.h>
+#include <libc.h>
 #endif /* RT_USING_POSIX_STDIO */
 
 /* Global variables */
@@ -454,7 +454,7 @@ char *dfs_normalize_path(const char *directory, const char *filename)
 
         /* copy up the next '/' and erase all '/' */
         while ((c = *src++) != '\0' && c != '/')
-            * dst ++ = c;
+            *dst ++ = c;
 
         if (c == '/')
         {
@@ -520,7 +520,6 @@ struct dfs_fdtable *dfs_fdtable_get(void)
 }
 
 #ifdef RT_USING_FINSH
-#include <finsh.h>
 int list_fd(void)
 {
     int index;
@@ -529,7 +528,7 @@ int list_fd(void)
     fd_table = dfs_fdtable_get();
     if (!fd_table) return -1;
 
-    rt_enter_critical();
+    dfs_lock();
 
     rt_kprintf("fd type    ref magic  path\n");
     rt_kprintf("-- ------  --- ----- ------\n");
@@ -562,11 +561,10 @@ int list_fd(void)
             }
         }
     }
-    rt_exit_critical();
+    dfs_unlock();
 
     return 0;
 }
-MSH_CMD_EXPORT(list_fd, list file descriptor);
-#endif
-/*@}*/
+#endif /* RT_USING_FINSH */
 
+/*@}*/

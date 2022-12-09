@@ -20,7 +20,7 @@
 #include <rthw.h>
 
 #ifdef RT_USING_MODULE
-    #include <dlmodule.h>
+#include <dlmodule.h>
 #endif /* RT_USING_MODULE */
 
 /*

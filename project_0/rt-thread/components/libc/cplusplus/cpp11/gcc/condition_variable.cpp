@@ -12,23 +12,23 @@
 
 namespace std
 {
-void condition_variable::wait(unique_lock<mutex> &lock)
-{
-    int err = pthread_cond_wait(&_m_cond, lock.mutex()->native_handle());
-
-    if (err)
+    void condition_variable::wait(unique_lock<mutex>& lock)
     {
-        throw_system_error(err, "condition_variable::wait: failed to wait on a condition");
-    }
-}
+        int err = pthread_cond_wait(&_m_cond, lock.mutex()->native_handle());
 
-void notify_all_at_thread_exit(condition_variable &cond, unique_lock<mutex> lk)
-{
-    // TLS currently not available
-    mutex *mut = lk.release();
-    mut->unlock();
-    cond.notify_all();
-}
+        if (err)
+        {
+            throw_system_error(err, "condition_variable::wait: failed to wait on a condition");
+        }
+    }
+
+    void notify_all_at_thread_exit(condition_variable& cond, unique_lock<mutex> lk)
+    {
+        // TLS currently not available
+        mutex* mut = lk.release();
+        mut->unlock();
+        cond.notify_all();
+    }
 
 
 } // namespace std

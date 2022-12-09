@@ -40,7 +40,7 @@ void zs_start(char *path)
 {
     struct zfile *zf;
     rt_err_t res = RT_ERROR;
-    char *p, *q;
+    char *p,*q;
     zf = rt_malloc(sizeof(struct zfile));
     if (zf == RT_NULL)
     {
@@ -55,18 +55,18 @@ void zs_start(char *path)
     p = zf->fname;
     for (;;)
     {
-        q = strstr(p, "/");
+        q = strstr(p,"/");
         if (q == RT_NULL)  break;
-        p = q + 1;
+        p = q+1;
     }
     if (res == RT_EOK)
     {
         rt_kprintf("\r\nfile: %s \r\nsize: %ld bytes\r\nsend completed.\r\n",
-                   p, zf->bytes_received);
+                  p,zf->bytes_received);
     }
     else
     {
-        rt_kprintf("\r\nfile: %s \r\nsize: 0 bytes\r\nsend failed.\r\n", p);
+        rt_kprintf("\r\nfile: %s \r\nsize: 0 bytes\r\nsend failed.\r\n",p);
     }
     rt_free(zf);
 
@@ -79,7 +79,7 @@ static void zsend_init(void)
     rt_err_t res = -RT_ERROR;
 
     zinit_parameter();
-    for (;;)         /* wait ZPAD */
+    for(;;)          /* wait ZPAD */
     {
         res = zread_line(800);
         if (res == ZPAD) break;
@@ -98,7 +98,7 @@ static void zsend_init(void)
     if (Rxflags & CANFC32) Txfcs32 = 1;    /* used 32bits CRC check */
 
     if (ZF2_OP == ZTRLE && (Rxflags & CANRLE))    /* for RLE packet */
-        Txfcs32 = 2;
+         Txfcs32 = 2;
     else
         ZF2_OP = 0;
     /* send SINIT cmd */
@@ -108,7 +108,7 @@ static void zsend_init(void)
 /* send files */
 static rt_err_t zsend_files(struct zfile *zf)
 {
-    char *p, *q;
+    char *p,*q;
     char *str = "/";
     struct stat finfo;
     rt_err_t res = -RT_ERROR;
@@ -118,9 +118,9 @@ static rt_err_t zsend_files(struct zfile *zf)
         rt_kprintf("\r\nerror: no file to be send.\r\n");
         return res;
     }
-    if ((zf->fd = open(zf->fname, DFS_O_RDONLY, 0)) < 0)
+    if ((zf->fd=open(zf->fname, DFS_O_RDONLY,0)) <0)
     {
-        rt_kprintf("\r\ncan not open file:%s\r\n", zf->fname + 1);
+        rt_kprintf("\r\ncan not open file:%s\r\n",zf->fname+1);
         return res;
     }
 
@@ -130,32 +130,32 @@ static rt_err_t zsend_files(struct zfile *zf)
     p = zf->fname;
     for (;;)
     {
-        q = strstr(p, str);
+        q = strstr(p,str);
         if (q == RT_NULL)  break;
-        p = q + 1;
+        p = q+1;
     }
-    q = (char *)TX_BUFFER;
+    q = (char*)TX_BUFFER;
     for (;;)
     {
         *q++ = *p++;
         if (*p == 0) break;
     }
     *q++ = 0;
-    p = q;
-    while (q < (char *)(TX_BUFFER + 1024))
+    p=q;
+    while (q < (char*)(TX_BUFFER + 1024))
         *q++ = 0;
     /* get file attributes */
-    fstat(zf->fd, &finfo);
+    fstat(zf->fd,&finfo);
     Left_sizes += finfo.st_size;
     rt_sprintf(p, "%lu %lo %o 3 %d %ld", (long)finfo.st_size, finfo.st_mtime,
-               finfo.st_mode, file_cnt, Left_sizes);
+              finfo.st_mode, file_cnt, Left_sizes);
     Left_sizes -= finfo.st_size;
-    TX_BUFFER[127] = (finfo.st_size + 127) >> 7;
-    TX_BUFFER[126] = (finfo.st_size + 127) >> 15;
+    TX_BUFFER[127] = (finfo.st_size + 127) >>7;
+    TX_BUFFER[126] = (finfo.st_size + 127) >>15;
 
     zsend_init();
     /* start sending files */
-    res = zsend_file(zf, TX_BUFFER, (p - (char *)TX_BUFFER) + strlen(p) + 1);
+    res = zsend_file(zf,TX_BUFFER, (p-(char*)TX_BUFFER)+strlen(p)+1);
     zsay_bibi();
     close(zf->fd);
 
@@ -168,11 +168,11 @@ static rt_err_t zsend_file(struct zfile *zf, rt_uint8_t *buf, rt_uint16_t len)
     rt_uint8_t cnt;
     rt_err_t res = -RT_ERROR;
 
-    for (cnt = 0; cnt < 5; cnt++)
+    for (cnt=0;cnt<5;cnt++)
     {
         tx_header[ZF0] = ZF0_CMD;               /* file conversion option */
         tx_header[ZF1] = ZF1_CMD;               /* file management option */
-        tx_header[ZF2] = (ZF3_CMD | ZF2_OP);    /* file transfer option   */
+        tx_header[ZF2] = (ZF3_CMD|ZF2_OP);      /* file transfer option   */
         tx_header[ZF3] = ZF3_CMD;
         zsend_bin_header(ZFILE, tx_header);
         zsend_bin_data(buf, len, ZCRCW);
@@ -181,33 +181,33 @@ loop:
         switch (res)
         {
         case ZRINIT:
-            while ((res = zread_line(50)) > 0)
-            {
-                if (res == ZPAD)
-                {
+             while ((res = zread_line(50)) > 0)
+             {
+                 if (res == ZPAD)
+                 {
                     goto loop;
-                }
-            }
-            break;
+                 }
+             }
+             break;
         case ZCAN:
         case TIMEOUT:
         case ZABORT:
         case ZFIN:
-            break;
+             break;
         case -RT_ERROR:
         case ZNAK:
-            break;
+             break;
         case ZCRC:                           /* no CRC request */
-            goto loop;
+             goto loop;
         case ZFERR:
         case ZSKIP:
-            break;
+             break;
         case ZRPOS:                          /* here we want */
-            zget_pos(Rxpos);
-            Txpos = Rxpos;
-            return (zsend_file_data(zf));
+             zget_pos(Rxpos);
+             Txpos = Rxpos;
+             return(zsend_file_data(zf));
         default:
-            break;
+             break;
         }
     }
 
@@ -226,17 +226,16 @@ start_send:
     zsend_bin_header(ZDATA, tx_header);
     do
     {
-        cnt = zfill_buffer(zf, TX_BUFFER, RX_BUFFER_SIZE);
-        if (cnt < RX_BUFFER_SIZE)
+        cnt = zfill_buffer(zf,TX_BUFFER,RX_BUFFER_SIZE);
+        if (cnt < RX_BUFFER_SIZE )
             cmd = ZCRCE;
         else
             cmd = ZCRCG;
         zsend_bin_data(TX_BUFFER, cnt, cmd);
-        zf->bytes_received = Txpos += cnt;
+        zf->bytes_received= Txpos += cnt;
         if (cmd == ZCRCW)
             goto get_syn1;
-    }
-    while (cnt == RX_BUFFER_SIZE);
+    } while (cnt == RX_BUFFER_SIZE);
     for (;;)                         /*  get ack and check if send finish */
     {
         zput_pos(Txpos);
@@ -246,19 +245,19 @@ get_syn1:
         switch (res)
         {
         case ZACK:
-            goto get_syn1;
+             goto get_syn1;
         case ZNAK:
-            continue;
+             continue;
         case ZRPOS:                     /* resend here */
-            lseek(zf->fd, Txpos, 0);
-            goto start_send;
+             lseek(zf->fd,Txpos,0);
+             goto start_send;
         case ZRINIT:                   /*  send finish,then begin to send next file */
-            return RT_EOK;
+             return RT_EOK;
         case ZSKIP:
         case -RT_ERROR:
-            return res;
+             return res;
         default:
-            return res;
+             return res;
         }
     }
 }
@@ -266,7 +265,7 @@ get_syn1:
 /* fill file data to buffer*/
 static rt_uint16_t zfill_buffer(struct zfile *zf, rt_uint8_t *buf, rt_uint16_t size)
 {
-    return (read(zf->fd, buf, size));
+    return (read(zf->fd,buf,size));
 }
 
 /* wait sync(ack) from the receiver */
@@ -283,21 +282,21 @@ static rt_err_t zget_sync(void)
         case ZABORT:
         case ZFIN:
         case TIMEOUT:
-            return -RT_ERROR;
+             return -RT_ERROR;
         case ZRPOS:                  /* get pos, need to resend */
-            zget_pos(Rxpos);
-            Txpos = Rxpos;
-            return res;
+             zget_pos(Rxpos);
+             Txpos = Rxpos;
+             return res;
         case ZACK:
-            return res;
+             return res;
         case ZRINIT:                 /* get ZRINIT indicate that the prev file send completed */
-            return res;
+             return res;
         case ZSKIP:
-            return res;
+             return res;
         case -RT_ERROR:
         default:
-            zsend_bin_header(ZNAK, tx_header);
-            continue;
+             zsend_bin_header(ZNAK, tx_header);
+             continue;
         }
     }
 }

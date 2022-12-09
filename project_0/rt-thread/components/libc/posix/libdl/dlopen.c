@@ -16,11 +16,11 @@
 
 #define MODULE_ROOT_DIR     "/modules"
 
-void *dlopen(const char *filename, int flags)
+void* dlopen(const char *filename, int flags)
 {
     struct rt_dlmodule *module;
     char *fullpath;
-    const char *def_path = MODULE_ROOT_DIR;
+    const char*def_path = MODULE_ROOT_DIR;
 
     /* check parameters */
     RT_ASSERT(filename != RT_NULL);
@@ -31,11 +31,11 @@ void *dlopen(const char *filename, int flags)
 
         /* join path and file name */
         rt_snprintf(fullpath, strlen(def_path) + strlen(filename) + 2,
-                    "%s/%s", def_path, filename);
+            "%s/%s", def_path, filename);
     }
     else
     {
-        fullpath = (char *)filename; /* absolute path, use it directly */
+        fullpath = (char*)filename; /* absolute path, use it directly */
     }
 
     rt_enter_critical();
@@ -43,7 +43,7 @@ void *dlopen(const char *filename, int flags)
     /* find in module list */
     module = dlmodule_find(fullpath);
 
-    if (module != RT_NULL)
+    if(module != RT_NULL)
     {
         rt_exit_critical();
         module->nref++;
@@ -54,11 +54,11 @@ void *dlopen(const char *filename, int flags)
         module = dlmodule_load(fullpath);
     }
 
-    if (fullpath != filename)
+    if(fullpath != filename)
     {
         rt_free(fullpath);
     }
 
-    return (void *)module;
+    return (void*)module;
 }
 RTM_EXPORT(dlopen);

@@ -134,8 +134,8 @@ extern "C" int __ARM_TPL_condvar_wait(__ARM_TPL_condvar_t *__cv, __ARM_TPL_mutex
 }
 
 extern "C" int __ARM_TPL_condvar_timedwait(__ARM_TPL_condvar_t *__cv,
-        __ARM_TPL_mutex_t *__m,
-        __ARM_TPL_timespec_t *__ts)
+                                __ARM_TPL_mutex_t *__m,
+                                __ARM_TPL_timespec_t *__ts)
 {
     volatile __ARM_TPL_condvar_t *__vcv = __cv;
     if (check_create(__vcv) != 0)

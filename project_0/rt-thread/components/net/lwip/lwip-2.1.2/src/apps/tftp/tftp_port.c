@@ -17,7 +17,7 @@
 
 static struct tftp_context ctx;
 
-static void *tftp_open(const char *fname, const char *mode, u8_t write)
+static void* tftp_open(const char* fname, const char* mode, u8_t write)
 {
     int fd = -1;
 
@@ -40,7 +40,7 @@ static void *tftp_open(const char *fname, const char *mode, u8_t write)
     return (void *) fd;
 }
 
-static int tftp_write(void *handle, struct pbuf *p)
+static int tftp_write(void* handle, struct pbuf* p)
 {
     int fd = (int) handle;
 

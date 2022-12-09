@@ -32,7 +32,7 @@ struct hid_s
 
 /* CustomHID_ConfigDescriptor */
 ALIGN(4)
-const rt_uint8_t _report_desc[] =
+const rt_uint8_t _report_desc[]=
 {
 #ifdef RT_USB_DEVICE_HID_KEYBOARD
     USAGE_PAGE(1),      0x01,
@@ -362,7 +362,7 @@ const static struct uhid_comm_descriptor _hid_comm_desc =
 };
 
 ALIGN(4)
-const static char *_ustring[] =
+const static char* _ustring[] =
 {
     "Language",
     "RT-Thread Team.",
@@ -381,18 +381,16 @@ static void dump_data(rt_uint8_t *data, rt_size_t size)
         if ((i + 1) % 8 == 0)
         {
             rt_kprintf("\n");
-        }
-        else if ((i + 1) % 4 == 0)
-        {
+        }else if ((i + 1) % 4 == 0){
             rt_kprintf(" ");
         }
     }
 }
-static void dump_report(struct hid_report *report)
+static void dump_report(struct hid_report * report)
 {
     rt_kprintf("\nHID Recived:");
     rt_kprintf("\nReport ID %02x \n", report->report_id);
-    dump_data(report->report, report->size);
+    dump_data(report->report,report->size);
 }
 
 static rt_err_t _ep_out_handler(ufunction_t func, rt_size_t size)
@@ -403,11 +401,11 @@ static rt_err_t _ep_out_handler(ufunction_t func, rt_size_t size)
     RT_ASSERT(func->device != RT_NULL);
     data = (struct hid_s *) func->user_data;
 
-    if (size != 0)
+    if(size != 0)
     {
-        rt_memcpy((void *)&report, (void *)data->ep_out->buffer, size);
-        report.size = size - 1;
-        rt_mq_send(&data->hid_mq, (void *)&report, sizeof(report));
+        rt_memcpy((void *)&report,(void*)data->ep_out->buffer,size);
+        report.size = size-1;
+        rt_mq_send(&data->hid_mq,(void *)&report,sizeof(report));
     }
 
     data->ep_out->request.buffer = data->ep_out->buffer;
@@ -424,9 +422,9 @@ static rt_err_t _ep_in_handler(ufunction_t func, rt_size_t size)
     RT_ASSERT(func->device != RT_NULL);
 
     data = (struct hid_s *) func->user_data;
-    if (data->parent.tx_complete != RT_NULL)
+    if(data->parent.tx_complete != RT_NULL)
     {
-        data->parent.tx_complete(&data->parent, RT_NULL);
+        data->parent.tx_complete(&data->parent,RT_NULL);
     }
     return RT_EOK;
 }
@@ -435,7 +433,7 @@ static rt_err_t _hid_set_report_callback(udevice_t device, rt_size_t size)
 {
     RT_DEBUG_LOG(RT_DEBUG_USB, ("_hid_set_report_callback\n"));
 
-    if (size != 0)
+    if(size != 0)
     {
     }
 
@@ -464,36 +462,36 @@ static rt_err_t _interface_handler(ufunction_t func, ureq_t setup)
     switch (setup->bRequest)
     {
     case USB_REQ_GET_DESCRIPTOR:
-        if ((setup->wValue >> 8) == USB_DESC_TYPE_REPORT)
+        if((setup->wValue >> 8) == USB_DESC_TYPE_REPORT)
         {
             rt_usbd_ep0_write(func->device, (void *)(&_report_desc[0]), sizeof(_report_desc));
         }
-        else if ((setup->wValue >> 8) == USB_DESC_TYPE_HID)
+        else if((setup->wValue >> 8) == USB_DESC_TYPE_HID)
         {
 
             rt_usbd_ep0_write(func->device, (void *)(&_hid_comm_desc.hid_desc), sizeof(struct uhid_descriptor));
         }
         break;
     case USB_HID_REQ_GET_REPORT:
-        if (setup->wLength == 0)
+        if(setup->wLength == 0)
         {
             rt_usbd_ep0_set_stall(func->device);
             break;
         }
-        if ((setup->wLength == 0) || (setup->wLength > MAX_REPORT_SIZE))
+        if((setup->wLength == 0) || (setup->wLength > MAX_REPORT_SIZE))
             setup->wLength = MAX_REPORT_SIZE;
-        rt_usbd_ep0_write(func->device, data->report_buf, setup->wLength);
+        rt_usbd_ep0_write(func->device, data->report_buf,setup->wLength);
         break;
     case USB_HID_REQ_GET_IDLE:
 
         dcd_ep0_send_status(func->device->dcd);
         break;
     case USB_HID_REQ_GET_PROTOCOL:
-        rt_usbd_ep0_write(func->device, &data->protocol, 1);
+        rt_usbd_ep0_write(func->device, &data->protocol,1);
         break;
     case USB_HID_REQ_SET_REPORT:
 
-        if ((setup->wLength == 0) || (setup->wLength > MAX_REPORT_SIZE))
+        if((setup->wLength == 0) || (setup->wLength > MAX_REPORT_SIZE))
             rt_usbd_ep0_set_stall(func->device);
 
         rt_usbd_ep0_read(func->device, data->report_buf, setup->wLength, _hid_set_report_callback);
@@ -531,7 +529,7 @@ static rt_err_t _function_enable(ufunction_t func)
 //
 //    _vcom_reset_state(func);
 //
-    if (data->ep_out->buffer == RT_NULL)
+    if(data->ep_out->buffer == RT_NULL)
     {
         data->ep_out->buffer        = rt_malloc(HID_RX_BUFSIZE);
     }
@@ -561,7 +559,7 @@ static rt_err_t _function_disable(ufunction_t func)
 
     RT_DEBUG_LOG(RT_DEBUG_USB, ("hid function disable\n"));
 
-    if (data->ep_out->buffer != RT_NULL)
+    if(data->ep_out->buffer != RT_NULL)
     {
         rt_free(data->ep_out->buffer);
         data->ep_out->buffer = RT_NULL;
@@ -603,10 +601,10 @@ static rt_size_t _hid_write(rt_device_t dev, rt_off_t pos, const void *buffer, r
     if (hiddev->func->device->state == USB_STATE_CONFIGURED)
     {
         report.report_id = pos;
-        rt_memcpy((void *)report.report, (void *)buffer, size);
+        rt_memcpy((void *)report.report,(void *)buffer,size);
         report.size = size;
         hiddev->ep_in->request.buffer = (void *)&report;
-        hiddev->ep_in->request.size = (size + 1) > 64 ? 64 : size + 1;
+        hiddev->ep_in->request.size = (size+1) > 64 ? 64 : size+1;
         hiddev->ep_in->request.req_type = UIO_REQUEST_WRITE;
         rt_usbd_io_request(hiddev->func->device, hiddev->ep_in, &hiddev->ep_in->request);
         return size;
@@ -622,14 +620,14 @@ ALIGN(RT_ALIGN_SIZE)
 static rt_uint8_t hid_thread_stack[512];
 static struct rt_thread hid_thread;
 
-static void hid_thread_entry(void *parameter)
+static void hid_thread_entry(void* parameter)
 {
     struct hid_report report;
     struct hid_s *hiddev;
     hiddev = (struct hid_s *)parameter;
-    while (1)
+    while(1)
     {
-        if (rt_mq_recv(&hiddev->hid_mq, &report, sizeof(report), RT_WAITING_FOREVER) != RT_EOK)
+        if(rt_mq_recv(&hiddev->hid_mq, &report, sizeof(report),RT_WAITING_FOREVER) != RT_EOK )
             continue;
         HID_Report_Received(&report);
     }
@@ -647,7 +645,7 @@ const static struct rt_device_ops hid_device_ops =
 };
 #endif
 
-static rt_uint8_t hid_mq_pool[(sizeof(struct hid_report) + sizeof(void *)) * 8];
+static rt_uint8_t hid_mq_pool[(sizeof(struct hid_report)+sizeof(void*))*8];
 static void rt_usb_hid_init(struct ufunction *func)
 {
     struct hid_s *hiddev;
@@ -663,10 +661,10 @@ static void rt_usb_hid_init(struct ufunction *func)
 
     rt_device_register(&hiddev->parent, "hidd", RT_DEVICE_FLAG_RDWR);
     rt_mq_init(&hiddev->hid_mq, "hiddmq", hid_mq_pool, sizeof(struct hid_report),
-               sizeof(hid_mq_pool), RT_IPC_FLAG_FIFO);
+                            sizeof(hid_mq_pool), RT_IPC_FLAG_FIFO);
 
     rt_thread_init(&hid_thread, "hidd", hid_thread_entry, hiddev,
-                   hid_thread_stack, sizeof(hid_thread_stack), RT_USBD_THREAD_PRIO, 20);
+            hid_thread_stack, sizeof(hid_thread_stack), RT_USBD_THREAD_PRIO, 20);
     rt_thread_startup(&hid_thread);
 }
 
@@ -703,9 +701,9 @@ ufunction_t rt_usbd_function_hid_create(udevice_t device)
     rt_usbd_device_set_qualifier(device, &dev_qualifier);
 
     /* allocate memory for cdc vcom data */
-    data = (struct hid_s *)rt_malloc(sizeof(struct hid_s));
+    data = (struct hid_s*)rt_malloc(sizeof(struct hid_s));
     rt_memset(data, 0, sizeof(struct hid_s));
-    func->user_data = (void *)data;
+    func->user_data = (void*)data;
 
     /* create an interface object */
     hid_intf = rt_usbd_interface_new(device, _interface_handler);
@@ -714,7 +712,7 @@ ufunction_t rt_usbd_function_hid_create(udevice_t device)
     hid_setting = rt_usbd_altsetting_new(sizeof(struct uhid_comm_descriptor));
 
     /* config desc in alternate setting */
-    rt_usbd_altsetting_config_descriptor(hid_setting, &_hid_comm_desc, (rt_off_t) & ((uhid_comm_desc_t)0)->intf_desc);
+    rt_usbd_altsetting_config_descriptor(hid_setting, &_hid_comm_desc, (rt_off_t)&((uhid_comm_desc_t)0)->intf_desc);
 
     /* configure the hid interface descriptor */
     _hid_descriptor_config(hid_setting->desc, hid_intf->intf_num);

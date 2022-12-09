@@ -15,8 +15,7 @@
 
 #include <rtthread.h>
 
-namespace rtthread
-{
+namespace rtthread {
 
 /**
  * The Queue class allow to control, send, receive, or wait for messages.
@@ -45,7 +44,7 @@ public:
       @param   millisec  timeout value or 0 in case of no time-out. (default: 0)
       @return  status code that indicates the execution status of the function.
     */
-    rt_err_t put(T &data, int32_t millisec = 0)
+    rt_err_t put(T& data, int32_t millisec = 0)
     {
         return rt_mq_send(&mID, &data, sizeof(data));
     }
@@ -54,7 +53,7 @@ public:
       @param   millisec  timeout value or 0 in case of no time-out. (default: osWaitForever).
       @return  bool .
     */
-    bool get(T &data, int32_t millisec = WAIT_FOREVER)
+    bool get(T& data, int32_t millisec = WAIT_FOREVER)
     {
         rt_int32_t tick;
 

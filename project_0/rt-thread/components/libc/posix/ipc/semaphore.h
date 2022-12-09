@@ -25,7 +25,7 @@ struct posix_sem
     rt_sem_t sem;
 
     /* next posix semaphore */
-    struct posix_sem *next;
+    struct posix_sem* next;
 };
 typedef struct posix_sem sem_t;
 

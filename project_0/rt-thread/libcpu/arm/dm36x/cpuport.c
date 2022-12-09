@@ -22,30 +22,30 @@ rt_inline rt_uint32_t cp15_rd(void)
 {
     rt_uint32_t i;
 
-    asm("mrc p15, 0, %0, c1, c0, 0":"=r"(i));
+    asm ("mrc p15, 0, %0, c1, c0, 0":"=r" (i));
     return i;
 }
 
 rt_inline void cache_enable(rt_uint32_t bit)
 {
-    __asm__ __volatile__(\
-                         "mrc  p15,0,r0,c1,c0,0\n\t" \
-                         "orr  r0,r0,%0\n\t"         \
-                         "mcr  p15,0,r0,c1,c0,0"     \
-                         :                           \
-                         :"r"(bit)                  \
-                         :"memory");
+    __asm__ __volatile__(           \
+        "mrc  p15,0,r0,c1,c0,0\n\t" \
+        "orr  r0,r0,%0\n\t"         \
+        "mcr  p15,0,r0,c1,c0,0"     \
+        :                           \
+        :"r" (bit)                  \
+        :"memory");
 }
 
 rt_inline void cache_disable(rt_uint32_t bit)
 {
-    __asm__ __volatile__(\
-                         "mrc  p15,0,r0,c1,c0,0\n\t" \
-                         "bic  r0,r0,%0\n\t"         \
-                         "mcr  p15,0,r0,c1,c0,0"     \
-                         :                           \
-                         :"r"(bit)                  \
-                         :"memory");
+    __asm__ __volatile__(           \
+        "mrc  p15,0,r0,c1,c0,0\n\t" \
+        "bic  r0,r0,%0\n\t"         \
+        "mcr  p15,0,r0,c1,c0,0"     \
+        :                           \
+        :"r" (bit)                  \
+        :"memory");
 }
 #endif
 
@@ -151,7 +151,7 @@ RT_WEAK void rt_hw_cpu_reset()
     rt_kprintf("Restarting system...\n");
     machine_reset();
 
-    while (1);  /* loop forever and wait for reset to happen */
+    while(1);   /* loop forever and wait for reset to happen */
 
     /* NEVER REACHED */
 }
@@ -220,7 +220,7 @@ int __rt_ffs(int value)
         return value;
 
     value &= (-value);
-    asm("clz %0, %1": "=r"(value) :"r"(value));
+    asm ("clz %0, %1": "=r"(value) :"r"(value));
 
     return (32 - value);
 }

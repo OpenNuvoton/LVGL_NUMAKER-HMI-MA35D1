@@ -29,7 +29,7 @@
               "offset": "0x80000",
               "loadaddr": "0x80400000",
               "type": "4",
-              "file": "../Debug/rtthread.bin"
+              "file": "../rtthread.bin"
             }
         ]
     }

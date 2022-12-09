@@ -3,6 +3,12 @@ OUTPUT_ARCH(arm)
 
 SECTIONS
 {
+    ".usbhostlib" 0x28000000 (NOLOAD):
+    {
+        . = ALIGN(4) ; 
+        *(.usbhostlib.*)
+    }
+
     . = 0x80400000;
 
     __text_start = .;

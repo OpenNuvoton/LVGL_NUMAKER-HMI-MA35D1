@@ -17,78 +17,78 @@
 namespace std
 {
 
-extern "C"
-{
-    static void *execute_native_thread_routine(void *p)
+    extern "C"
     {
-        thread::invoker_base *t = static_cast<thread::invoker_base *>(p);
-        thread::invoker_base_ptr local;
-        local.swap(t->this_ptr); // tranfer the ownership of the invoker into the thread entry
+        static void* execute_native_thread_routine(void *p)
+        {
+            thread::invoker_base* t = static_cast<thread::invoker_base*>(p);
+            thread::invoker_base_ptr local;
+            local.swap(t->this_ptr); // tranfer the ownership of the invoker into the thread entry
 
-        local->invoke();
+            local->invoke();
 
-        return NULL;
-    }
-}
-
-void thread::start_thread(invoker_base_ptr b)
-{
-    auto raw_ptr = b.get();
-    // transfer the ownership of the invoker to the new thread
-    raw_ptr->this_ptr = std::move(b);
-    int err = pthread_create(&_m_thr.__cpp_thread_t, NULL,
-                             &execute_native_thread_routine, raw_ptr);
-
-    if (err)
-    {
-        raw_ptr->this_ptr.reset();
-        throw_system_error(err, "Failed to create a thread");
+            return NULL;
+        }
     }
 
-}
-
-thread::~thread()
-{
-    if (joinable()) // when either not joined or not detached
-        terminate();
-}
-
-void thread::join()
-{
-    int err = EINVAL;
-
-    if (joinable())
-        err = pthread_join(native_handle(), NULL);
-
-    if (err)
+    void thread::start_thread(invoker_base_ptr b)
     {
-        throw_system_error(err, "thread::join failed");
+        auto raw_ptr = b.get();
+        // transfer the ownership of the invoker to the new thread
+        raw_ptr->this_ptr = std::move(b);
+        int err = pthread_create(&_m_thr.__cpp_thread_t, NULL,
+                &execute_native_thread_routine, raw_ptr);
+
+        if (err)
+        {
+            raw_ptr->this_ptr.reset();
+            throw_system_error(err, "Failed to create a thread");
+        }
+
     }
 
-    _m_thr = id();
-}
-
-void thread::detach()
-{
-    int err = EINVAL;
-
-    if (joinable())
-        err = pthread_detach(native_handle());
-    if (err)
+    thread::~thread()
     {
-        throw_system_error(err, "thread::detach failed");
+        if (joinable()) // when either not joined or not detached
+            terminate();
     }
 
-    _m_thr = id();
-}
+    void thread::join()
+    {
+        int err = EINVAL;
 
-// TODO: not yet actually implemented.
-// The standard states that the returned value should only be considered a hint.
-unsigned thread::hardware_concurrency() noexcept
-{
-    int __n = _RT_NPROCS;
-    if (__n < 0)
-        __n = 0;
-    return __n;
-}
+        if (joinable())
+            err = pthread_join(native_handle(), NULL);
+
+        if (err)
+        {
+            throw_system_error(err, "thread::join failed");
+        }
+
+        _m_thr = id();
+    }
+
+    void thread::detach()
+    {
+        int err = EINVAL;
+
+        if (joinable())
+            err = pthread_detach(native_handle());
+        if (err)
+        {
+            throw_system_error(err, "thread::detach failed");
+        }
+
+        _m_thr = id();
+    }
+
+    // TODO: not yet actually implemented.
+    // The standard states that the returned value should only be considered a hint.
+    unsigned thread::hardware_concurrency() noexcept
+    {
+        int __n = _RT_NPROCS;
+        if (__n < 0)
+            __n = 0;
+        return __n;
+    }
 }

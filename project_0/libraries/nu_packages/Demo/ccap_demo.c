@@ -506,7 +506,9 @@ static void ccap_grabber(void *parameter)
 exit_ccap_grabber:
 
     ccap_sensor_fini(rt_device_find(psGrabberParam->devname_ccap), rt_device_find(psGrabberParam->devname_sensor));
-    rt_device_close(psDevLcd);
+
+    if (psDevLcd != RT_NULL)
+        rt_device_close(psDevLcd);
 
     return;
 }
@@ -541,5 +543,5 @@ int ccap_demo(void)
     return 0;
 }
 MSH_CMD_EXPORT(ccap_demo, camera capture demo);
-INIT_ENV_EXPORT(ccap_demo);
+//INIT_ENV_EXPORT(ccap_demo);
 #endif

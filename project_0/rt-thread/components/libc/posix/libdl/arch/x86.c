@@ -28,21 +28,21 @@ int dlmodule_relocate(struct rt_dlmodule *module, Elf32_Rel *rel, Elf32_Addr sym
 
     switch (ELF32_R_TYPE(rel->r_info))
     {
-    case R_X86_64_GLOB_DAT:
-    case R_X86_64_JUMP_SLOT:
-        *where = (Elf32_Addr)sym_val;
+        case R_X86_64_GLOB_DAT:
+        case R_X86_64_JUMP_SLOT:
+            *where = (Elf32_Addr)sym_val;
 
-        RT_DEBUG_LOG(RT_DEBUG_MODULE, ("R_X86_64_JUMP_SLOT: 0x%x -> 0x%x 0x%x\n",
-                                       (uint32_t)where, *where, sym_val));
-        break;
-    case R_X86_64_RELATIVE:
-        *where = (Elf32_Addr)sym_val + *where;
-        RT_DEBUG_LOG(RT_DEBUG_MODULE, ("R_X86_64_RELATIVE: 0x%x -> 0x%x 0x%x\n",
-                                       (uint32_t)where, *where, sym_val));
-        break;
-    default:
-        RT_DEBUG_LOG(RT_DEBUG_MODULE, ("X86ELF: invalid relocate TYPE %d\n", ELF32_R_TYPE(rel->r_info)));
-        return -1;
+            RT_DEBUG_LOG(RT_DEBUG_MODULE, ("R_X86_64_JUMP_SLOT: 0x%x -> 0x%x 0x%x\n",
+                  (uint32_t)where, *where, sym_val));
+            break;
+        case R_X86_64_RELATIVE:
+            *where = (Elf32_Addr)sym_val + *where;
+            RT_DEBUG_LOG(RT_DEBUG_MODULE, ("R_X86_64_RELATIVE: 0x%x -> 0x%x 0x%x\n",
+                  (uint32_t)where, *where, sym_val));
+            break;
+        default:
+            RT_DEBUG_LOG(RT_DEBUG_MODULE, ("X86ELF: invalid relocate TYPE %d\n", ELF32_R_TYPE(rel->r_info)));
+            return -1;
     }
 
     return 0;

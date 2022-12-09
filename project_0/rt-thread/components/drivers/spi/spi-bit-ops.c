@@ -13,9 +13,9 @@
 
 #define DBG_TAG               "SPI"
 #ifdef RT_SPI_BITOPS_DEBUG
-    #define DBG_LVL               DBG_LOG
+#define DBG_LVL               DBG_LOG
 #else
-    #define DBG_LVL               DBG_ERROR
+#define DBG_LVL               DBG_ERROR
 #endif
 #include <rtdbg.h>
 
@@ -49,10 +49,10 @@ rt_inline void spi_delay2(struct rt_spi_bit_ops *ops)
 #define MISO_OUT(ops)        DIR_MISO(ops, 0)
 
 rt_inline rt_size_t spi_xfer_4line_data8(struct rt_spi_bit_ops       *ops,
-        struct rt_spi_configuration *config,
-        const void                  *send_buf,
-        void                        *recv_buf,
-        rt_size_t                    length)
+                                         struct rt_spi_configuration *config,
+                                         const void                  *send_buf,
+                                         void                        *recv_buf,
+                                         rt_size_t                    length)
 {
     int i = 0;
 
@@ -77,14 +77,8 @@ rt_inline rt_size_t spi_xfer_4line_data8(struct rt_spi_bit_ops       *ops,
 
             for (i = 0; i < 8; i++)
             {
-                if (config->mode & RT_SPI_MSB)
-                {
-                    bit = tx_data & (0x1 << (7 - i));
-                }
-                else
-                {
-                    bit = tx_data & (0x1 << i);
-                }
+                if (config->mode & RT_SPI_MSB) { bit = tx_data & (0x1 << (7 - i)); }
+                else                           { bit = tx_data & (0x1 << i); }
 
                 if (bit) MOSI_H(ops);
                 else     MOSI_L(ops);
@@ -93,25 +87,11 @@ rt_inline rt_size_t spi_xfer_4line_data8(struct rt_spi_bit_ops       *ops,
 
                 TOG_SCLK(ops);
 
-                if (config->mode & RT_SPI_MSB)
-                {
-                    rx_data <<= 1;
-                    bit = 0x01;
-                }
-                else
-                {
-                    rx_data >>= 1;
-                    bit = 0x80;
-                }
+                if (config->mode & RT_SPI_MSB) { rx_data <<= 1; bit = 0x01; }
+                else                           { rx_data >>= 1; bit = 0x80; }
 
-                if (GET_MISO(ops))
-                {
-                    rx_data |=  bit;
-                }
-                else
-                {
-                    rx_data &= ~bit;
-                }
+                if (GET_MISO(ops)) { rx_data |=  bit; }
+                else               { rx_data &= ~bit; }
 
                 spi_delay2(ops);
 
@@ -132,10 +112,10 @@ rt_inline rt_size_t spi_xfer_4line_data8(struct rt_spi_bit_ops       *ops,
 }
 
 rt_inline rt_size_t spi_xfer_4line_data16(struct rt_spi_bit_ops       *ops,
-        struct rt_spi_configuration *config,
-        const void                  *send_buf,
-        void                        *recv_buf,
-        rt_size_t                    length)
+                                          struct rt_spi_configuration *config,
+                                          const void                  *send_buf,
+                                          void                        *recv_buf,
+                                          rt_size_t                    length)
 {
     int i = 0;
 
@@ -160,14 +140,8 @@ rt_inline rt_size_t spi_xfer_4line_data16(struct rt_spi_bit_ops       *ops,
 
             for (i = 0; i < 16; i++)
             {
-                if (config->mode & RT_SPI_MSB)
-                {
-                    bit = tx_data & (0x1 << (15 - i));
-                }
-                else
-                {
-                    bit = tx_data & (0x1 << i);
-                }
+                if (config->mode & RT_SPI_MSB) { bit = tx_data & (0x1 << (15 - i)); }
+                else                           { bit = tx_data & (0x1 << i); }
 
                 if (bit) MOSI_H(ops);
                 else     MOSI_L(ops);
@@ -176,25 +150,11 @@ rt_inline rt_size_t spi_xfer_4line_data16(struct rt_spi_bit_ops       *ops,
 
                 TOG_SCLK(ops);
 
-                if (config->mode & RT_SPI_MSB)
-                {
-                    rx_data <<= 1;
-                    bit = 0x0001;
-                }
-                else
-                {
-                    rx_data >>= 1;
-                    bit = 0x8000;
-                }
+                if (config->mode & RT_SPI_MSB) { rx_data <<= 1; bit = 0x0001; }
+                else                           { rx_data >>= 1; bit = 0x8000; }
 
-                if (GET_MISO(ops))
-                {
-                    rx_data |=  bit;
-                }
-                else
-                {
-                    rx_data &= ~bit;
-                }
+                if (GET_MISO(ops)) { rx_data |=  bit; }
+                else               { rx_data &= ~bit; }
 
                 spi_delay2(ops);
 
@@ -215,10 +175,10 @@ rt_inline rt_size_t spi_xfer_4line_data16(struct rt_spi_bit_ops       *ops,
 }
 
 rt_inline rt_size_t spi_xfer_3line_data8(struct rt_spi_bit_ops       *ops,
-        struct rt_spi_configuration *config,
-        const void                  *send_buf,
-        void                        *recv_buf,
-        rt_size_t                    length)
+                                         struct rt_spi_configuration *config,
+                                         const void                  *send_buf,
+                                         void                        *recv_buf,
+                                         rt_size_t                    length)
 {
     int i = 0;
 
@@ -256,14 +216,8 @@ rt_inline rt_size_t spi_xfer_3line_data8(struct rt_spi_bit_ops       *ops,
             {
                 for (i = 0; i < 8; i++)
                 {
-                    if (config->mode & RT_SPI_MSB)
-                    {
-                        bit = tx_data & (0x1 << (7 - i));
-                    }
-                    else
-                    {
-                        bit = tx_data & (0x1 << i);
-                    }
+                    if (config->mode & RT_SPI_MSB) { bit = tx_data & (0x1 << (7 - i)); }
+                    else                           { bit = tx_data & (0x1 << i); }
 
                     if (bit) MOSI_H(ops);
                     else     MOSI_L(ops);
@@ -290,25 +244,11 @@ rt_inline rt_size_t spi_xfer_3line_data8(struct rt_spi_bit_ops       *ops,
 
                     TOG_SCLK(ops);
 
-                    if (config->mode & RT_SPI_MSB)
-                    {
-                        rx_data <<= 1;
-                        bit = 0x01;
-                    }
-                    else
-                    {
-                        rx_data >>= 1;
-                        bit = 0x80;
-                    }
+                    if (config->mode & RT_SPI_MSB) { rx_data <<= 1; bit = 0x01; }
+                    else                           { rx_data >>= 1; bit = 0x80; }
 
-                    if (GET_MOSI(ops))
-                    {
-                        rx_data |=  bit;
-                    }
-                    else
-                    {
-                        rx_data &= ~bit;
-                    }
+                    if (GET_MOSI(ops)) { rx_data |=  bit; }
+                    else               { rx_data &= ~bit; }
 
                     spi_delay2(ops);
 
@@ -336,10 +276,10 @@ rt_inline rt_size_t spi_xfer_3line_data8(struct rt_spi_bit_ops       *ops,
 }
 
 rt_inline rt_size_t spi_xfer_3line_data16(struct rt_spi_bit_ops       *ops,
-        struct rt_spi_configuration *config,
-        const void                  *send_buf,
-        void                        *recv_buf,
-        rt_size_t                    length)
+                                          struct rt_spi_configuration *config,
+                                          const void                  *send_buf,
+                                          void                        *recv_buf,
+                                          rt_size_t                    length)
 {
     int i = 0;
 
@@ -377,14 +317,8 @@ rt_inline rt_size_t spi_xfer_3line_data16(struct rt_spi_bit_ops       *ops,
             {
                 for (i = 0; i < 16; i++)
                 {
-                    if (config->mode & RT_SPI_MSB)
-                    {
-                        bit = tx_data & (0x1 << (15 - i));
-                    }
-                    else
-                    {
-                        bit = tx_data & (0x1 << i);
-                    }
+                    if (config->mode & RT_SPI_MSB) { bit = tx_data & (0x1 << (15 - i)); }
+                    else                           { bit = tx_data & (0x1 << i); }
 
                     if (bit) MOSI_H(ops);
                     else     MOSI_L(ops);
@@ -411,25 +345,11 @@ rt_inline rt_size_t spi_xfer_3line_data16(struct rt_spi_bit_ops       *ops,
 
                     TOG_SCLK(ops);
 
-                    if (config->mode & RT_SPI_MSB)
-                    {
-                        rx_data <<= 1;
-                        bit = 0x0001;
-                    }
-                    else
-                    {
-                        rx_data >>= 1;
-                        bit = 0x8000;
-                    }
+                    if (config->mode & RT_SPI_MSB) { rx_data <<= 1; bit = 0x0001; }
+                    else                           { rx_data >>= 1; bit = 0x8000; }
 
-                    if (GET_MOSI(ops))
-                    {
-                        rx_data |=  bit;
-                    }
-                    else
-                    {
-                        rx_data &= ~bit;
-                    }
+                    if (GET_MOSI(ops)) { rx_data |=  bit; }
+                    else               { rx_data &= ~bit; }
 
                     spi_delay2(ops);
 

@@ -34,7 +34,7 @@ int pthread_barrierattr_getpshared(const pthread_barrierattr_t *attr,
 {
     if (!attr)
         return EINVAL;
-    *pshared = (int) * attr;
+    *pshared = (int)*attr;
 
     return 0;
 }

@@ -63,7 +63,7 @@ static void posix_mq_delete(mqd_t pmq)
     }
 }
 
-static mqd_t posix_mq_find(const char *name)
+static mqd_t posix_mq_find(const char* name)
 {
     mqd_t iter;
     rt_object_t object;
@@ -136,7 +136,7 @@ mqd_t mq_open(const char *name, int oflag, ...)
                 goto __return;
             }
         }
-        mqdes = (mqd_t) rt_malloc(sizeof(struct mqdes));
+        mqdes = (mqd_t) rt_malloc (sizeof(struct mqdes));
         if (mqdes == RT_NULL)
         {
             rt_set_errno(ENFILE);
@@ -224,7 +224,7 @@ int mq_send(mqd_t mqdes, const char *msg_ptr, size_t msg_len, unsigned msg_prio)
         return -1;
     }
 
-    result = rt_mq_send(mqdes->mq, (void *)msg_ptr, msg_len);
+    result = rt_mq_send(mqdes->mq, (void*)msg_ptr, msg_len);
     if (result == RT_EOK)
         return 0;
 

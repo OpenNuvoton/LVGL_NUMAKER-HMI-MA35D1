@@ -11,13 +11,13 @@
 #include <rtthread.h>
 
 #ifdef RT_USING_DFS
-    #include <unistd.h>
-    #include <sys/stat.h>
-    #include <sys/statfs.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/statfs.h>
 #endif
 
 #ifdef SAL_USING_TLS
-    #include <sal_tls.h>
+#include <sal_tls.h>
 #endif
 #include <netdb.h>
 #include <sal_low_lvl.h>
@@ -27,16 +27,16 @@
 #ifdef SAL_USING_TLS
 
 #if !defined(MBEDTLS_CONFIG_FILE)
-    #include <mbedtls/config.h>
+#include <mbedtls/config.h>
 #else
-    #include MBEDTLS_CONFIG_FILE
+#include MBEDTLS_CONFIG_FILE
 #endif
 
 #include <tls_certificate.h>
 #include <tls_client.h>
 
 #ifndef SAL_MEBDTLS_BUFFER_LEN
-    #define SAL_MEBDTLS_BUFFER_LEN         1024
+#define SAL_MEBDTLS_BUFFER_LEN         1024
 #endif
 
 static void *mebdtls_socket(int socket)
@@ -104,7 +104,7 @@ int mbedtls_net_send_cb(void *ctx, const unsigned char *buf, size_t len)
 #endif
         if (errno == ECONNRESET)
             return MBEDTLS_ERR_NET_CONN_RESET;
-        if (errno == EINTR)
+        if ( errno == EINTR)
             return MBEDTLS_ERR_SSL_WANT_READ;
 
         return MBEDTLS_ERR_NET_SEND_FAILED ;
@@ -113,7 +113,7 @@ int mbedtls_net_send_cb(void *ctx, const unsigned char *buf, size_t len)
     return ret;
 }
 
-int mbedtls_net_recv_cb(void *ctx, unsigned char *buf, size_t len)
+int mbedtls_net_recv_cb( void *ctx, unsigned char *buf, size_t len)
 {
     struct sal_socket *sock;
     struct sal_proto_family *pf;
@@ -141,7 +141,7 @@ int mbedtls_net_recv_cb(void *ctx, unsigned char *buf, size_t len)
 #endif
         if (errno == ECONNRESET)
             return MBEDTLS_ERR_NET_CONN_RESET;
-        if (errno == EINTR)
+        if ( errno == EINTR)
             return MBEDTLS_ERR_SSL_WANT_READ;
 
         return MBEDTLS_ERR_NET_RECV_FAILED ;
@@ -221,7 +221,7 @@ static int mbedtls_closesocket(void *sock)
     return 0;
 }
 
-static const struct sal_proto_tls_ops mbedtls_proto_ops =
+static const struct sal_proto_tls_ops mbedtls_proto_ops=
 {
     RT_NULL,
     mebdtls_socket,

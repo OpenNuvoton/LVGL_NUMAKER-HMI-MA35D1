@@ -1037,6 +1037,26 @@ static int nu_uart_receive(struct rt_serial_device *serial)
     return UART_READ(uart_base);
 }
 
+void nu_uart_set_loopback(struct rt_serial_device *serial, rt_bool_t bOn)
+{
+    /* Get base address of uart register */
+    UART_T *uart_base = ((nu_uart_t)serial)->uart_base;
+
+    bOn ? (uart_base->MODEM |= 0x10) : (uart_base->MODEM &= ~0x10);
+}
+
+void nu_uart_get_pdma_channel_transferred_bytes(struct rt_serial_device *serial)
+{
+#if defined(RT_SERIAL_USING_DMA)
+    nu_uart_t psNuUart = (nu_uart_t)serial;
+    RT_ASSERT(serial);
+
+    rt_kprintf("ch:%d, transferred_bytes:%d B\n",
+               psNuUart->pdma_chanid_rx,
+               nu_pdma_transferred_byte_get(psNuUart->pdma_chanid_rx, serial->config.bufsz));
+#endif
+}
+
 /**
  * Hardware UART Initialization
  */
@@ -1067,5 +1087,38 @@ rt_err_t rt_hw_uart_init(void)
 
     return ret;
 }
+
+#if defined(RT_SERIAL_USING_DMA)
+
+#define DEF_DUMMY_BUFFER_SIZE  64
+
+
+int nu_uart_workaround(void)
+{
+    int i;
+    uint8_t *pu8Buf;
+
+    pu8Buf = rt_malloc_align(DEF_DUMMY_BUFFER_SIZE, 64);
+    RT_ASSERT(pu8Buf != RT_NULL);
+
+    for (i = (UART_START + 1); i < UART_CNT; i++)
+    {
+        if (nu_uart_arr[i].dma_flag & RT_DEVICE_FLAG_DMA_RX)
+        {
+            nu_pdma_transfer(nu_uart_arr[i].pdma_chanid_rx,
+                             8,
+                             (uint32_t)nu_uart_arr[i].uart_base,
+                             (uint32_t)pu8Buf,
+                             DEF_DUMMY_BUFFER_SIZE,
+                             1000);  //Idle-timeout, 1ms
+            nu_pdma_channel_terminate(nu_uart_arr[i].pdma_chanid_rx);
+        }
+    }
+
+    rt_free_align(pu8Buf);
+    return 0;
+}
+//INIT_BOARD_EXPORT(nu_uart_workaround);
+#endif
 
 #endif //#if defined(BSP_USING_UART)

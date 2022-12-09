@@ -21,7 +21,7 @@
  * @return          CRC context
  */
 struct rt_hwcrypto_ctx *rt_hwcrypto_crc_create(struct rt_hwcrypto_device *device,
-        hwcrypto_crc_mode mode)
+                                               hwcrypto_crc_mode mode)
 {
     struct hwcrypto_crc *crc_ctx;
 
@@ -90,8 +90,8 @@ void rt_hwcrypto_crc_destroy(struct rt_hwcrypto_ctx *ctx)
  * @return          CRC value
  */
 rt_uint32_t rt_hwcrypto_crc_update(struct rt_hwcrypto_ctx *ctx,
-                                   const rt_uint8_t *input,
-                                   rt_size_t length)
+                                             const rt_uint8_t *input,
+                                             rt_size_t length)
 {
     struct hwcrypto_crc *crc_ctx = (struct hwcrypto_crc *)ctx;
     if (ctx && crc_ctx->ops->update)
@@ -108,7 +108,7 @@ rt_uint32_t rt_hwcrypto_crc_update(struct rt_hwcrypto_ctx *ctx,
  * @param cfg       CRC config
  */
 void rt_hwcrypto_crc_cfg(struct rt_hwcrypto_ctx *ctx,
-                         struct hwcrypto_crc_cfg *cfg)
+                                   struct hwcrypto_crc_cfg *cfg)
 {
     if (cfg)
     {

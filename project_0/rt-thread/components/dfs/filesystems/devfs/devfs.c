@@ -126,7 +126,7 @@ int dfs_device_fs_open(struct dfs_fd *file)
 
     /* open root directory */
     if ((file->path[0] == '/') && (file->path[1] == '\0') &&
-            (file->flags & O_DIRECTORY))
+        (file->flags & O_DIRECTORY))
     {
         struct rt_object *object;
         struct rt_list_node *node;
@@ -282,7 +282,7 @@ int dfs_device_fs_getdents(struct dfs_fd *file, struct dirent *dirp, uint32_t co
         return -EINVAL;
 
     for (index = 0; index < count && index + root_dirent->read_index < root_dirent->device_count;
-            index ++)
+        index ++)
     {
         object = (rt_object_t)root_dirent->devices[root_dirent->read_index + index];
 

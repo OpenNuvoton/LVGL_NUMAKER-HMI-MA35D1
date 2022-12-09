@@ -13,14 +13,12 @@
 #include <stdint.h>
 #include <rtthread.h>
 
-namespace rtthread
-{
+namespace rtthread {
 
 /** The Mutex class is used to synchronise the execution of threads.
  This is for example used to protect access to a shared resource.
 */
-class Mutex
-{
+class Mutex {
 public:
     /** Create and Initialize a Mutex object */
     Mutex(const char *name = "mutex");

@@ -22,7 +22,7 @@
 extern void rt_hw_interrupt_init(void);
 extern void rt_application_init(void);
 
-void vmm_entry(struct vmm_entry_param *param) RT_SECTION(".vmm_init");
+void vmm_entry(struct vmm_entry_param* param) RT_SECTION(".vmm_init");
 
 struct rt_thread vmm_thread RT_SECTION(".bss.share.vmm");
 extern rt_uint8_t vmm_stack_start;
@@ -48,7 +48,7 @@ static void _verify_guest(void *p)
 {
     while (1)
     {
-        rt_thread_delay(RT_TICK_PER_SECOND / 4);
+        rt_thread_delay(RT_TICK_PER_SECOND/4);
         vmm_verify_guest_status(vmm_thread.sp);
     }
 }
@@ -66,16 +66,16 @@ static void vmm_create_monitor(void)
 #endif
 
 #ifdef RT_VMM_USING_DOMAIN
-    extern unsigned long guest_domain_val;
-    extern unsigned long vmm_domain_val;
+extern unsigned long guest_domain_val;
+extern unsigned long vmm_domain_val;
 #endif
 
 static void vmm_entry_glue(rt_uint32_t level,
                            unsigned int vmm_domain,
                            unsigned int kernel_domain)
-/* inline would make the section setting meaningless */
-__attribute__((noinline))
-RT_SECTION(".vmm_glue");
+    /* inline would make the section setting meaningless */
+    __attribute__((noinline))
+    RT_SECTION(".vmm_glue");
 static void vmm_entry_glue(rt_uint32_t level,
                            unsigned int vmm_domain,
                            unsigned int kernel_domain)
@@ -124,8 +124,8 @@ void vmm_entry(struct vmm_entry_param *param)
 
     {
         rt_uint32_t ttbr;
-        asm volatile("mrc p15, 0, %0, c2, c0, 0\n"
-                     : "=r"(ttbr));
+        asm volatile ("mrc p15, 0, %0, c2, c0, 0\n"
+                      : "=r"(ttbr));
         rt_kprintf("Linux TTBR: 0x%08x\n", ttbr);
         /*
          *rt_hw_cpu_dump_page_table((void*)((ttbr & (0xffffc000))
@@ -139,10 +139,10 @@ void vmm_entry(struct vmm_entry_param *param)
 #endif
 
     rt_kprintf("heap: 0x%p - 0x%p, %dKi bytes\n",
-               (void *)HEAP_BEGIN, (void *)HEAP_END,
+               (void*)HEAP_BEGIN, (void*)HEAP_END,
                ((int)HEAP_END - (int)HEAP_BEGIN) / 1024);
     /* init heap memory system */
-    rt_system_heap_init((void *)HEAP_BEGIN, (void *)HEAP_END);
+    rt_system_heap_init((void*)HEAP_BEGIN, (void*)HEAP_END);
 
     /* init scheduler system */
     rt_system_scheduler_init();

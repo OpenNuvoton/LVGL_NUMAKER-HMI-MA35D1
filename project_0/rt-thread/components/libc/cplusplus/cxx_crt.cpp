@@ -11,7 +11,7 @@
 #include <rtthread.h>
 #include "cxx_crt.h"
 
-void *operator new (size_t size)
+void *operator new(size_t size)
 {
     return rt_malloc(size);
 }
@@ -21,7 +21,7 @@ void *operator new[](size_t size)
     return rt_malloc(size);
 }
 
-void operator delete (void *ptr)
+void operator delete(void *ptr)
 {
     rt_free(ptr);
 }

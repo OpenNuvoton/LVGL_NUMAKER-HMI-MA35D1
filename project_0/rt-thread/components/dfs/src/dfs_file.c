@@ -164,15 +164,15 @@ int dfs_file_ioctl(struct dfs_fd *fd, int cmd, void *args)
         case F_GETFL:
             return fd->flags; /* return flags */
         case F_SETFL:
-        {
-            int flags = (int)(rt_base_t)args;
-            int mask  = O_NONBLOCK | O_APPEND;
+            {
+                int flags = (int)(rt_base_t)args;
+                int mask  = O_NONBLOCK | O_APPEND;
 
-            flags &= mask;
-            fd->flags &= ~mask;
-            fd->flags |= flags;
-        }
-        return 0;
+                flags &= mask;
+                fd->flags &= ~mask;
+                fd->flags |= flags;
+            }
+            return 0;
         }
     }
 
@@ -376,7 +376,7 @@ int dfs_file_stat(const char *path, struct stat *buf)
     }
 
     if ((fullpath[0] == '/' && fullpath[1] == '\0') ||
-            (dfs_subdir(fs->path, fullpath) == NULL))
+        (dfs_subdir(fs->path, fullpath) == NULL))
     {
         /* it's the root directory */
         buf->st_dev   = 0;
@@ -500,7 +500,7 @@ int dfs_file_ftruncate(struct dfs_fd *fd, off_t length)
     if (fd->fops->ioctl == NULL)
         return -ENOSYS;
 
-    result = fd->fops->ioctl(fd, RT_FIOFTRUNCATE, (void *)&length);
+    result = fd->fops->ioctl(fd, RT_FIOFTRUNCATE, (void*)&length);
 
     /* update current size */
     if (result == 0)

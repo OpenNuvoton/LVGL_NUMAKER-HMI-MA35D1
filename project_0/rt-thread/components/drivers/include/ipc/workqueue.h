@@ -56,8 +56,8 @@ struct rt_work
 
 #ifdef RT_USING_HEAP
 /**
-* WorkQueue for DeviceDriver
-*/
+ * WorkQueue for DeviceDriver
+ */
 void rt_work_init(struct rt_work *work, void (*work_func)(struct rt_work *work, void *work_data), void *work_data);
 struct rt_workqueue *rt_workqueue_create(const char *name, rt_uint16_t stack_size, rt_uint8_t priority);
 rt_err_t rt_workqueue_destroy(struct rt_workqueue *queue);

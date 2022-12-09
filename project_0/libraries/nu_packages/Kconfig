@@ -7,19 +7,6 @@ menu "Nuvoton Packages Config"
         bool "Enable demos"
         default y
 
-    config NU_PKG_USING_LVGL
-        bool "Enable LVGL demos"
-        select PKG_USING_LVGL
-        select PKG_LVGL_USING_DEMOS
-        select PKG_LVGL_USING_LATEST_VERSION
-        default n
-    
-    if NU_PKG_USING_LVGL
-        config NU_PKG_LVGL_RENDERING_LAYER
-            string "Specify Layer"
-            default "lcd"
-    endif
-
     config NU_PKG_USING_BMX055
         bool "BMX055 9-axis sensor."
         select RT_USING_I2C

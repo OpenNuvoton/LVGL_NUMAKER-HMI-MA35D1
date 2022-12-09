@@ -17,9 +17,9 @@
 
 #define RT_RTC_YEARS_MAX         137
 #ifdef RT_USING_SOFT_RTC
-    #define RT_ALARM_DELAY             0
+#define RT_ALARM_DELAY             0
 #else
-    #define RT_ALARM_DELAY             2
+#define RT_ALARM_DELAY             2
 #endif
 
 #if (defined(RT_USING_RTC) && defined(RT_USING_ALARM))
@@ -147,7 +147,7 @@ static void alarm_wakeup(struct rt_alarm *alarm, struct tm *now)
         case RT_ALARM_HOUR:
         {
             if ((alarm->wktime.tm_min == now->tm_min) &&
-                    (alarm->wktime.tm_sec == now->tm_sec))
+                (alarm->wktime.tm_sec == now->tm_sec))
             {
                 alarm->wktime.tm_hour = now->tm_hour + 1;
                 if (alarm->wktime.tm_hour > 23)
@@ -711,7 +711,7 @@ static void rt_alarmsvc_thread_init(void *param)
 
 struct _alarm_flag
 {
-    const char *name;
+    const char* name;
     rt_uint32_t flag;
 };
 
@@ -756,8 +756,8 @@ void rt_alarm_dump(void)
         alarm = rt_list_entry(next, struct rt_alarm, list);
         rt_uint8_t flag_index = get_alarm_flag_index(alarm->flag);
         rt_kprintf("| %02d:%02d:%02d |  %2d  |  %2s  | %2d |\n",
-                   alarm->wktime.tm_hour, alarm->wktime.tm_min, alarm->wktime.tm_sec,
-                   alarm->wktime.tm_wday, _alarm_flag_tbl[flag_index].name, alarm->flag & RT_ALARM_STATE_START);
+            alarm->wktime.tm_hour, alarm->wktime.tm_min, alarm->wktime.tm_sec,
+            alarm->wktime.tm_wday, _alarm_flag_tbl[flag_index].name, alarm->flag & RT_ALARM_STATE_START);
     }
     rt_kprintf("+----------+------+------+----+\n");
 }

@@ -21,36 +21,36 @@
 
 /* tickless threshold time */
 #ifndef PM_TICKLESS_THRESHOLD_TIME
-    #define PM_TICKLESS_THRESHOLD_TIME          2
+#define PM_TICKLESS_THRESHOLD_TIME          2
 #endif
 
 /* tickless threshold : sleep mode */
 #ifndef PM_TICKLESS_THRESHOLD_MODE
-    #define PM_TICKLESS_THRESHOLD_MODE          PM_SLEEP_MODE_IDLE
+#define PM_TICKLESS_THRESHOLD_MODE          PM_SLEEP_MODE_IDLE
 #endif
 
 /* busy : sleep mode */
 #ifndef PM_BUSY_SLEEP_MODE
-    #define PM_BUSY_SLEEP_MODE                  PM_SLEEP_MODE_IDLE
+#define PM_BUSY_SLEEP_MODE                  PM_SLEEP_MODE_IDLE
 #endif
 
 /* suspend : suspend sleep mode */
 #ifndef PM_SUSPEND_SLEEP_MODE
-    #define PM_SUSPEND_SLEEP_MODE               PM_SLEEP_MODE_IDLE
+#define PM_SUSPEND_SLEEP_MODE               PM_SLEEP_MODE_IDLE
 #endif
 
 #ifdef PM_ENABLE_THRESHOLD_SLEEP_MODE
-    #ifndef PM_LIGHT_THRESHOLD_TIME
-        #define PM_LIGHT_THRESHOLD_TIME             5
-    #endif
+#ifndef PM_LIGHT_THRESHOLD_TIME
+#define PM_LIGHT_THRESHOLD_TIME             5
+#endif
 
-    #ifndef PM_DEEP_THRESHOLD_TIME
-        #define PM_DEEP_THRESHOLD_TIME              20
-    #endif
+#ifndef PM_DEEP_THRESHOLD_TIME
+#define PM_DEEP_THRESHOLD_TIME              20
+#endif
 
-    #ifndef PM_STANDBY_THRESHOLD_TIME
-        #define PM_STANDBY_THRESHOLD_TIME           100
-    #endif
+#ifndef PM_STANDBY_THRESHOLD_TIME
+#define PM_STANDBY_THRESHOLD_TIME           100
+#endif
 #endif
 
 static struct rt_pm _pm;
@@ -128,7 +128,7 @@ static int _pm_device_suspend(rt_uint8_t mode)
         if (_pm.device_pm[index].ops->suspend != RT_NULL)
         {
             ret = _pm.device_pm[index].ops->suspend(_pm.device_pm[index].device, mode);
-            if (ret != RT_EOK)
+            if(ret != RT_EOK)
                 break;
         }
     }
@@ -198,7 +198,7 @@ static rt_uint8_t _judge_sleep_mode(void)
     rt_uint16_t index;
     rt_uint16_t len;
 
-    for (index = 0; index < PM_SLEEP_MODE_MAX - 1; index++)
+    for (index = 0; index < PM_SLEEP_MODE_MAX -1; index++)
     {
         for (len = 0; len < ((PM_MODULE_MAX_ID + 31) / 32); len++)
         {
@@ -292,11 +292,11 @@ RT_WEAK rt_tick_t pm_timer_next_timeout_tick(rt_uint8_t mode)
 {
     switch (mode)
     {
-    case PM_SLEEP_MODE_LIGHT:
-        return rt_timer_next_timeout_tick();
-    case PM_SLEEP_MODE_DEEP:
-    case PM_SLEEP_MODE_STANDBY:
-        return rt_lptimer_next_timeout_tick();
+        case PM_SLEEP_MODE_LIGHT:
+            return rt_timer_next_timeout_tick();
+        case PM_SLEEP_MODE_DEEP:
+        case PM_SLEEP_MODE_STANDBY:
+            return rt_lptimer_next_timeout_tick();
     }
 
     return RT_TICK_MAX;
@@ -1007,7 +1007,7 @@ void rt_system_pm_init(const struct rt_pm_ops *ops,
     pm->device_pm_number = 0;
 
 #if IDLE_THREAD_STACK_SIZE <= 256
-#error "[pm.c ERR] IDLE Stack Size Too Small!"
+    #error "[pm.c ERR] IDLE Stack Size Too Small!"
 #endif
 
     _pm_init_flag = 1;
@@ -1137,7 +1137,7 @@ rt_uint32_t rt_pm_module_get_status(void)
     for (index = 0; index < PM_MODULE_MAX_ID; index ++)
     {
         if (pm->module_status[index].req_status == 0x01)
-            req_status |= 1 << index;
+            req_status |= 1<<index;
     }
 
     return req_status;
@@ -1173,12 +1173,12 @@ void pm_sleep_dump(void)
     rt_kprintf("+-------------+--------------+\n");
     rt_kprintf("| Sleep Mode  | Request List |\n");
     rt_kprintf("+-------------+--------------+\n");
-    for (index = 0; index < PM_SLEEP_MODE_MAX - 1; index++)
+    for (index = 0; index < PM_SLEEP_MODE_MAX -1; index++)
     {
         for (len = 0; len < ((PM_MODULE_MAX_ID + 31) / 32); len++)
         {
             rt_kprintf("| Mode[%d] : %d |  0x%08x  |\n", index, len,
-                       _pm.sleep_status[index][len]);
+                _pm.sleep_status[index][len]);
         }
     }
     rt_kprintf("+-------------+--------------+\n");
@@ -1242,12 +1242,12 @@ static void rt_pm_dump_status(void)
     for (index = 0; index < PM_MODULE_MAX_ID; index ++)
     {
         if ((pm->module_status[index].busy_flag == RT_TRUE) ||
-                (pm->module_status[index].req_status != 0x00))
+            (pm->module_status[index].req_status != 0x00))
         {
             rt_kprintf("|  %04d  |  %d   | 0x%08x | 0x%08x |\n",
-                       index, pm->module_status[index].busy_flag,
-                       pm->module_status[index].start_time,
-                       pm->module_status[index].timeout);
+                index, pm->module_status[index].busy_flag,
+                pm->module_status[index].start_time,
+                pm->module_status[index].timeout);
         }
     }
     rt_kprintf("+--------+------+------------+-----------+\n");

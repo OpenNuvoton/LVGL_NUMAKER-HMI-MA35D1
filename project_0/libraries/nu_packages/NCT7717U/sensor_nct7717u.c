@@ -13,7 +13,6 @@
 #include <rtthread.h>
 
 #include <sys/time.h>
-#include "sensor.h"
 #include "sensor_nct7717u.h"
 
 #define DBG_ENABLE
@@ -116,14 +115,14 @@ static rt_err_t nct7717u_ldt_readout(struct rt_i2c_bus_device *i2c_bus_dev, uint
     return nct7717u_i2c_read_reg(i2c_bus_dev, (const char *)&u8Reg, sizeof(u8Reg), (char *)u8Temp, sizeof(uint8_t));
 }
 
-static rt_size_t nct7717u_fetch_data(struct rt_sensor_device *sensor, void *buf, rt_size_t len)
+static rt_ssize_t nct7717u_fetch_data(rt_sensor_t sensor, rt_sensor_data_t data, rt_size_t len)
 {
-    struct rt_sensor_data *data = (struct rt_sensor_data *)buf;
+    RT_ASSERT(data);
 
     if (sensor->info.type == RT_SENSOR_CLASS_TEMP)
     {
         rt_int8_t i8Temp;
-        struct rt_i2c_bus_device *i2c_bus_dev = sensor->config.intf.user_data;
+        struct rt_i2c_bus_device *i2c_bus_dev = sensor->config.intf.arg;
 
         if (nct7717u_ldt_readout(i2c_bus_dev, (uint8_t *)&i8Temp) == RT_EOK)
         {
@@ -143,7 +142,7 @@ static rt_err_t nct7717u_control(struct rt_sensor_device *sensor, int cmd, void 
     {
     case RT_SENSOR_CTRL_GET_ID:
     {
-        struct rt_i2c_bus_device *i2c_bus_dev = sensor->config.intf.user_data;
+        struct rt_i2c_bus_device *i2c_bus_dev = sensor->config.intf.arg;
         uint8_t u8Did;
 
         RT_ASSERT(args);
@@ -213,7 +212,7 @@ int rt_hw_nct7717u_init(const char *name, struct rt_sensor_config *cfg)
     {
         goto exit_rt_hw_nct7717u_init;
     }
-    intf->user_data = i2c_bus_dev;
+    intf->arg = i2c_bus_dev;
 
     if (nct7717u_probe(i2c_bus_dev) != RT_EOK)
         goto exit_rt_hw_nct7717u_init;

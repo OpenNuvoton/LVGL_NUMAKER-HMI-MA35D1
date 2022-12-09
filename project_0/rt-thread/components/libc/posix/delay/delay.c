@@ -50,7 +50,7 @@ unsigned int sleep(unsigned int seconds)
     }
     else /* scheduler has not run yet */
     {
-        while (seconds > 0)
+        while(seconds > 0)
         {
             udelay(1000000u);
             seconds --;

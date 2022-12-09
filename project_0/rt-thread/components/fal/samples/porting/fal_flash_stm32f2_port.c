@@ -96,38 +96,23 @@ static uint32_t stm32_get_sector(uint32_t address)
  *
  * @return sector size
  */
-static uint32_t stm32_get_sector_size(uint32_t sector)
-{
+static uint32_t stm32_get_sector_size(uint32_t sector) {
     assert(IS_FLASH_SECTOR(sector));
 
-    switch (sector)
-    {
-    case FLASH_Sector_0:
-        return 16 * 1024;
-    case FLASH_Sector_1:
-        return 16 * 1024;
-    case FLASH_Sector_2:
-        return 16 * 1024;
-    case FLASH_Sector_3:
-        return 16 * 1024;
-    case FLASH_Sector_4:
-        return 64 * 1024;
-    case FLASH_Sector_5:
-        return 128 * 1024;
-    case FLASH_Sector_6:
-        return 128 * 1024;
-    case FLASH_Sector_7:
-        return 128 * 1024;
-    case FLASH_Sector_8:
-        return 128 * 1024;
-    case FLASH_Sector_9:
-        return 128 * 1024;
-    case FLASH_Sector_10:
-        return 128 * 1024;
-    case FLASH_Sector_11:
-        return 128 * 1024;
-    default :
-        return 128 * 1024;
+    switch (sector) {
+    case FLASH_Sector_0: return 16 * 1024;
+    case FLASH_Sector_1: return 16 * 1024;
+    case FLASH_Sector_2: return 16 * 1024;
+    case FLASH_Sector_3: return 16 * 1024;
+    case FLASH_Sector_4: return 64 * 1024;
+    case FLASH_Sector_5: return 128 * 1024;
+    case FLASH_Sector_6: return 128 * 1024;
+    case FLASH_Sector_7: return 128 * 1024;
+    case FLASH_Sector_8: return 128 * 1024;
+    case FLASH_Sector_9: return 128 * 1024;
+    case FLASH_Sector_10: return 128 * 1024;
+    case FLASH_Sector_11: return 128 * 1024;
+    default : return 128 * 1024;
     }
 }
 static int init(void)
@@ -155,8 +140,8 @@ static int write(long offset, const uint8_t *buf, size_t size)
 
     FLASH_Unlock();
     FLASH_ClearFlag(
-        FLASH_FLAG_EOP | FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR
-        | FLASH_FLAG_PGSERR);
+            FLASH_FLAG_EOP | FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR
+                    | FLASH_FLAG_PGSERR);
     for (i = 0; i < size; i++, buf++, addr++)
     {
         /* write data */
@@ -183,8 +168,8 @@ static int erase(long offset, size_t size)
     /* start erase */
     FLASH_Unlock();
     FLASH_ClearFlag(
-        FLASH_FLAG_EOP | FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR
-        | FLASH_FLAG_PGSERR);
+            FLASH_FLAG_EOP | FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR
+                    | FLASH_FLAG_PGSERR);
     /* it will stop when erased size is greater than setting size */
     while (erased_size < size)
     {
@@ -205,8 +190,8 @@ const struct fal_flash_dev stm32f2_onchip_flash =
 {
     .name       = "stm32_onchip",
     .addr       = 0x08000000,
-    .len        = 1024 * 1024,
-    .blk_size   = 128 * 1024,
+    .len        = 1024*1024,
+    .blk_size   = 128*1024,
     .ops        = {init, read, write, erase},
     .write_gran = 8
 };

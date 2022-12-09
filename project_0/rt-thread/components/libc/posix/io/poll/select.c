@@ -43,8 +43,8 @@ int select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struc
     {
         /* Check if any monitor operation is requested on this fd */
         if ((readfds   && FD_ISSET(fd, readfds))  ||
-                (writefds  && FD_ISSET(fd, writefds)) ||
-                (exceptfds && FD_ISSET(fd, exceptfds)))
+            (writefds  && FD_ISSET(fd, writefds)) ||
+            (exceptfds && FD_ISSET(fd, exceptfds)))
         {
             npfds++;
         }

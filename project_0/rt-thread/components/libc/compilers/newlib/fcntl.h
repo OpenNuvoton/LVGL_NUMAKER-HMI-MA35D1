@@ -14,11 +14,11 @@
 #include <sys/_default_fcntl.h>
 
 #ifndef O_DIRECTORY
-    #define O_DIRECTORY 0x200000
+#define O_DIRECTORY 0x200000
 #endif
 
 #ifndef O_BINARY
-    #define O_BINARY 0x10000
+#define O_BINARY 0x10000
 #endif
 
 #endif

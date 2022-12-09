@@ -92,8 +92,8 @@ int dlmodule_relocate(struct rt_dlmodule *module, Elf32_Rel *rel, Elf32_Addr sym
         offset += sym_val - (Elf32_Addr)where;
 
         if (!(offset & 1) ||
-                offset <= (rt_int32_t)0xff000000 ||
-                offset >= (rt_int32_t)0x01000000)
+            offset <= (rt_int32_t)0xff000000 ||
+            offset >= (rt_int32_t)0x01000000)
         {
             rt_kprintf("Module: Only Thumb addresses allowed\n");
 
@@ -107,8 +107,8 @@ int dlmodule_relocate(struct rt_dlmodule *module, Elf32_Rel *rel, Elf32_Addr sym
                                               (sign << 10) |
                                               ((offset >> 12) & 0x03ff));
         *(rt_uint16_t *)(where + 2) = (rt_uint16_t)((lower & 0xd000) |
-                                      (j1 << 13) | (j2 << 11) |
-                                      ((offset >> 1) & 0x07ff));
+                                                    (j1 << 13) | (j2 << 11) |
+                                                    ((offset >> 1) & 0x07ff));
         upper = *(rt_uint16_t *)where;
         lower = *(rt_uint16_t *)((Elf32_Addr)where + 2);
         break;

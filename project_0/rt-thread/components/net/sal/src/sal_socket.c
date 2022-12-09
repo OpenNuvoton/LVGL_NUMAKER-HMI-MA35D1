@@ -16,18 +16,18 @@
 #include <sal_socket.h>
 #include <sal_netdb.h>
 #ifdef SAL_USING_TLS
-    #include <sal_tls.h>
+#include <sal_tls.h>
 #endif
 #include <sal_low_lvl.h>
 #include <netdev.h>
 
 #ifdef SAL_INTERNET_CHECK
-    #include <ipc/workqueue.h>
+#include <ipc/workqueue.h>
 #endif
 
 /* check system workqueue stack size */
 #if RT_SYSTEM_WORKQUEUE_STACKSIZE < 1536
-    #error "The system workqueue stack size must more than 1536 bytes"
+#error "The system workqueue stack size must more than 1536 bytes"
 #endif
 
 #define DBG_TAG                        "sal.skt"
@@ -51,8 +51,8 @@ struct sal_netdev_res_table
 };
 
 #ifdef SAL_USING_TLS
-    /* The global TLS protocol options */
-    static struct sal_proto_tls *proto_tls;
+/* The global TLS protocol options */
+static struct sal_proto_tls *proto_tls;
 #endif
 
 /* The global socket table */
@@ -1133,12 +1133,12 @@ int sal_getaddrinfo(const char *nodename,
         }
     }
 
-    if (ret == RT_EOK)
+    if(ret == RT_EOK)
     {
         /*record the netdev and res*/
-        for (i = 0; i < SAL_SOCKETS_NUM; i++)
+        for(i = 0; i < SAL_SOCKETS_NUM; i++)
         {
-            if (sal_dev_res_tbl[i].res == RT_NULL)
+            if(sal_dev_res_tbl[i].res == RT_NULL)
             {
                 sal_dev_res_tbl[i].res = *res;
                 sal_dev_res_tbl[i].netdev = netdev;
@@ -1160,9 +1160,9 @@ void sal_freeaddrinfo(struct addrinfo *ai)
     rt_uint32_t  i = 0;
 
     /*when use the multi netdev, it must free the ai use the getaddrinfo netdev */
-    for (i = 0; i < SAL_SOCKETS_NUM; i++)
+    for(i = 0; i < SAL_SOCKETS_NUM; i++)
     {
-        if (sal_dev_res_tbl[i].res == ai)
+        if(sal_dev_res_tbl[i].res == ai)
         {
             netdev = sal_dev_res_tbl[i].netdev;
             sal_dev_res_tbl[i].res = RT_NULL;

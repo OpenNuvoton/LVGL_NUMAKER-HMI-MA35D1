@@ -13,9 +13,9 @@
 
 #define DBG_TAG               "I2C"
 #ifdef RT_I2C_DEBUG
-    #define DBG_LVL               DBG_LOG
+#define DBG_LVL               DBG_LOG
 #else
-    #define DBG_LVL               DBG_INFO
+#define DBG_LVL               DBG_INFO
 #endif
 #include <rtdbg.h>
 
@@ -88,7 +88,7 @@ rt_err_t rt_i2c_control(struct rt_i2c_bus_device *bus,
 {
     rt_err_t ret;
 
-    if (bus->ops->i2c_bus_control)
+    if(bus->ops->i2c_bus_control)
     {
         ret = bus->ops->i2c_bus_control(bus, cmd, arg);
 

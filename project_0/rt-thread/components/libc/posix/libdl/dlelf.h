@@ -357,21 +357,21 @@ typedef struct
 #define IS_AW(s)          ((s.sh_flags & SHF_ALLOC) && (s.sh_flags & SHF_WRITE))
 
 #if (defined(__arm__) || defined(__i386__) || (__riscv_xlen == 32))
-    #define elf_module        ((Elf32_Ehdr *)module_ptr)
-    #define shdr              ((Elf32_Shdr *)((rt_uint8_t *)module_ptr + elf_module->e_shoff))
-    #define phdr              ((Elf32_Phdr *)((rt_uint8_t *)module_ptr + elf_module->e_phoff))
+#define elf_module        ((Elf32_Ehdr *)module_ptr)
+#define shdr              ((Elf32_Shdr *)((rt_uint8_t *)module_ptr + elf_module->e_shoff))
+#define phdr              ((Elf32_Phdr *)((rt_uint8_t *)module_ptr + elf_module->e_phoff))
 
-    typedef Elf32_Sym       Elf_Sym;
-    typedef Elf32_Rel       Elf_Rel;
-    typedef Elf32_Addr      Elf_Addr;
+typedef Elf32_Sym       Elf_Sym;
+typedef Elf32_Rel       Elf_Rel;
+typedef Elf32_Addr      Elf_Addr;
 #elif (defined(__aarch64__) || defined(__x86_64__) || (__riscv_xlen == 64))
-    #define elf_module        ((Elf64_Ehdr *)module_ptr)
-    #define shdr              ((Elf64_Shdr *)((rt_uint8_t *)module_ptr + elf_module->e_shoff))
-    #define phdr              ((Elf64_Phdr *)((rt_uint8_t *)module_ptr + elf_module->e_phoff))
+#define elf_module        ((Elf64_Ehdr *)module_ptr)
+#define shdr              ((Elf64_Shdr *)((rt_uint8_t *)module_ptr + elf_module->e_shoff))
+#define phdr              ((Elf64_Phdr *)((rt_uint8_t *)module_ptr + elf_module->e_phoff))
 
-    typedef Elf64_Sym       Elf_Sym;
-    typedef Elf64_Rela      Elf_Rel;
-    typedef Elf64_Addr      Elf_Addr;
+typedef Elf64_Sym       Elf_Sym;
+typedef Elf64_Rela      Elf_Rel;
+typedef Elf64_Addr      Elf_Addr;
 #endif
 
 int dlmodule_relocate(struct rt_dlmodule *module, Elf_Rel *rel, Elf_Addr sym_val);

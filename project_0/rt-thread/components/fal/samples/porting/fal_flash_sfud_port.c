@@ -13,11 +13,11 @@
 
 #ifdef FAL_USING_SFUD_PORT
 #ifdef RT_USING_SFUD
-    #include <spi_flash_sfud.h>
+#include <spi_flash_sfud.h>
 #endif
 
 #ifndef FAL_USING_NOR_FLASH_DEV_NAME
-    #define FAL_USING_NOR_FLASH_DEV_NAME             "norflash0"
+#define FAL_USING_NOR_FLASH_DEV_NAME             "norflash0"
 #endif
 
 static int init(void);

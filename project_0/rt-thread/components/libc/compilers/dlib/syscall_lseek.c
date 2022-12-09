@@ -35,8 +35,8 @@
 long __lseek(int handle, long offset, int whence)
 {
     if (handle == _LLIO_STDOUT ||
-            handle == _LLIO_STDERR ||
-            handle == _LLIO_STDIN)
+        handle == _LLIO_STDERR ||
+        handle == _LLIO_STDIN)
         return _LLIO_ERROR;
 #ifdef DFS_USING_POSIX
     return lseek(handle, offset, whence);

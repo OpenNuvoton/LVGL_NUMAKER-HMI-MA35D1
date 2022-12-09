@@ -23,7 +23,7 @@ INIT_COMPONENT_EXPORT(pthread_key_system_init);
 
 void *pthread_getspecific(pthread_key_t key)
 {
-    struct _pthread_data *ptd;
+    struct _pthread_data* ptd;
 
     if (rt_thread_self() == NULL) return NULL;
 
@@ -43,7 +43,7 @@ RTM_EXPORT(pthread_getspecific);
 
 int pthread_setspecific(pthread_key_t key, const void *value)
 {
-    struct _pthread_data *ptd;
+    struct _pthread_data* ptd;
 
     if (rt_thread_self() == NULL) return EINVAL;
 
@@ -54,7 +54,7 @@ int pthread_setspecific(pthread_key_t key, const void *value)
     /* check tls area */
     if (ptd->tls == NULL)
     {
-        ptd->tls = (void **)rt_malloc(sizeof(void *) * PTHREAD_KEY_MAX);
+        ptd->tls = (void**)rt_malloc(sizeof(void*) * PTHREAD_KEY_MAX);
     }
 
     if ((key < PTHREAD_KEY_MAX) && _thread_keys[key].is_used)
@@ -68,7 +68,7 @@ int pthread_setspecific(pthread_key_t key, const void *value)
 }
 RTM_EXPORT(pthread_setspecific);
 
-int pthread_key_create(pthread_key_t *key, void (*destructor)(void *))
+int pthread_key_create(pthread_key_t *key, void (*destructor)(void*))
 {
     rt_uint32_t index;
 

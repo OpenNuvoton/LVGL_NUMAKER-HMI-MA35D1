@@ -15,7 +15,7 @@
 #include <ulog.h>
 
 #ifndef ULOG_FILE_PATH_LEN
-    #define ULOG_FILE_PATH_LEN   128
+#define ULOG_FILE_PATH_LEN   128
 #endif
 
 struct ulog_file_be
@@ -36,7 +36,7 @@ struct ulog_file_be
 
 /* ulog file backend api */
 int ulog_file_backend_init(struct ulog_file_be *be, const char *name, const char *dir_path, rt_size_t max_num,
-                           rt_size_t max_size, rt_size_t buf_size);
+        rt_size_t max_size, rt_size_t buf_size);
 int ulog_file_backend_deinit(struct ulog_file_be *be);
 void ulog_file_backend_enable(struct ulog_file_be *be);
 void ulog_file_backend_disable(struct ulog_file_be *be);

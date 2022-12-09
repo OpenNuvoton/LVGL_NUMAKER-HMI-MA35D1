@@ -11,10 +11,10 @@
 #include <pthread.h>
 #include <cstdlib>
 
-typedef void (*destructor)(void *);
+typedef void (*destructor) (void *);
 
 extern "C"
-int __cxa_thread_atexit_impl(destructor dtor, void *obj, void *dso_symbol)
+int __cxa_thread_atexit_impl(destructor dtor, void* obj, void* dso_symbol)
 {
     pthread_key_t key_tmp;
     if (pthread_key_create(&key_tmp, dtor) != 0)

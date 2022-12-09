@@ -78,11 +78,11 @@ rt_err_t rt_usbh_class_driver_unregister(ucd_t drv)
  *
  * @return the error code, RT_EOK on successfully.
  */
-rt_err_t rt_usbh_class_driver_enable(ucd_t drv, void *args)
+rt_err_t rt_usbh_class_driver_enable(ucd_t drv, void* args)
 {
     RT_ASSERT(drv != RT_NULL);
 
-    if (drv->enable != RT_NULL)
+    if(drv->enable != RT_NULL)
         drv->enable(args);
 
     return RT_EOK;
@@ -96,11 +96,11 @@ rt_err_t rt_usbh_class_driver_enable(ucd_t drv, void *args)
  *
  * @return the error code, RT_EOK on successfully.
  */
-rt_err_t rt_usbh_class_driver_disable(ucd_t drv, void *args)
+rt_err_t rt_usbh_class_driver_disable(ucd_t drv, void* args)
 {
     RT_ASSERT(drv != RT_NULL);
 
-    if (drv->disable != RT_NULL)
+    if(drv->disable != RT_NULL)
         drv->disable(args);
 
     return RT_EOK;

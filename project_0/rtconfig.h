@@ -138,6 +138,7 @@
 #define RT_AUDIO_REPLAY_MP_BLOCK_SIZE 4096
 #define RT_AUDIO_REPLAY_MP_BLOCK_COUNT 2
 #define RT_AUDIO_RECORD_PIPE_SIZE 2048
+#define RT_USING_SENSOR
 #define RT_USING_TOUCH
 
 /* Using USB */
@@ -248,6 +249,7 @@
 #define ULOG_OUTPUT_TIME
 #define ULOG_OUTPUT_LEVEL
 #define ULOG_OUTPUT_TAG
+#define ULOG_OUTPUT_THREAD_NAME
 #define ULOG_BACKEND_USING_CONSOLE
 #define RT_USING_UTEST
 #define UTEST_THR_STACK_SIZE 4096
@@ -309,10 +311,10 @@
 #define PKG_USING_LVGL
 #define PKG_LVGL_THREAD_PRIO 20
 #define PKG_LVGL_THREAD_STACK_SIZE 4096
-#define PKG_LVGL_DISP_REFR_PERIOD 5
+#define PKG_LVGL_DISP_REFR_PERIOD 16
 #define PKG_LVGL_USING_DEMOS
-#define PKG_LVGL_USING_LATEST_VERSION
-#define PKG_LVGL_VER_NUM 0x99999
+#define PKG_LVGL_USING_V8_3_LATEST_VERSION
+#define PKG_LVGL_VER_NUM 0x0803F
 
 /* u8g2: a monochrome graphic library */
 
@@ -347,11 +349,23 @@
 
 /* peripheral libraries and drivers */
 
+/* sensors drivers */
+
+#define PKG_USING_MPU6XXX
+#define PKG_USING_MPU6XXX_LATEST_VERSION
+#define PKG_USING_MPU6XXX_ACCE
+#define PKG_USING_MPU6XXX_GYRO
+
+/* touch drivers */
+
 
 /* Kendryte SDK */
 
 
 /* AI packages */
+
+
+/* Signal Processing and Control Algorithm Packages */
 
 
 /* miscellaneous packages */
@@ -407,6 +421,11 @@
 /* On-chip Peripheral Drivers */
 
 #define SOC_SERIES_MA35D1
+#define BSP_USING_SSPCC
+#define BSP_USING_SSMCC
+#define BSP_USING_UMCTL2
+#define BSP_USING_RTP
+#define RTP_USING_AT_STARTUP
 #define RT_USING_FPU
 #define BSP_USE_STDDRIVER_SOURCE
 #define BSP_USING_PDMA
@@ -420,8 +439,6 @@
 #define BSP_USING_RTC
 #define BSP_USING_ADC
 #define BSP_USING_ADC_TOUCH
-#define BSP_USING_CCAP
-#define BSP_USING_CCAP0
 #define BSP_USING_UART
 #define BSP_USING_UART0
 #define BSP_USING_UART11
@@ -463,6 +480,7 @@
 #define BSP_USING_HWSEM0
 #define BSP_USING_WHC
 #define BSP_USING_WHC0
+#define BSP_USING_NFI
 #define BSP_USING_USBH
 #define BSP_USING_HSUSBH0
 #define BSP_USING_HSUSBH1
@@ -473,7 +491,9 @@
 #define BOARD_USING_NAU8822
 #define BOARD_USING_STORAGE_SDCARD
 #define BOARD_USING_STORAGE_EMMC
+#define BOARD_USING_STORAGE_RAWNAND
 #define BOARD_USING_STORAGE_SPINAND
+#define BOARD_USING_MPU6500
 #define BOARD_USING_USBHOST
 
 /* Board extended module drivers */
@@ -486,8 +506,6 @@
 
 #define NU_PKG_USING_UTILS
 #define NU_PKG_USING_DEMO
-#define NU_PKG_USING_LVGL
-#define NU_PKG_LVGL_RENDERING_LAYER "lcd"
 #define NU_PKG_USING_NAU8822
 #define NU_PKG_USING_ADC_TOUCH
 #define NU_PKG_USING_SPINAND

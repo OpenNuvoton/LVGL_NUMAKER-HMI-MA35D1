@@ -23,7 +23,7 @@
 #include <at_device.h>
 
 #ifdef SAL_USING_POSIX
-    #include <poll.h>
+#include <poll.h>
 #endif
 
 #include <arpa/inet.h>
@@ -43,11 +43,10 @@
 
 /* The maximum number of sockets structure */
 #ifndef AT_SOCKETS_NUM
-    #define AT_SOCKETS_NUM       AT_DEVICE_SOCKETS_NUM
+#define AT_SOCKETS_NUM       AT_DEVICE_SOCKETS_NUM
 #endif
 
-typedef enum
-{
+typedef enum {
     AT_EVENT_SEND,
     AT_EVENT_RECV,
     AT_EVENT_ERROR,
@@ -146,7 +145,7 @@ static int at_recvpkt_all_delete(rt_slist_t *rlist)
         return 0;
     }
 
-    for (node = rt_slist_first(rlist); node;)
+    for(node = rt_slist_first(rlist); node;)
     {
         pkt = rt_slist_entry(node, struct at_recv_pkt, list);
         node = rt_slist_next(node);
@@ -246,7 +245,7 @@ static void at_do_event_changes(struct at_socket *sock, at_event_t event, rt_boo
             sock->sendevent = 1;
 
 #ifdef SAL_USING_POSIX
-            rt_wqueue_wakeup(&sock->wait_head, (void *) POLLOUT);
+            rt_wqueue_wakeup(&sock->wait_head, (void*) POLLOUT);
 #endif
         }
         else if (sock->sendevent)
@@ -262,7 +261,7 @@ static void at_do_event_changes(struct at_socket *sock, at_event_t event, rt_boo
             sock->rcvevent++;
 
 #ifdef SAL_USING_POSIX
-            rt_wqueue_wakeup(&sock->wait_head, (void *) POLLIN);
+            rt_wqueue_wakeup(&sock->wait_head, (void*) POLLIN);
 #endif
         }
         else if (sock->rcvevent)
@@ -278,7 +277,7 @@ static void at_do_event_changes(struct at_socket *sock, at_event_t event, rt_boo
             sock->errevent++;
 
 #ifdef SAL_USING_POSIX
-            rt_wqueue_wakeup(&sock->wait_head, (void *) POLLERR);
+            rt_wqueue_wakeup(&sock->wait_head, (void*) POLLERR);
 #endif
         }
         else if (sock->errevent)
@@ -331,7 +330,7 @@ static int alloc_empty_socket(rt_slist_t *l)
     rt_slist_for_each(node, &_socket_list)
     {
         at_sock = rt_slist_entry(node, struct at_socket, list);
-        if (at_sock->socket != idx)
+        if(at_sock->socket != idx)
             break;
         idx++;
         pre_node = node;
@@ -408,7 +407,7 @@ static struct at_socket *alloc_socket_by_device(struct at_device *device, enum a
 
     rt_snprintf(name, RT_NAME_MAX, "%s%d", "at_skt", idx);
     /* create AT socket receive ring buffer lock */
-    if ((sock->recv_lock = rt_mutex_create(name, RT_IPC_FLAG_PRIO)) == RT_NULL)
+    if((sock->recv_lock = rt_mutex_create(name, RT_IPC_FLAG_PRIO)) == RT_NULL)
     {
         LOG_E("No memory for socket receive mutex create.");
         rt_sem_delete(sock->recv_notice);
@@ -466,7 +465,7 @@ int at_socket(int domain, int type, int protocol)
 
     //TODO check protocol
 
-    switch (type)
+    switch(type)
     {
     case SOCK_STREAM:
         socket_type = AT_SOCKET_TCP;
@@ -610,7 +609,7 @@ int at_shutdown(int socket, int how)
 /* get IP address and port by socketaddr structure information */
 static int socketaddr_to_ipaddr_port(const struct sockaddr *sockaddr, ip_addr_t *addr, uint16_t *port)
 {
-    const struct sockaddr_in *sin = (const struct sockaddr_in *)(const void *) sockaddr;
+    const struct sockaddr_in* sin = (const struct sockaddr_in*) (const void *) sockaddr;
 
 #if NETDEV_IPV4 && NETDEV_IPV6
     addr->u_addr.ip4.addr = sin->sin_addr.s_addr;
@@ -1055,7 +1054,7 @@ int at_recvfrom(int socket, void *mem, size_t len, int flags, struct sockaddr *f
 
     /* receive packet list last transmission of remaining data */
     rt_mutex_take(sock->recv_lock, RT_WAITING_FOREVER);
-    if ((recv_len = at_recvpkt_get(&(sock->recvpkt_list), (char *)mem, len)) > 0)
+    if((recv_len = at_recvpkt_get(&(sock->recvpkt_list), (char *)mem, len)) > 0)
     {
         rt_mutex_release(sock->recv_lock);
         goto __exit;
@@ -1320,12 +1319,12 @@ int at_setsockopt(int socket, int level, int optname, const void *optval, sockle
         {
         case SO_RCVTIMEO:
             sock->recv_timeout = ((const struct timeval *) optval)->tv_sec * 1000
-                                 + ((const struct timeval *) optval)->tv_usec / 1000;
+                    + ((const struct timeval *) optval)->tv_usec / 1000;
             break;
 
         case SO_SNDTIMEO:
             sock->send_timeout = ((const struct timeval *) optval)->tv_sec * 1000
-                                 + ((const struct timeval *) optval)->tv_usec / 1000;
+                    + ((const struct timeval *) optval)->tv_usec / 1000;
             break;
 
         default:
@@ -1348,7 +1347,7 @@ int at_setsockopt(int socket, int level, int optname, const void *optval, sockle
     return 0;
 }
 
-static uint32_t ipstr_atol(const char *nptr)
+static uint32_t ipstr_atol(const char* nptr)
 {
     uint32_t total = 0;
     char sign = '+';
@@ -1444,13 +1443,13 @@ struct hostent *at_gethostbyname(const char *name)
     s_hostent.h_aliases = &s_aliases;
     s_hostent.h_addrtype = AF_AT;
     s_hostent.h_length = sizeof(ip_addr_t);
-    s_hostent.h_addr_list = (char **) &s_phostent_addr;
+    s_hostent.h_addr_list = (char**) &s_phostent_addr;
 
     return &s_hostent;
 }
 
 int at_getaddrinfo(const char *nodename, const char *servname,
-                   const struct addrinfo *hints, struct addrinfo **res)
+                    const struct addrinfo *hints, struct addrinfo **res)
 {
     int port_nr = 0;
     ip_addr_t addr;
@@ -1520,7 +1519,7 @@ int at_getaddrinfo(const char *nodename, const char *servname,
 
             for (idx = 0; idx < strlen(nodename) && !isalpha(nodename[idx]); idx++);
 
-            if (idx < strlen(nodename))
+            if(idx < strlen(nodename))
             {
                 if (device->class->socket_ops->at_domain_resolve((char *) nodename, ip_str) != 0)
                 {
@@ -1532,17 +1531,17 @@ int at_getaddrinfo(const char *nodename, const char *servname,
                 strncpy(ip_str, nodename, strlen(nodename));
             }
 
-#if NETDEV_IPV4 && NETDEV_IPV6
+        #if NETDEV_IPV4 && NETDEV_IPV6
             addr.type = IPADDR_TYPE_V4;
             if ((addr.u_addr.ip4.addr = ipstr_to_u32(ip_str)) == 0)
             {
                 return EAI_FAIL;
             }
-#elif NETDEV_IPV4
+        #elif NETDEV_IPV4
             addr.addr = ipstr_to_u32(ip_str);
-#elif NETDEV_IPV6
-#error "not support IPV6."
-#endif /* NETDEV_IPV4 && NETDEV_IPV6 */
+        #elif NETDEV_IPV6
+        #error "not support IPV6."
+        #endif /* NETDEV_IPV4 && NETDEV_IPV6 */
         }
     }
     else
@@ -1571,7 +1570,7 @@ int at_getaddrinfo(const char *nodename, const char *servname,
     }
     rt_memset(ai, 0, total_size);
     /* cast through void* to get rid of alignment warnings */
-    sa = (struct sockaddr_storage *)(void *)((uint8_t *) ai + sizeof(struct addrinfo));
+    sa = (struct sockaddr_storage *) (void *) ((uint8_t *) ai + sizeof(struct addrinfo));
     struct sockaddr_in *sa4 = (struct sockaddr_in *) sa;
     /* set up sockaddr */
 #if NETDEV_IPV4 && NETDEV_IPV6

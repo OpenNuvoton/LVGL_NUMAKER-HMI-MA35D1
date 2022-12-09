@@ -19,7 +19,7 @@
 #include <netdev.h>
 
 #ifdef SAL_USING_POSIX
-    #include <poll.h>
+#include <poll.h>
 #endif
 
 #ifdef SAL_USING_AT
@@ -32,7 +32,7 @@ static int at_poll(struct dfs_fd *file, struct rt_pollreq *req)
     struct sal_socket *sal_sock;
 
     sal_sock = sal_get_socket((int) file->data);
-    if (!sal_sock)
+    if(!sal_sock)
     {
         return -1;
     }

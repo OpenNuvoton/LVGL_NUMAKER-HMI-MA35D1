@@ -42,20 +42,20 @@ enum rym_code
 
 /* how many ticks wait for chars between packet. */
 #ifndef RYM_WAIT_CHR_TICK
-    #define RYM_WAIT_CHR_TICK (RT_TICK_PER_SECOND * 3)
+#define RYM_WAIT_CHR_TICK (RT_TICK_PER_SECOND * 3)
 #endif
 /* how many ticks wait for between packet. */
 #ifndef RYM_WAIT_PKG_TICK
-    #define RYM_WAIT_PKG_TICK (RT_TICK_PER_SECOND * 3)
+#define RYM_WAIT_PKG_TICK (RT_TICK_PER_SECOND * 3)
 #endif
 /* how many ticks between two handshake code. */
 #ifndef RYM_CHD_INTV_TICK
-    #define RYM_CHD_INTV_TICK (RT_TICK_PER_SECOND * 3)
+#define RYM_CHD_INTV_TICK (RT_TICK_PER_SECOND * 3)
 #endif
 
 /* how many CAN be sent when user active end the session. */
 #ifndef RYM_END_SESSION_SEND_CAN_NUM
-    #define RYM_END_SESSION_SEND_CAN_NUM  0x07
+#define RYM_END_SESSION_SEND_CAN_NUM  0x07
 #endif
 
 enum rym_stage

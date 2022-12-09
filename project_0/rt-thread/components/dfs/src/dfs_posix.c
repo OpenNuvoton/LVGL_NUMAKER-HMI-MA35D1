@@ -121,9 +121,9 @@ RTM_EXPORT(close);
  * may be reach the end of file, please check errno.
  */
 #ifdef _READ_WRITE_RETURN_TYPE
-    _READ_WRITE_RETURN_TYPE read(int fd, void *buf, size_t len) /* some gcc tool chains will use different data structure */
+_READ_WRITE_RETURN_TYPE read(int fd, void *buf, size_t len) /* some gcc tool chains will use different data structure */
 #else
-    ssize_t read(int fd, void *buf, size_t len)
+ssize_t read(int fd, void *buf, size_t len)
 #endif
 {
     int result;
@@ -165,9 +165,9 @@ RTM_EXPORT(read);
  * @return the actual written data buffer length.
  */
 #ifdef _READ_WRITE_RETURN_TYPE
-    _READ_WRITE_RETURN_TYPE write(int fd, const void *buf, size_t len) /* some gcc tool chains will use different data structure */
+_READ_WRITE_RETURN_TYPE write(int fd, const void *buf, size_t len) /* some gcc tool chains will use different data structure */
 #else
-    ssize_t write(int fd, const void *buf, size_t len)
+ssize_t write(int fd, const void *buf, size_t len)
 #endif
 {
     int result;
@@ -248,7 +248,7 @@ off_t lseek(int fd, off_t offset, int whence)
 
         return -1;
     }
-    if (offset != d->pos)
+    if(offset != d->pos)
     {
         result = dfs_file_lseek(d, offset);
         if (result < 0)
@@ -762,7 +762,7 @@ RTM_EXPORT(telldir);
  * @param d the directory stream.
  * @param offset the offset in directory stream.
  */
-void seekdir(DIR *d, off_t offset)
+void seekdir(DIR *d, long offset)
 {
     struct dfs_fd *fd;
 
@@ -908,7 +908,7 @@ int chdir(const char *path)
 RTM_EXPORT(chdir);
 
 #ifdef RT_USING_FINSH
-    FINSH_FUNCTION_EXPORT_ALIAS(chdir, cd, change current working directory);
+FINSH_FUNCTION_EXPORT_ALIAS(chdir, cd, change current working directory);
 #endif
 #endif
 

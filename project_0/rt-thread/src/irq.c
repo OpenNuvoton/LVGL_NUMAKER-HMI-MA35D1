@@ -65,9 +65,9 @@ void rt_interrupt_leave_sethook(void (*hook)(void))
 /**@{*/
 
 #ifdef RT_USING_SMP
-    #define rt_interrupt_nest rt_cpu_self()->irq_nest
+#define rt_interrupt_nest rt_cpu_self()->irq_nest
 #else
-    volatile rt_uint8_t rt_interrupt_nest = 0;
+volatile rt_uint8_t rt_interrupt_nest = 0;
 #endif /* RT_USING_SMP */
 
 
@@ -78,13 +78,13 @@ void rt_interrupt_leave_sethook(void (*hook)(void))
  *
  * @see rt_interrupt_leave
  */
-void rt_interrupt_enter(void)
+RT_WEAK void rt_interrupt_enter(void)
 {
     rt_base_t level;
 
     level = rt_hw_interrupt_disable();
     rt_interrupt_nest ++;
-    RT_OBJECT_HOOK_CALL(rt_interrupt_enter_hook, ());
+    RT_OBJECT_HOOK_CALL(rt_interrupt_enter_hook,());
     rt_hw_interrupt_enable(level);
 
     RT_DEBUG_LOG(RT_DEBUG_IRQ, ("irq has come..., irq current nest:%d\n",
@@ -100,7 +100,7 @@ RTM_EXPORT(rt_interrupt_enter);
  *
  * @see rt_interrupt_enter
  */
-void rt_interrupt_leave(void)
+RT_WEAK void rt_interrupt_leave(void)
 {
     rt_base_t level;
 
@@ -108,7 +108,7 @@ void rt_interrupt_leave(void)
                                 (rt_int32_t)rt_interrupt_nest));
 
     level = rt_hw_interrupt_disable();
-    RT_OBJECT_HOOK_CALL(rt_interrupt_leave_hook, ());
+    RT_OBJECT_HOOK_CALL(rt_interrupt_leave_hook,());
     rt_interrupt_nest --;
     rt_hw_interrupt_enable(level);
 }

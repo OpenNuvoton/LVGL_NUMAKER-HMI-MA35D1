@@ -65,26 +65,26 @@ static rt_err_t rt_rtc_control(struct rt_device *dev, int cmd, void *args)
 
     switch (cmd)
     {
-    case RT_DEVICE_CTRL_RTC_GET_TIME:
-        ret = TRY_DO_RTC_FUNC(rtc_device, get_secs, args);
-        break;
-    case RT_DEVICE_CTRL_RTC_SET_TIME:
-        ret = TRY_DO_RTC_FUNC(rtc_device, set_secs, args);
-        break;
-    case RT_DEVICE_CTRL_RTC_GET_TIMEVAL:
-        ret = TRY_DO_RTC_FUNC(rtc_device, get_timeval, args);
-        break;
-    case RT_DEVICE_CTRL_RTC_SET_TIMEVAL:
-        ret = TRY_DO_RTC_FUNC(rtc_device, set_timeval, args);
-        break;
-    case RT_DEVICE_CTRL_RTC_GET_ALARM:
-        ret = TRY_DO_RTC_FUNC(rtc_device, get_alarm, args);
-        break;
-    case RT_DEVICE_CTRL_RTC_SET_ALARM:
-        ret = TRY_DO_RTC_FUNC(rtc_device, set_alarm, args);
-        break;
-    default:
-        break;
+        case RT_DEVICE_CTRL_RTC_GET_TIME:
+            ret = TRY_DO_RTC_FUNC(rtc_device, get_secs, args);
+            break;
+        case RT_DEVICE_CTRL_RTC_SET_TIME:
+            ret = TRY_DO_RTC_FUNC(rtc_device, set_secs, args);
+            break;
+        case RT_DEVICE_CTRL_RTC_GET_TIMEVAL:
+            ret = TRY_DO_RTC_FUNC(rtc_device, get_timeval, args);
+            break;
+        case RT_DEVICE_CTRL_RTC_SET_TIMEVAL:
+            ret = TRY_DO_RTC_FUNC(rtc_device, set_timeval, args);
+            break;
+        case RT_DEVICE_CTRL_RTC_GET_ALARM:
+            ret = TRY_DO_RTC_FUNC(rtc_device, get_alarm, args);
+            break;
+        case RT_DEVICE_CTRL_RTC_SET_ALARM:
+            ret = TRY_DO_RTC_FUNC(rtc_device, set_alarm, args);
+            break;
+        default:
+            break;
     }
 
     return ret;
@@ -361,7 +361,7 @@ static void date(int argc, char **argv)
         rt_kprintf("e.g: date 2018 01 01 23 59 59 or date\n");
     }
 }
-MSH_CMD_EXPORT(date, get date and time or set(local timezone) [year month day hour min sec])
+MSH_CMD_EXPORT(date, get date and time or set (local timezone) [year month day hour min sec])
 #endif /* RT_USING_FINSH */
 
 #endif /* RT_USING_RTC */

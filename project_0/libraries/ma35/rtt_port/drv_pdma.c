@@ -727,31 +727,31 @@ exit_nu_pdma_desc_setup:
 rt_err_t nu_pdma_sgtbls_allocate(nu_pdma_desc_t *ppsSgtbls, int num)
 {
     int i;
-    nu_pdma_desc_t psSgTblHead;
 
     RT_ASSERT(ppsSgtbls != NULL);
     RT_ASSERT(num > 0);
 
-    psSgTblHead = (nu_pdma_desc_t) rt_malloc_align(RT_ALIGN(sizeof(DSCT_T) * num, 64), 64);
-    RT_ASSERT(psSgTblHead != RT_NULL);
-
-    rt_memset((void *)psSgTblHead, 0, sizeof(DSCT_T) * num);
-
     for (i = 0; i < num; i++)
-        ppsSgtbls[i] = &psSgTblHead[i];
+    {
+        ppsSgtbls[i] = (nu_pdma_desc_t) rt_malloc_align(RT_ALIGN(sizeof(DSCT_T), 64), 64);
+        RT_ASSERT(ppsSgtbls[i] != RT_NULL);
+        rt_memset((void *)ppsSgtbls[i], 0, RT_ALIGN(sizeof(DSCT_T), 64));
+    }
 
     return RT_EOK;
 }
 
 void nu_pdma_sgtbls_free(nu_pdma_desc_t *ppsSgtbls, int num)
 {
-    nu_pdma_desc_t psSgTblHead;
+    int i;
 
     RT_ASSERT(ppsSgtbls != NULL);
-    psSgTblHead = *ppsSgtbls;
-    RT_ASSERT(psSgTblHead != NULL);
+    RT_ASSERT(num > 0);
 
-    rt_free_align(psSgTblHead);
+    for (i = 0; i < num; i++)
+    {
+        rt_free_align(ppsSgtbls[i]);
+    }
 }
 
 static void _nu_pdma_transfer(int i32ChannID, uint32_t u32Peripheral, nu_pdma_desc_t head, uint32_t u32IdleTimeout_us)

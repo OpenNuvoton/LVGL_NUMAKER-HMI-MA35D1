@@ -58,7 +58,7 @@ pthread_t _pthread_data_create(void)
     _pthread_data_t *ptd = NULL;
     RT_DECLARE_SPINLOCK(pth_lock);
 
-    ptd = (_pthread_data_t *)rt_malloc(sizeof(_pthread_data_t));
+    ptd = (_pthread_data_t*)rt_malloc(sizeof(_pthread_data_t));
     if (!ptd) return PTHREAD_NUM_MAX;
 
     memset(ptd, 0x0, sizeof(_pthread_data_t));
@@ -386,7 +386,7 @@ int pthread_join(pthread_t thread, void **value_ptr)
 }
 RTM_EXPORT(pthread_join);
 
-pthread_t pthread_self(void)
+pthread_t pthread_self (void)
 {
     rt_thread_t tid;
     _pthread_data_t *ptd;
@@ -404,7 +404,7 @@ RTM_EXPORT(pthread_self);
 
 int pthread_getcpuclockid(pthread_t thread, clockid_t *clock_id)
 {
-    if (_pthread_get_data(thread) == NULL)
+    if(_pthread_get_data(thread) == NULL)
     {
         return EINVAL;
     }

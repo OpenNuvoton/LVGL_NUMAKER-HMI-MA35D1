@@ -13,7 +13,7 @@
         },
         {
           "offset": "0x4000",
-          "file": "../Debug/rtthread.bin",
+          "file": "../rtthread.bin",
           "type": 0
         }
     ]

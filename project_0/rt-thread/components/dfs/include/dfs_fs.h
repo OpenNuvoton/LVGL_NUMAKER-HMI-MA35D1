@@ -33,16 +33,16 @@ struct dfs_filesystem_ops
     const struct dfs_file_ops *fops;
 
     /* mount and unmount file system */
-    int (*mount)(struct dfs_filesystem *fs, unsigned long rwflag, const void *data);
-    int (*unmount)(struct dfs_filesystem *fs);
+    int (*mount)    (struct dfs_filesystem *fs, unsigned long rwflag, const void *data);
+    int (*unmount)  (struct dfs_filesystem *fs);
 
     /* make a file system */
-    int (*mkfs)(rt_device_t devid);
-    int (*statfs)(struct dfs_filesystem *fs, struct statfs *buf);
+    int (*mkfs)     (rt_device_t devid);
+    int (*statfs)   (struct dfs_filesystem *fs, struct statfs *buf);
 
-    int (*unlink)(struct dfs_filesystem *fs, const char *pathname);
-    int (*stat)(struct dfs_filesystem *fs, const char *filename, struct stat *buf);
-    int (*rename)(struct dfs_filesystem *fs, const char *oldpath, const char *newpath);
+    int (*unlink)   (struct dfs_filesystem *fs, const char *pathname);
+    int (*stat)     (struct dfs_filesystem *fs, const char *filename, struct stat *buf);
+    int (*rename)   (struct dfs_filesystem *fs, const char *oldpath, const char *newpath);
 };
 
 /* Mounted file system */

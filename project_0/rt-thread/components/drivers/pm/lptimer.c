@@ -16,11 +16,11 @@ static rt_list_t rt_soft_lptimer_list = RT_LIST_OBJECT_INIT(rt_soft_lptimer_list
 
 /* lptimer init */
 void rt_lptimer_init(rt_lptimer_t  timer,
-                     const char *name,
-                     void (*timeout)(void *parameter),
-                     void       *parameter,
-                     rt_tick_t   time,
-                     rt_uint8_t  flag)
+                   const char *name,
+                   void (*timeout)(void *parameter),
+                   void       *parameter,
+                   rt_tick_t   time,
+                   rt_uint8_t  flag)
 {
     rt_timer_init(&timer->timer, name, timeout, parameter, time, flag);
     rt_list_init(&timer->list);
@@ -159,8 +159,8 @@ void lptimer_dump(void)
         {
             timer = rt_list_entry(node, struct rt_lptimer, list);
             rt_kprintf("| %-13s | 0x%08x | 0x%08x |",
-                       timer->timer.parent.name, timer->timer.init_tick,
-                       timer->timer.timeout_tick);
+                timer->timer.parent.name, timer->timer.init_tick,
+                timer->timer.timeout_tick);
             if (timer->timer.parent.flag & RT_TIMER_FLAG_ACTIVATED)
                 rt_kprintf(" activated   |\n");
             else

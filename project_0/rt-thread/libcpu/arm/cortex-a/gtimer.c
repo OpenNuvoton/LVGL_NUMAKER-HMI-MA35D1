@@ -27,7 +27,7 @@ static inline void __set_cntfrq(rt_uint32_t value)
 static inline rt_uint32_t __get_cntfrq(void)
 {
     rt_uint32_t result;
-    __get_cp(15, 0, result, 14, 0, 0);
+    __get_cp(15, 0, result, 14, 0 , 0);
     return result;
 }
 
@@ -107,7 +107,7 @@ static inline rt_uint32_t __get_cntp_ctl(void)
 void gtimer_set_counter_frequency(rt_uint32_t value)
 {
     __set_cntfrq(value);
-    __asm__ volatile("isb 0xF":::"memory");
+    __asm__ volatile ("isb 0xF":::"memory");
 }
 
 /** Get the frequency the timer shall run at.
@@ -115,7 +115,7 @@ void gtimer_set_counter_frequency(rt_uint32_t value)
  */
 rt_uint32_t gtimer_get_counter_frequency(void)
 {
-    return (__get_cntfrq());
+    return(__get_cntfrq());
 }
 
 /** Sets the reset value of the timer.
@@ -124,7 +124,7 @@ rt_uint32_t gtimer_get_counter_frequency(void)
 void gtimer_set_load_value(rt_uint32_t value)
 {
     __set_cntp_tval(value);
-    __asm__ volatile("isb 0xF":::"memory");
+    __asm__ volatile ("isb 0xF":::"memory");
 }
 
 /** Get the current counter value.
@@ -132,7 +132,7 @@ void gtimer_set_load_value(rt_uint32_t value)
  */
 rt_uint32_t gtimer_get_current_value(void)
 {
-    return (__get_cntp_tval());
+    return(__get_cntp_tval());
 }
 
 /** Get the current physical counter value.
@@ -140,7 +140,7 @@ rt_uint32_t gtimer_get_current_value(void)
  */
 rt_uint64_t gtimer_get_current_physical_value(void)
 {
-    return (__get_cntpct());
+    return(__get_cntpct());
 }
 
 /** Set the physical compare value.
@@ -149,7 +149,7 @@ rt_uint64_t gtimer_get_current_physical_value(void)
 void gtimer_set_physical_compare_value(rt_uint64_t value)
 {
     __set_cntp_cval(value);
-    __asm__ volatile("isb 0xF":::"memory");
+    __asm__ volatile ("isb 0xF":::"memory");
 }
 
 /** Get the physical compare value.
@@ -157,7 +157,7 @@ void gtimer_set_physical_compare_value(rt_uint64_t value)
  */
 rt_uint64_t gtimer_get_physical_compare_value(void)
 {
-    return (__get_cntp_cval());
+    return(__get_cntp_cval());
 }
 
 /** Configure the timer by setting the control value.
@@ -166,7 +166,7 @@ rt_uint64_t gtimer_get_physical_compare_value(void)
 void gtimer_set_control(rt_uint32_t value)
 {
     __set_cntp_ctl(value);
-    __asm__ volatile("isb 0xF":::"memory");
+    __asm__ volatile ("isb 0xF":::"memory");
 }
 
 /** Get the control value.
@@ -174,6 +174,6 @@ void gtimer_set_control(rt_uint32_t value)
  */
 rt_uint32_t gtimer_get_control(void)
 {
-    return (__get_cntp_ctl());
+    return(__get_cntp_ctl());
 }
 

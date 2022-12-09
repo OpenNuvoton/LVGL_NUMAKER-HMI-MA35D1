@@ -19,16 +19,16 @@
 // #define RT_WLAN_MGNT_DEBUG
 #define DBG_TAG "WLAN.mgnt"
 #ifdef RT_WLAN_MGNT_DEBUG
-    #define DBG_LVL DBG_LOG
+#define DBG_LVL DBG_LOG
 #else
-    #define DBG_LVL DBG_INFO
+#define DBG_LVL DBG_INFO
 #endif /* RT_WLAN_MGNT_DEBUG */
 #include <rtdbg.h>
 
 #ifdef RT_WLAN_MANAGE_ENABLE
 
 #ifndef RT_WLAN_DEVICE
-    #define RT_WLAN_DEVICE(__device) ((struct rt_wlan_device *)__device)
+#define RT_WLAN_DEVICE(__device) ((struct rt_wlan_device *)__device)
 #endif
 
 #define RT_WLAN_LOG_D(_fmt, ...) LOG_D("L:%d "_fmt"", __LINE__, ##__VA_ARGS__)
@@ -49,16 +49,16 @@
 #define COMPLETE_UNLOCK()     (rt_mutex_release(&complete_mutex))
 
 #ifdef RT_WLAN_AUTO_CONNECT_ENABLE
-    #define TIME_STOP()    (rt_timer_stop(&reconnect_time))
-    #define TIME_START()   (rt_timer_start(&reconnect_time))
-    static rt_uint32_t id = 0;
+#define TIME_STOP()    (rt_timer_stop(&reconnect_time))
+#define TIME_START()   (rt_timer_start(&reconnect_time))
+static rt_uint32_t id = 0;
 #else
-    #define TIME_STOP()
-    #define TIME_START()
+#define TIME_STOP()
+#define TIME_START()
 #endif
 
 #if RT_WLAN_EBOX_NUM < 1
-    #error "event box num Too few"
+#error "event box num Too few"
 #endif
 
 struct rt_wlan_mgnt_des
@@ -117,7 +117,7 @@ static struct rt_wlan_complete_des *complete_tab[5];
 static struct rt_mutex complete_mutex;
 
 #ifdef RT_WLAN_AUTO_CONNECT_ENABLE
-    static struct rt_timer reconnect_time;
+static struct rt_timer reconnect_time;
 #endif
 
 rt_inline int _sta_is_null(void)
@@ -389,7 +389,7 @@ static void rt_wlan_cyclic_check(void *parameter)
         level = rt_hw_interrupt_disable();
         rt_work_init(&work, rt_wlan_auto_connect_run, RT_NULL);
         rt_hw_interrupt_enable(level);
-        if (rt_work_submit(&work, RT_TICK_PER_SECOND) != RT_EOK)
+        if(rt_work_submit(&work,RT_TICK_PER_SECOND) != RT_EOK)
         {
             level = rt_hw_interrupt_disable();
             rt_memset(&work, 0, sizeof(struct rt_work));
@@ -852,14 +852,14 @@ static void rt_wlan_join_scan_callback(int event, struct rt_wlan_buff *buff, voi
     tgt_info = (struct rt_wlan_info *)parameter;
 
 
-    RT_WLAN_LOG_D("%s info len:%d tgt info len:%d", __FUNCTION__, info->ssid.len, tgt_info->ssid.len);
-    RT_WLAN_LOG_D("%s info ssid:%s tgt info ssid:%s", __FUNCTION__, &info->ssid.val[0], &tgt_info->ssid.val[0]);
+    RT_WLAN_LOG_D("%s info len:%d tgt info len:%d", __FUNCTION__,info->ssid.len,tgt_info->ssid.len);
+    RT_WLAN_LOG_D("%s info ssid:%s tgt info ssid:%s", __FUNCTION__,&info->ssid.val[0],&tgt_info->ssid.val[0]);
 
-    if (rt_memcmp(&info->ssid.val[0], &tgt_info->ssid.val[0], info->ssid.len) == 0 &&
+    if(rt_memcmp(&info->ssid.val[0], &tgt_info->ssid.val[0], info->ssid.len) == 0 &&
             info->ssid.len == tgt_info->ssid.len)
     {
         /*Get the rssi the max ap*/
-        if (info->rssi > tgt_info->rssi)
+        if(info->rssi > tgt_info->rssi)
         {
             tgt_info->security  = info->security;
             tgt_info->band      = info->band;
@@ -868,7 +868,7 @@ static void rt_wlan_join_scan_callback(int event, struct rt_wlan_buff *buff, voi
             tgt_info->rssi      = info->rssi;
             tgt_info->hidden    = info->hidden;
             /* hwaddr */
-            rt_memcmp(tgt_info->bssid, info->bssid, RT_WLAN_BSSID_MAX_LENGTH);
+            rt_memcmp(tgt_info->bssid,info->bssid,RT_WLAN_BSSID_MAX_LENGTH);
         }
     }
 }
@@ -910,27 +910,27 @@ rt_err_t rt_wlan_connect(const char *ssid, const char *password)
     INVALID_INFO(&info);
     MGNT_LOCK();
 
-    rt_memcpy(&info.ssid.val[0], ssid, rt_strlen(ssid));
+    rt_memcpy(&info.ssid.val[0],ssid,rt_strlen(ssid));
     info.ssid.len = rt_strlen(ssid);
 
 #ifdef RT_WLAN_JOIN_SCAN_BY_MGNT
-    err = rt_wlan_register_event_handler(RT_WLAN_EVT_SCAN_REPORT, rt_wlan_join_scan_callback, &info);
-    if (err != RT_EOK)
+    err = rt_wlan_register_event_handler(RT_WLAN_EVT_SCAN_REPORT,rt_wlan_join_scan_callback,&info);
+    if(err != RT_EOK)
     {
-        LOG_E("Scan register user callback error:%d!\n", err);
+        LOG_E("Scan register user callback error:%d!\n",err);
         return err;
     }
 
     err = rt_wlan_scan_with_info(&info);
-    if (err != RT_EOK)
+    if(err != RT_EOK)
     {
-        LOG_E("Scan with info error:%d!\n", err);
+        LOG_E("Scan with info error:%d!\n",err);
         return err;
     }
 
     if (info.channel <= 0)
     {
-        RT_WLAN_LOG_W("not find ap! ssid:%s,info.ssid.len=%d", ssid, info.ssid.len);
+        RT_WLAN_LOG_W("not find ap! ssid:%s,info.ssid.len=%d", ssid,info.ssid.len);
         MGNT_UNLOCK();
         return -RT_ERROR;
     }
@@ -1037,7 +1037,7 @@ rt_err_t rt_wlan_connect_adv(struct rt_wlan_info *info, const char *password)
     _sta_mgnt.state |= RT_WLAN_STATE_CONNECTING;
 
     err = rt_wlan_dev_fast_connect(_sta_mgnt.device, info, password, password_len);
-    if (err != RT_EOK)
+    if(err != RT_EOK)
     {
         err = rt_wlan_dev_connect(_sta_mgnt.device, info, password, password_len);
         if (err != RT_EOK)

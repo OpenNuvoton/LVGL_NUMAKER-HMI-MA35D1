@@ -66,7 +66,7 @@ static void posix_sem_delete(sem_t *psem)
     }
 }
 
-static sem_t *posix_sem_find(const char *name)
+static sem_t *posix_sem_find(const char* name)
 {
     sem_t *iter;
     rt_object_t object;
@@ -214,7 +214,7 @@ RTM_EXPORT(sem_init);
 
 sem_t *sem_open(const char *name, int oflag, ...)
 {
-    sem_t *sem;
+    sem_t* sem;
     va_list arg;
     mode_t mode;
     unsigned int value;
@@ -226,9 +226,8 @@ sem_t *sem_open(const char *name, int oflag, ...)
     if (oflag & O_CREAT)
     {
         va_start(arg, oflag);
-        mode = (mode_t) va_arg(arg, unsigned int);
-        mode = mode;
-        value = va_arg(arg, unsigned int);
+        mode = (mode_t) va_arg( arg, unsigned int); mode = mode;
+        value = va_arg( arg, unsigned int);
         va_end(arg);
 
         if (oflag & O_EXCL)
@@ -239,7 +238,7 @@ sem_t *sem_open(const char *name, int oflag, ...)
                 goto __return;
             }
         }
-        sem = (sem_t *) rt_malloc(sizeof(struct posix_sem));
+        sem = (sem_t*) rt_malloc (sizeof(struct posix_sem));
         if (sem == RT_NULL)
         {
             rt_set_errno(ENFILE);

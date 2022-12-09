@@ -19,8 +19,8 @@
 #include <netdev.h>
 
 #ifdef RT_USING_SAL
-    #include <sal_netdb.h>
-    #include <sal_low_lvl.h>
+#include <sal_netdb.h>
+#include <sal_low_lvl.h>
 #endif /* RT_USING_SAL */
 
 #define DBG_TAG              "netdev"
@@ -78,7 +78,7 @@ int netdev_register(struct netdev *netdev, const char *name, void *user_data)
     netdev->status_callback = RT_NULL;
     netdev->addr_callback = RT_NULL;
 
-    if (rt_strlen(name) > RT_NAME_MAX)
+    if(rt_strlen(name) > RT_NAME_MAX)
     {
         char netdev_name[RT_NAME_MAX + 1] = {0};
 
@@ -161,7 +161,7 @@ int netdev_unregister(struct netdev *netdev)
     if (cur_netdev == netdev)
     {
 #ifdef RT_USING_SAL
-        extern int sal_netdev_cleanup(struct netdev * netdev);
+        extern int sal_netdev_cleanup(struct netdev *netdev);
         sal_netdev_cleanup(netdev);
 #endif
         rt_memset(netdev, 0, sizeof(*netdev));
@@ -478,7 +478,7 @@ int netdev_set_ipaddr(struct netdev *netdev, const ip_addr_t *ip_addr)
         return -RT_ERROR;
     }
 
-    /* execute network interface device set IP address operations */
+     /* execute network interface device set IP address operations */
     return netdev->ops->set_addr_info(netdev, (ip_addr_t *)ip_addr, RT_NULL, RT_NULL);
 }
 
@@ -972,13 +972,13 @@ static void netdev_list_if(void)
             if (!ip_addr_isany(addr))
             {
                 rt_kprintf("ipv6 link-local: %s %s\n", inet_ntoa(*addr),
-                           !ip_addr_isany(addr) ? "VALID" : "INVALID");
+                        !ip_addr_isany(addr) ? "VALID" : "INVALID");
 
                 for (i = 1; i < NETDEV_IPV6_NUM_ADDRESSES; i++)
                 {
                     addr = &netdev->ip6_addr[i];
                     rt_kprintf("ipv6[%d] address: %s %s\n", i, inet_ntoa(*addr),
-                               !ip_addr_isany(addr) ? "VALID" : "INVALID");
+                            !ip_addr_isany(addr) ? "VALID" : "INVALID");
                 }
             }
         }
@@ -996,7 +996,7 @@ static void netdev_list_if(void)
     }
 }
 
-static void netdev_set_if(char *netdev_name, char *ip_addr, char *gw_addr, char *nm_addr)
+static void netdev_set_if(char* netdev_name, char* ip_addr, char* gw_addr, char* nm_addr)
 {
     struct netdev *netdev = RT_NULL;
     ip_addr_t addr;
@@ -1052,14 +1052,14 @@ MSH_CMD_EXPORT_ALIAS(netdev_ifconfig, ifconfig, list the information of all netw
 #endif /* NETDEV_USING_IFCONFIG */
 
 #ifdef NETDEV_USING_PING
-int netdev_cmd_ping(char *target_name, char *netdev_name, rt_uint32_t times, rt_size_t size)
+int netdev_cmd_ping(char* target_name, char *netdev_name, rt_uint32_t times, rt_size_t size)
 {
 #define NETDEV_PING_DATA_SIZE       32
-    /** ping receive timeout - in milliseconds */
+/** ping receive timeout - in milliseconds */
 #define NETDEV_PING_RECV_TIMEO      (2 * RT_TICK_PER_SECOND)
-    /** ping delay - in milliseconds */
+/** ping delay - in milliseconds */
 #define NETDEV_PING_DELAY           (1 * RT_TICK_PER_SECOND)
-    /* check netdev ping options */
+/* check netdev ping options */
 #define NETDEV_PING_IS_COMMONICABLE(netdev) \
     ((netdev) && (netdev)->ops && (netdev)->ops->ping && \
         netdev_is_up(netdev) && netdev_is_link_up(netdev)) \
@@ -1121,25 +1121,25 @@ int netdev_cmd_ping(char *target_name, char *netdev_name, rt_uint32_t times, rt_
         if (ret == -RT_ETIMEOUT)
         {
             rt_kprintf("ping: from %s icmp_seq=%d timeout\n",
-                       (ip_addr_isany(&(ping_resp.ip_addr))) ? target_name : inet_ntoa(ping_resp.ip_addr), index);
+                (ip_addr_isany(&(ping_resp.ip_addr))) ? target_name : inet_ntoa(ping_resp.ip_addr), index);
         }
         else if (ret == -RT_ERROR)
         {
             rt_kprintf("ping: unknown %s %s\n",
-                       (ip_addr_isany(&(ping_resp.ip_addr))) ? "host" : "address",
-                       (ip_addr_isany(&(ping_resp.ip_addr))) ? target_name : inet_ntoa(ping_resp.ip_addr));
+                (ip_addr_isany(&(ping_resp.ip_addr))) ? "host" : "address",
+                    (ip_addr_isany(&(ping_resp.ip_addr))) ? target_name : inet_ntoa(ping_resp.ip_addr));
         }
         else
         {
             if (ping_resp.ttl == 0)
             {
                 rt_kprintf("%d bytes from %s icmp_seq=%d time=%d ms\n",
-                           ping_resp.data_len, inet_ntoa(ping_resp.ip_addr), index, ping_resp.ticks);
+                            ping_resp.data_len, inet_ntoa(ping_resp.ip_addr), index, ping_resp.ticks);
             }
             else
             {
                 rt_kprintf("%d bytes from %s icmp_seq=%d ttl=%d time=%d ms\n",
-                           ping_resp.data_len, inet_ntoa(ping_resp.ip_addr), index, ping_resp.ttl, ping_resp.ticks);
+                            ping_resp.data_len, inet_ntoa(ping_resp.ip_addr), index, ping_resp.ttl, ping_resp.ticks);
             }
         }
 
@@ -1155,7 +1155,7 @@ int netdev_ping(int argc, char **argv)
 {
     if (argc == 1)
     {
-        rt_kprintf("Please input: ping [netdev name] <host address>\n");
+        rt_kprintf("Please input: ping <host address> [netdev name]\n");
     }
     else if (argc == 2)
     {
@@ -1182,10 +1182,10 @@ static void netdev_list_dns(void)
         netdev = rt_list_entry(node, struct netdev, list);
 
         rt_kprintf("network interface device: %.*s%s\n",
-                   RT_NAME_MAX, netdev->name,
-                   (netdev == netdev_default) ? " (Default)" : "");
+                RT_NAME_MAX, netdev->name,
+                (netdev == netdev_default)?" (Default)":"");
 
-        for (index = 0; index < NETDEV_DNS_SERVERS_NUM; index++)
+        for(index = 0; index < NETDEV_DNS_SERVERS_NUM; index++)
         {
             rt_kprintf("dns server #%d: %s\n", index, inet_ntoa(netdev->dns_servers[index]));
         }

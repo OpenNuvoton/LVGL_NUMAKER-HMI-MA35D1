@@ -74,15 +74,15 @@ extern "C" int __ARM_TPL_thread_nanosleep(const __ARM_TPL_timespec_t *__req,
 {
     rt_tick_t tick;
 
-    tick = __req->tv_sec * RT_TICK_PER_SECOND + (__req->tv_nsec * RT_TICK_PER_SECOND) / 1000000000;
+    tick = __req->tv_sec * RT_TICK_PER_SECOND + (__req->tv_nsec * RT_TICK_PER_SECOND)/ 1000000000;
     rt_thread_delay(tick);
 
     if (__rem)
     {
         tick = rt_tick_get() - tick;
         /* get the passed time */
-        __rem->tv_sec = tick / RT_TICK_PER_SECOND;
-        __rem->tv_nsec = (tick % RT_TICK_PER_SECOND) * (1000000000 / RT_TICK_PER_SECOND);
+        __rem->tv_sec = tick/RT_TICK_PER_SECOND;
+        __rem->tv_nsec = (tick%RT_TICK_PER_SECOND) * (1000000000/RT_TICK_PER_SECOND);
     }
     return 0;
 }
@@ -112,7 +112,7 @@ extern "C" void *__ARM_TPL_tls_get(__ARM_TPL_tls_key __key)
 
 extern "C" int __ARM_TPL_tls_set(__ARM_TPL_tls_key __key, void *__p)
 {
-    if (pthread_setspecific(__key, (void *)__p) != 0)
+    if (pthread_setspecific(__key, (void*)__p) != 0)
     {
         return -1;
     }

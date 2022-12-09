@@ -16,7 +16,7 @@
 #include "interrupt.h"
 
 #if defined(RT_USING_FINSH) && defined(MSH_USING_BUILT_IN_COMMANDS)
-    extern long list_thread(void);
+extern long list_thread(void);
 #endif
 
 static rt_err_t (*rt_exception_hook)(void *context) = RT_NULL;
@@ -90,14 +90,14 @@ void rt_hw_trap_undef(struct rt_hw_exp_stack *regs)
         {
             addr = regs->pc - 4;
         }
-        asm volatile("vmrs %0, fpexc" : "=r"(val)::"memory");
+        asm volatile ("vmrs %0, fpexc" : "=r"(val)::"memory");
 
         if (!(val & 0x40000000))
         {
             /* float ins */
             val = (1U << 30);
 
-            asm volatile("vmsr fpexc, %0"::"r"(val):"memory");
+            asm volatile ("vmsr fpexc, %0"::"r"(val):"memory");
             regs->pc = addr;
             return;
         }

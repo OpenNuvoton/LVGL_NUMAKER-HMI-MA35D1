@@ -31,6 +31,7 @@
  * 2021-12-27     Meco Man     remove .init_priority
  * 2022-01-07     Gabriel      Moving __on_rt_xxxxx_hook to thread.c
  * 2022-01-24     THEWON       let rt_thread_sleep return thread->error when using signal
+ * 2022-10-15     Bernard      add nested mutex feature
  */
 
 #include <rthw.h>
@@ -49,8 +50,8 @@
 
 #if defined(RT_USING_HOOK) && defined(RT_HOOK_USING_FUNC_PTR)
 static void (*rt_thread_suspend_hook)(rt_thread_t thread);
-static void (*rt_thread_resume_hook)(rt_thread_t thread);
-static void (*rt_thread_inited_hook)(rt_thread_t thread);
+static void (*rt_thread_resume_hook) (rt_thread_t thread);
+static void (*rt_thread_inited_hook) (rt_thread_t thread);
 
 /**
  * @brief   This function sets a hook function when the system suspend a thread.
@@ -187,9 +188,15 @@ static rt_err_t _thread_init(struct rt_thread *thread,
 
     /* priority init */
     RT_ASSERT(priority < RT_THREAD_PRIORITY_MAX);
+    thread->init_priority    = priority;
     thread->current_priority = priority;
 
     thread->number_mask = 0;
+
+#ifdef RT_USING_MUTEX
+    rt_list_init(&thread->taken_object_list);
+    thread->pending_object = RT_NULL;
+#endif
 
 #ifdef RT_USING_EVENT
     thread->event_set = 0;
@@ -420,6 +427,16 @@ rt_err_t rt_thread_detach(rt_thread_t thread)
     /* change stat */
     thread->stat = RT_THREAD_CLOSE;
 
+#ifdef RT_USING_MUTEX
+    if ((thread->pending_object) &&
+        (rt_object_get_type(thread->pending_object) == RT_Object_Class_Mutex))
+    {
+        struct rt_mutex *mutex = (struct rt_mutex*)thread->pending_object;
+        rt_mutex_drop_thread(mutex, thread);
+        thread->pending_object = RT_NULL;
+    }
+#endif
+
     /* insert to defunct thread list */
     rt_thread_defunct_enqueue(thread);
 
@@ -461,7 +478,7 @@ rt_thread_t rt_thread_create(const char *name,
     void *stack_start;
 
     thread = (struct rt_thread *)rt_object_allocate(RT_Object_Class_Thread,
-             name);
+                                                    name);
     if (thread == RT_NULL)
         return RT_NULL;
 
@@ -522,6 +539,16 @@ rt_err_t rt_thread_delete(rt_thread_t thread)
 
     /* change stat */
     thread->stat = RT_THREAD_CLOSE;
+
+#ifdef RT_USING_MUTEX
+    if ((thread->pending_object) &&
+        (rt_object_get_type(thread->pending_object) == RT_Object_Class_Mutex))
+    {
+        struct rt_mutex *mutex = (struct rt_mutex*)thread->pending_object;
+        rt_mutex_drop_thread(mutex, thread);
+        thread->pending_object = RT_NULL;
+    }
+#endif
 
     /* insert to defunct thread list */
     rt_thread_defunct_enqueue(thread);
@@ -737,93 +764,93 @@ rt_err_t rt_thread_control(rt_thread_t thread, int cmd, void *arg)
 
     switch (cmd)
     {
-    case RT_THREAD_CTRL_CHANGE_PRIORITY:
-    {
-        /* disable interrupt */
-        level = rt_hw_interrupt_disable();
-
-        /* for ready thread, change queue */
-        if ((thread->stat & RT_THREAD_STAT_MASK) == RT_THREAD_READY)
+        case RT_THREAD_CTRL_CHANGE_PRIORITY:
         {
-            /* remove thread from schedule queue first */
-            rt_schedule_remove_thread(thread);
+            /* disable interrupt */
+            level = rt_hw_interrupt_disable();
 
-            /* change thread priority */
-            thread->current_priority = *(rt_uint8_t *)arg;
+            /* for ready thread, change queue */
+            if ((thread->stat & RT_THREAD_STAT_MASK) == RT_THREAD_READY)
+            {
+                /* remove thread from schedule queue first */
+                rt_schedule_remove_thread(thread);
 
-            /* recalculate priority attribute */
-#if RT_THREAD_PRIORITY_MAX > 32
-            thread->number      = thread->current_priority >> 3;            /* 5bit */
-            thread->number_mask = 1 << thread->number;
-            thread->high_mask   = 1 << (thread->current_priority & 0x07);   /* 3bit */
-#else
-            thread->number_mask = 1 << thread->current_priority;
-#endif /* RT_THREAD_PRIORITY_MAX > 32 */
+                /* change thread priority */
+                thread->current_priority = *(rt_uint8_t *)arg;
 
-            /* insert thread to schedule queue again */
-            rt_schedule_insert_thread(thread);
-        }
-        else
-        {
-            thread->current_priority = *(rt_uint8_t *)arg;
+                /* recalculate priority attribute */
+    #if RT_THREAD_PRIORITY_MAX > 32
+                thread->number      = thread->current_priority >> 3;            /* 5bit */
+                thread->number_mask = 1 << thread->number;
+                thread->high_mask   = 1 << (thread->current_priority & 0x07);   /* 3bit */
+    #else
+                thread->number_mask = 1 << thread->current_priority;
+    #endif /* RT_THREAD_PRIORITY_MAX > 32 */
 
-            /* recalculate priority attribute */
-#if RT_THREAD_PRIORITY_MAX > 32
-            thread->number      = thread->current_priority >> 3;            /* 5bit */
-            thread->number_mask = 1 << thread->number;
-            thread->high_mask   = 1 << (thread->current_priority & 0x07);   /* 3bit */
-#else
-            thread->number_mask = 1 << thread->current_priority;
-#endif /* RT_THREAD_PRIORITY_MAX > 32 */
-        }
+                /* insert thread to schedule queue again */
+                rt_schedule_insert_thread(thread);
+            }
+            else
+            {
+                thread->current_priority = *(rt_uint8_t *)arg;
 
-        /* enable interrupt */
-        rt_hw_interrupt_enable(level);
-        break;
-    }
+                /* recalculate priority attribute */
+    #if RT_THREAD_PRIORITY_MAX > 32
+                thread->number      = thread->current_priority >> 3;            /* 5bit */
+                thread->number_mask = 1 << thread->number;
+                thread->high_mask   = 1 << (thread->current_priority & 0x07);   /* 3bit */
+    #else
+                thread->number_mask = 1 << thread->current_priority;
+    #endif /* RT_THREAD_PRIORITY_MAX > 32 */
+            }
 
-    case RT_THREAD_CTRL_STARTUP:
-    {
-        return rt_thread_startup(thread);
-    }
-
-    case RT_THREAD_CTRL_CLOSE:
-    {
-        rt_err_t rt_err;
-
-        if (rt_object_is_systemobject((rt_object_t)thread) == RT_TRUE)
-        {
-            rt_err = rt_thread_detach(thread);
-        }
-#ifdef RT_USING_HEAP
-        else
-        {
-            rt_err = rt_thread_delete(thread);
-        }
-#endif /* RT_USING_HEAP */
-        rt_schedule();
-        return rt_err;
-    }
-
-#ifdef RT_USING_SMP
-    case RT_THREAD_CTRL_BIND_CPU:
-    {
-        rt_uint8_t cpu;
-
-        if ((thread->stat & RT_THREAD_STAT_MASK) != RT_THREAD_INIT)
-        {
-            /* we only support bind cpu before started phase. */
-            return RT_ERROR;
+            /* enable interrupt */
+            rt_hw_interrupt_enable(level);
+            break;
         }
 
-        cpu = (rt_uint8_t)(rt_size_t)arg;
-        thread->bind_cpu = cpu > RT_CPUS_NR ? RT_CPUS_NR : cpu;
-        break;
-    }
-#endif /* RT_USING_SMP */
+        case RT_THREAD_CTRL_STARTUP:
+        {
+            return rt_thread_startup(thread);
+        }
 
-    default:
-        break;
+        case RT_THREAD_CTRL_CLOSE:
+        {
+            rt_err_t rt_err;
+
+            if (rt_object_is_systemobject((rt_object_t)thread) == RT_TRUE)
+            {
+                rt_err = rt_thread_detach(thread);
+            }
+    #ifdef RT_USING_HEAP
+            else
+            {
+                rt_err = rt_thread_delete(thread);
+            }
+    #endif /* RT_USING_HEAP */
+            rt_schedule();
+            return rt_err;
+        }
+
+    #ifdef RT_USING_SMP
+        case RT_THREAD_CTRL_BIND_CPU:
+        {
+            rt_uint8_t cpu;
+
+            if ((thread->stat & RT_THREAD_STAT_MASK) != RT_THREAD_INIT)
+            {
+                /* we only support bind cpu before started phase. */
+                return RT_ERROR;
+            }
+
+            cpu = (rt_uint8_t)(rt_size_t)arg;
+            thread->bind_cpu = cpu > RT_CPUS_NR? RT_CPUS_NR : cpu;
+            break;
+        }
+    #endif /* RT_USING_SMP */
+
+        default:
+            break;
     }
 
     return RT_EOK;

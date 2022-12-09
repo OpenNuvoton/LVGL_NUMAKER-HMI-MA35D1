@@ -36,15 +36,15 @@
 rt_list_t rt_thread_priority_table[RT_THREAD_PRIORITY_MAX];
 rt_uint32_t rt_thread_ready_priority_group;
 #if RT_THREAD_PRIORITY_MAX > 32
-    /* Maximum priority level, 256 */
-    rt_uint8_t rt_thread_ready_table[32];
+/* Maximum priority level, 256 */
+rt_uint8_t rt_thread_ready_table[32];
 #endif /* RT_THREAD_PRIORITY_MAX > 32 */
 
 #ifndef RT_USING_SMP
-    extern volatile rt_uint8_t rt_interrupt_nest;
-    static rt_int16_t rt_scheduler_lock_nest;
-    struct rt_thread *rt_current_thread = RT_NULL;
-    rt_uint8_t rt_current_priority;
+extern volatile rt_uint8_t rt_interrupt_nest;
+static rt_int16_t rt_scheduler_lock_nest;
+struct rt_thread *rt_current_thread = RT_NULL;
+rt_uint8_t rt_current_priority;
 #endif /* RT_USING_SMP */
 
 #ifndef __on_rt_scheduler_hook
@@ -99,9 +99,9 @@ static void _scheduler_stack_check(struct rt_thread *thread)
 #else
     if (*((rt_uint8_t *)thread->stack_addr) != '#' ||
 #endif /* ARCH_CPU_STACK_GROWS_UPWARD */
-            (rt_ubase_t)thread->sp <= (rt_ubase_t)thread->stack_addr ||
-            (rt_ubase_t)thread->sp >
-            (rt_ubase_t)thread->stack_addr + (rt_ubase_t)thread->stack_size)
+        (rt_ubase_t)thread->sp <= (rt_ubase_t)thread->stack_addr ||
+        (rt_ubase_t)thread->sp >
+        (rt_ubase_t)thread->stack_addr + (rt_ubase_t)thread->stack_size)
     {
         rt_base_t level;
 
@@ -130,11 +130,11 @@ static void _scheduler_stack_check(struct rt_thread *thread)
  * get the highest priority thread in ready queue
  */
 #ifdef RT_USING_SMP
-static struct rt_thread *_scheduler_get_highest_priority_thread(rt_ubase_t *highest_prio)
+static struct rt_thread* _scheduler_get_highest_priority_thread(rt_ubase_t *highest_prio)
 {
     struct rt_thread *highest_priority_thread;
     rt_ubase_t highest_ready_priority, local_highest_ready_priority;
-    struct rt_cpu *pcpu = rt_cpu_self();
+    struct rt_cpu* pcpu = rt_cpu_self();
 #if RT_THREAD_PRIORITY_MAX > 32
     rt_ubase_t number;
 
@@ -152,21 +152,21 @@ static struct rt_thread *_scheduler_get_highest_priority_thread(rt_ubase_t *high
     {
         *highest_prio = highest_ready_priority;
         highest_priority_thread = rt_list_entry(rt_thread_priority_table[highest_ready_priority].next,
-                                                struct rt_thread,
-                                                tlist);
+                                  struct rt_thread,
+                                  tlist);
     }
     else
     {
         *highest_prio = local_highest_ready_priority;
         highest_priority_thread = rt_list_entry(pcpu->priority_table[local_highest_ready_priority].next,
-                                                struct rt_thread,
-                                                tlist);
+                                  struct rt_thread,
+                                  tlist);
     }
 
     return highest_priority_thread;
 }
 #else
-static struct rt_thread *_scheduler_get_highest_priority_thread(rt_ubase_t *highest_prio)
+static struct rt_thread* _scheduler_get_highest_priority_thread(rt_ubase_t *highest_prio)
 {
     struct rt_thread *highest_priority_thread;
     rt_ubase_t highest_ready_priority;
@@ -182,8 +182,8 @@ static struct rt_thread *_scheduler_get_highest_priority_thread(rt_ubase_t *high
 
     /* get highest ready priority thread */
     highest_priority_thread = rt_list_entry(rt_thread_priority_table[highest_ready_priority].next,
-                                            struct rt_thread,
-                                            tlist);
+                              struct rt_thread,
+                              tlist);
 
     *highest_prio = highest_ready_priority;
 
@@ -370,12 +370,12 @@ void rt_schedule(void)
 
                 /* switch to new thread */
                 RT_DEBUG_LOG(RT_DEBUG_SCHEDULER,
-                             ("[%d]switch to priority#%d "
-                              "thread:%.*s(sp:0x%08x), "
-                              "from thread:%.*s(sp: 0x%08x)\n",
-                              pcpu->irq_nest, highest_ready_priority,
-                              RT_NAME_MAX, to_thread->name, to_thread->sp,
-                              RT_NAME_MAX, current_thread->name, current_thread->sp));
+                        ("[%d]switch to priority#%d "
+                         "thread:%.*s(sp:0x%08x), "
+                         "from thread:%.*s(sp: 0x%08x)\n",
+                         pcpu->irq_nest, highest_ready_priority,
+                         RT_NAME_MAX, to_thread->name, to_thread->sp,
+                         RT_NAME_MAX, current_thread->name, current_thread->sp));
 
 #ifdef RT_USING_OVERFLOW_CHECK
                 _scheduler_stack_check(to_thread);
@@ -384,7 +384,7 @@ void rt_schedule(void)
                 RT_OBJECT_HOOK_CALL(rt_scheduler_switch_hook, (current_thread));
 
                 rt_hw_context_switch((rt_ubase_t)&current_thread->sp,
-                                     (rt_ubase_t)&to_thread->sp, to_thread);
+                        (rt_ubase_t)&to_thread->sp, to_thread);
             }
         }
     }
@@ -477,12 +477,12 @@ void rt_schedule(void)
 
                 /* switch to new thread */
                 RT_DEBUG_LOG(RT_DEBUG_SCHEDULER,
-                             ("[%d]switch to priority#%d "
-                              "thread:%.*s(sp:0x%08x), "
-                              "from thread:%.*s(sp: 0x%08x)\n",
-                              rt_interrupt_nest, highest_ready_priority,
-                              RT_NAME_MAX, to_thread->name, to_thread->sp,
-                              RT_NAME_MAX, from_thread->name, from_thread->sp));
+                        ("[%d]switch to priority#%d "
+                         "thread:%.*s(sp:0x%08x), "
+                         "from thread:%.*s(sp: 0x%08x)\n",
+                         rt_interrupt_nest, highest_ready_priority,
+                         RT_NAME_MAX, to_thread->name, to_thread->sp,
+                         RT_NAME_MAX, from_thread->name, from_thread->sp));
 
 #ifdef RT_USING_OVERFLOW_CHECK
                 _scheduler_stack_check(to_thread);
@@ -495,7 +495,7 @@ void rt_schedule(void)
                     RT_OBJECT_HOOK_CALL(rt_scheduler_switch_hook, (from_thread));
 
                     rt_hw_context_switch((rt_ubase_t)&from_thread->sp,
-                                         (rt_ubase_t)&to_thread->sp);
+                            (rt_ubase_t)&to_thread->sp);
 
                     /* enable interrupt */
                     rt_hw_interrupt_enable(level);
@@ -526,7 +526,7 @@ void rt_schedule(void)
                     RT_DEBUG_LOG(RT_DEBUG_SCHEDULER, ("switch in interrupt\n"));
 
                     rt_hw_context_switch_interrupt((rt_ubase_t)&from_thread->sp,
-                                                   (rt_ubase_t)&to_thread->sp);
+                            (rt_ubase_t)&to_thread->sp);
                 }
             }
             else
@@ -555,7 +555,7 @@ void rt_scheduler_do_irq_switch(void *context)
 {
     int cpu_id;
     rt_base_t level;
-    struct rt_cpu *pcpu;
+    struct rt_cpu* pcpu;
     struct rt_thread *to_thread;
     struct rt_thread *current_thread;
 
@@ -633,7 +633,7 @@ void rt_scheduler_do_irq_switch(void *context)
                 RT_OBJECT_HOOK_CALL(rt_scheduler_switch_hook, (current_thread));
 
                 rt_hw_context_switch_interrupt(context, (rt_ubase_t)&current_thread->sp,
-                                               (rt_ubase_t)&to_thread->sp, to_thread);
+                        (rt_ubase_t)&to_thread->sp, to_thread);
             }
         }
     }

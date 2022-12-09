@@ -20,9 +20,9 @@
 #define RTLD_DEFAULT    ((void*)1)
 #define RTLD_NEXT       ((void*)2)
 
-void *dlopen(const char *filename, int flag);
+void *dlopen (const char *filename, int flag);
 const char *dlerror(void);
 void *dlsym(void *handle, const char *symbol);
-int dlclose(void *handle);
+int dlclose (void *handle);
 
 #endif

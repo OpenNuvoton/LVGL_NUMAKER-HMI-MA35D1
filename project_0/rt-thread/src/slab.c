@@ -339,7 +339,7 @@ rt_slab_t rt_slab_init(const char *name, void *begin_addr, rt_size_t size)
     limsize = end_align - begin_align;
     npages  = limsize / RT_MM_PAGE_SIZE;
     RT_DEBUG_LOG(RT_DEBUG_SLAB, ("heap[0x%x - 0x%x], size 0x%x, 0x%x pages\n",
-                                 begin_align, end_align, limsize, npages));
+                                begin_align, end_align, limsize, npages));
 
     rt_memset(slab, 0, sizeof(*slab));
     /* initialize slab memory object */
@@ -700,7 +700,7 @@ void *rt_slab_realloc(rt_slab_t m, void *ptr, rt_size_t size)
     else if (kup->type == PAGE_TYPE_SMALL)
     {
         z = (struct rt_slab_zone *)(((rt_ubase_t)ptr & ~RT_MM_PAGE_MASK) -
-                                    kup->size * RT_MM_PAGE_SIZE);
+                          kup->size * RT_MM_PAGE_SIZE);
         RT_ASSERT(z->z_magic == ZALLOC_SLAB_MAGIC);
 
         zoneindex(&size);
@@ -780,7 +780,7 @@ void rt_slab_free(rt_slab_t m, void *ptr)
 
     /* zone case. get out zone. */
     z = (struct rt_slab_zone *)(((rt_ubase_t)ptr & ~RT_MM_PAGE_MASK) -
-                                kup->size * RT_MM_PAGE_SIZE);
+                      kup->size * RT_MM_PAGE_SIZE);
     RT_ASSERT(z->z_magic == ZALLOC_SLAB_MAGIC);
 
     chunk          = (struct rt_slab_chunk *)ptr;
@@ -806,7 +806,7 @@ void rt_slab_free(rt_slab_t m, void *ptr)
      * with kernel_map here.  Hysteresis will be performed at malloc() time.
      */
     if (z->z_nfree == z->z_nmax &&
-            (z->z_next || slab->zone_array[z->z_zoneindex] != z))
+        (z->z_next || slab->zone_array[z->z_zoneindex] != z))
     {
         struct rt_slab_zone **pz;
 

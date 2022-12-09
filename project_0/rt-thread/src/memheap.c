@@ -615,7 +615,7 @@ void rt_memheap_free(void *ptr)
 
     /* check magic */
     if (header_ptr->magic != (RT_MEMHEAP_MAGIC | RT_MEMHEAP_USED) ||
-            (header_ptr->next->magic & RT_MEMHEAP_MASK) != RT_MEMHEAP_MAGIC)
+       (header_ptr->next->magic & RT_MEMHEAP_MASK) != RT_MEMHEAP_MAGIC)
     {
         RT_DEBUG_LOG(RT_DEBUG_MEMHEAP, ("bad magic:0x%08x @ memheap\n",
                                         header_ptr->magic));
@@ -690,9 +690,9 @@ void rt_memheap_free(void *ptr)
     if (insert_header)
     {
         struct rt_memheap_item *n = heap->free_list->next_free;;
-#if defined(RT_MEMHEAP_BSET_MODE)
+#if defined(RT_MEMHEAP_BEST_MODE)
         rt_size_t blk_size = MEMITEM_SIZE(header_ptr);
-        for (; n != heap->free_list; n = n->next_free)
+        for (;n != heap->free_list; n = n->next_free)
         {
             rt_size_t m = MEMITEM_SIZE(n);
             if (blk_size <= m)
@@ -793,8 +793,8 @@ void *_memheap_alloc(struct rt_memheap *heap, rt_size_t size)
         information = rt_object_get_information(RT_Object_Class_MemHeap);
         RT_ASSERT(information != RT_NULL);
         for (node  = information->object_list.next;
-                node != &(information->object_list);
-                node  = node->next)
+             node != &(information->object_list);
+             node  = node->next)
         {
             object = rt_list_entry(node, struct rt_object, list);
             _heap   = (struct rt_memheap *)object;
@@ -892,7 +892,7 @@ int memheapcheck(int argc, char *argv[])
         {
             /* check magic */
             if (!((item->magic & (RT_MEMHEAP_MAGIC | RT_MEMHEAP_FREED)) == (RT_MEMHEAP_MAGIC | RT_MEMHEAP_FREED) ||
-                    (item->magic & (RT_MEMHEAP_MAGIC | RT_MEMHEAP_USED))  == (RT_MEMHEAP_MAGIC | RT_MEMHEAP_USED)))
+                 (item->magic & (RT_MEMHEAP_MAGIC | RT_MEMHEAP_USED))  == (RT_MEMHEAP_MAGIC | RT_MEMHEAP_USED)))
             {
                 has_bad = RT_TRUE;
                 break;
@@ -905,9 +905,9 @@ int memheapcheck(int argc, char *argv[])
             }
             /* check next and prev */
             if (!((rt_ubase_t)item->next <= (rt_ubase_t)((rt_ubase_t)heap->start_addr + heap->pool_size) &&
-                    (rt_ubase_t)item->prev >= (rt_ubase_t)heap->start_addr) &&
-                    (rt_ubase_t)item->next == RT_ALIGN((rt_ubase_t)item->next, RT_ALIGN_SIZE) &&
-                    (rt_ubase_t)item->prev == RT_ALIGN((rt_ubase_t)item->prev, RT_ALIGN_SIZE))
+                  (rt_ubase_t)item->prev >= (rt_ubase_t)heap->start_addr) &&
+                  (rt_ubase_t)item->next == RT_ALIGN((rt_ubase_t)item->next, RT_ALIGN_SIZE) &&
+                  (rt_ubase_t)item->prev == RT_ALIGN((rt_ubase_t)item->prev, RT_ALIGN_SIZE))
             {
                 has_bad = RT_TRUE;
                 break;
@@ -961,13 +961,13 @@ int memheaptrace(int argc, char *argv[])
         rt_kprintf("\n--memory used information --\n");
         /* memheap item */
         for (header_ptr = mh->block_list;
-                header_ptr->next != mh->block_list;
-                header_ptr = header_ptr->next)
+             header_ptr->next != mh->block_list;
+             header_ptr = header_ptr->next)
         {
             if ((header_ptr->magic & RT_MEMHEAP_MASK) != RT_MEMHEAP_MAGIC)
             {
                 rt_kprintf("[0x%p - incorrect magic: 0x%08x\n",
-                           header_ptr, header_ptr->magic);
+                    header_ptr, header_ptr->magic);
                 break;
             }
             /* get current memory block size */
@@ -986,18 +986,18 @@ int memheaptrace(int argc, char *argv[])
                 rt_kprintf("%4dM", block_size / (1024 * 1024));
             /* dump thread name */
             rt_kprintf("] %c%c%c%c\n",
-                       header_ptr->owner_thread_name[0],
-                       header_ptr->owner_thread_name[1],
-                       header_ptr->owner_thread_name[2],
-                       header_ptr->owner_thread_name[3]);
+                header_ptr->owner_thread_name[0],
+                header_ptr->owner_thread_name[1],
+                header_ptr->owner_thread_name[2],
+                header_ptr->owner_thread_name[3]);
         }
     }
     return 0;
 }
 
 #ifdef RT_USING_FINSH
-    #include <finsh.h>
-    MSH_CMD_EXPORT(memheaptrace, dump memory trace for memheap);
+#include <finsh.h>
+MSH_CMD_EXPORT(memheaptrace, dump memory trace for memheap);
 #endif /* RT_USING_FINSH */
 #endif /* RT_USING_MEMTRACE */
 #endif /* RT_USING_MEMHEAP */

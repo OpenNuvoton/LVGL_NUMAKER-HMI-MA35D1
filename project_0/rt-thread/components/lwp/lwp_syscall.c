@@ -17,10 +17,10 @@
 #include <sys/select.h>
 
 #if (defined(RT_USING_SAL) && defined(SAL_USING_POSIX))
-    #include <sys/socket.h>
-    #define SYSCALL_NET(f) ((void*)(f))
+#include <sys/socket.h>
+#define SYSCALL_NET(f) ((void*)(f))
 #else
-    #define SYSCALL_NET(f) ((void*)sys_notimpl)
+#define SYSCALL_NET(f) ((void*)sys_notimpl)
 #endif
 
 #define DBG_TAG    "LWP_CALL"
@@ -86,7 +86,7 @@ int sys_close(int fd)
 }
 
 /* syscall: "ioctl" ret: "int" args: "int" "u_long" "..." */
-int sys_ioctl(int fd, unsigned long cmd, void *data)
+int sys_ioctl(int fd, unsigned long cmd, void* data)
 {
     return ioctl(fd, cmd, data);
 }
@@ -98,15 +98,15 @@ int sys_nanosleep(const struct timespec *rqtp, struct timespec *rmtp)
 
     dbg_log(DBG_LOG, "sys_nanosleep\n");
 
-    tick = rqtp->tv_sec * RT_TICK_PER_SECOND + (rqtp->tv_nsec * RT_TICK_PER_SECOND) / 1000000000;
+    tick = rqtp->tv_sec * RT_TICK_PER_SECOND + (rqtp->tv_nsec * RT_TICK_PER_SECOND)/ 1000000000;
     rt_thread_delay(tick);
 
     if (rmtp)
     {
         tick = rt_tick_get() - tick;
         /* get the passed time */
-        rmtp->tv_sec = tick / RT_TICK_PER_SECOND;
-        rmtp->tv_nsec = (tick % RT_TICK_PER_SECOND) * (1000000000 / RT_TICK_PER_SECOND);
+        rmtp->tv_sec = tick/RT_TICK_PER_SECOND;
+        rmtp->tv_nsec = (tick%RT_TICK_PER_SECOND) * (1000000000/RT_TICK_PER_SECOND);
     }
 
     return 0;
@@ -184,7 +184,7 @@ int sys_msgrcv(int msqid, void *msgp, size_t msgsz, long msgtyp, int msgflg)
 }
 
 /* syscall: "sys_log" ret: "int" args: "const char*" "size" */
-int sys_log(const char *log, int size)
+int sys_log(const char* log, int size)
 {
     rt_device_t console = rt_console_get_device();
 
@@ -218,7 +218,7 @@ int sys_notimpl(void)
     return -ENOSYS;
 }
 
-const static void *func_table[] =
+const static void* func_table[] =
 {
     (void *)sys_exit,           // 0x01
     (void *)sys_read,           // 0x02
@@ -262,7 +262,7 @@ const static void *func_table[] =
 
 const void *lwp_get_sys_api(rt_uint32_t number)
 {
-    const void *func = (const void *)sys_notimpl;
+    const void *func = (const void*)sys_notimpl;
 
     if (number == 0xff)
     {
@@ -271,7 +271,7 @@ const void *lwp_get_sys_api(rt_uint32_t number)
     else
     {
         number -= 1;
-        if (number < sizeof(func_table) / sizeof(func_table[0]))
+        if (number < sizeof(func_table)/sizeof(func_table[0]))
         {
             func = func_table[number];
         }

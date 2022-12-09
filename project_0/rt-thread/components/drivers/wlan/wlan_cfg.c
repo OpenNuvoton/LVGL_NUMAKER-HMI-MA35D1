@@ -13,9 +13,9 @@
 
 #define DBG_TAG "WLAN.cfg"
 #ifdef RT_WLAN_CFG_DEBUG
-    #define DBG_LVL DBG_LOG
+#define DBG_LVL DBG_LOG
 #else
-    #define DBG_LVL DBG_INFO
+#define DBG_LVL DBG_INFO
 #endif /* RT_WLAN_CFG_DEBUG */
 #include <rtdbg.h>
 
@@ -25,7 +25,7 @@
 #define WLAN_CFG_UNLOCK()    (rt_mutex_release(&cfg_mutex))
 
 #if RT_WLAN_CFG_INFO_MAX < 1
-    #error "The minimum configuration is 1"
+#error "The minimum configuration is 1"
 #endif
 
 struct cfg_save_info_head

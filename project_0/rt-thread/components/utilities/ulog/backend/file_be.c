@@ -19,7 +19,7 @@
 #ifdef ULOG_BACKEND_USING_FILE
 
 #if defined(ULOG_ASYNC_OUTPUT_THREAD_STACK) && (ULOG_ASYNC_OUTPUT_THREAD_STACK < 2048)
-    #error "The value of ULOG_ASYNC_OUTPUT_THREAD_STACK must be greater than 2048."
+#error "The value of ULOG_ASYNC_OUTPUT_THREAD_STACK must be greater than 2048."
 #endif
 
 /* rotate the log file xxx_n-1.log => xxx_n.log, and xxx.log => xxx_0.log */
@@ -52,7 +52,7 @@ static rt_bool_t ulog_file_rotate(struct ulog_file_be *be)
             unlink(new_path);
         }
         /* change the new log file to old file name */
-        if ((file_fd = open(old_path, O_RDONLY)) >= 0)
+        if ((file_fd = open(old_path , O_RDONLY)) >= 0)
         {
             close(file_fd);
             err = dfs_file_rename(old_path, new_path);
@@ -123,7 +123,7 @@ static void ulog_file_backend_flush_with_buf(struct ulog_backend *backend)
 }
 
 static void ulog_file_backend_output_with_buf(struct ulog_backend *backend, rt_uint32_t level,
-        const char *tag, rt_bool_t is_raw, const char *log, rt_size_t len)
+            const char *tag, rt_bool_t is_raw, const char *log, rt_size_t len)
 {
     struct ulog_file_be *be = (struct ulog_file_be *)backend;
     rt_size_t copy_len = 0, free_len = 0;
@@ -165,7 +165,7 @@ static void ulog_file_backend_output_with_buf(struct ulog_backend *backend, rt_u
 
 /* initialize the ulog file backend */
 int ulog_file_backend_init(struct ulog_file_be *be, const char *name, const char *dir_path, rt_size_t max_num,
-                           rt_size_t max_size, rt_size_t buf_size)
+        rt_size_t max_size, rt_size_t buf_size)
 {
     be->file_buf = rt_calloc(1, buf_size);
     if (!be->file_buf)

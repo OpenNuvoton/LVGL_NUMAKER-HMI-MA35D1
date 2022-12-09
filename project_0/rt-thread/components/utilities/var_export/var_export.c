@@ -16,7 +16,7 @@ static rt_size_t ve_exporter_num = 0;
 
 /* for IAR compiler */
 #if defined(__ICCARM__) || defined(__ICCRX__)
-    #pragma section="VarExpTab"
+#pragma section="VarExpTab"
 #endif
 
 /* for ARM C and IAR Compiler */
@@ -88,8 +88,7 @@ int var_export_init(void)
     /* past the three members in first ptr_begin */
     ptr_begin += (sizeof(struct ve_exporter) / sizeof(unsigned int));
     while (*ptr_begin == 0) ptr_begin++;
-    do ptr_end--;
-    while (*ptr_end == 0);
+    do ptr_end--; while (*ptr_end == 0);
 
     /* Find var objects in custom segments to solve the problem of holes in objects in different files */
     ve_exporter_num = ve_init_find_obj(ptr_begin, ptr_end, ve_exporter_tab);

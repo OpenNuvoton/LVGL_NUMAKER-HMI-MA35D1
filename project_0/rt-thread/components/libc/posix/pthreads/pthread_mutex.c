@@ -99,7 +99,7 @@ int pthread_mutexattr_getpshared(pthread_mutexattr_t *attr, int *pshared)
         return EINVAL;
 
     *pshared = (*attr & MUTEXATTR_SHARED_MASK) ? PTHREAD_PROCESS_SHARED
-               : PTHREAD_PROCESS_PRIVATE;
+                                               : PTHREAD_PROCESS_PRIVATE;
     return 0;
 }
 RTM_EXPORT(pthread_mutexattr_getpshared);
@@ -166,7 +166,7 @@ int pthread_mutex_lock(pthread_mutex_t *mutex)
     mtype = mutex->attr & MUTEXATTR_TYPE_MASK;
     rt_enter_critical();
     if (mutex->lock.owner == rt_thread_self() &&
-            mtype != PTHREAD_MUTEX_RECURSIVE)
+        mtype != PTHREAD_MUTEX_RECURSIVE)
     {
         rt_exit_critical();
 
@@ -232,7 +232,7 @@ int pthread_mutex_trylock(pthread_mutex_t *mutex)
     mtype = mutex->attr & MUTEXATTR_TYPE_MASK;
     rt_enter_critical();
     if (mutex->lock.owner == rt_thread_self() &&
-            mtype != PTHREAD_MUTEX_RECURSIVE)
+        mtype != PTHREAD_MUTEX_RECURSIVE)
     {
         rt_exit_critical();
 
@@ -280,7 +280,7 @@ RTM_EXPORT(pthread_mutex_getprioceiling);
 int pthread_mutex_setprioceiling(pthread_mutex_t *mutex, int prioceiling, int *old_ceiling)
 {
     *old_ceiling = pthread_mutexattr_getprioceiling(&mutex->attr, old_ceiling);
-    if (*old_ceiling != 0)
+    if(*old_ceiling != 0)
     {
         return EINVAL;
     }

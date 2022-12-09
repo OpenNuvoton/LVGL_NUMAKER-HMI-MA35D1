@@ -53,9 +53,9 @@ static rt_err_t _dac_control(rt_device_t dev, int cmd, void *args)
     else if (cmd == RT_DAC_CMD_GET_RESOLUTION && dac->ops->get_resolution)
     {
         rt_uint8_t resolution = dac->ops->get_resolution(dac);
-        if (resolution != 0)
+        if(resolution != 0)
         {
-            *((rt_uint8_t *)args) = resolution;
+            *((rt_uint8_t*)args) = resolution;
             LOG_D("resolution: %d bits", resolution);
             result = RT_EOK;
         }

@@ -51,8 +51,8 @@ extern "C" {
 #define MCL_FUTURE     2
 #define MCL_ONFAULT    4
 
-void *mmap(void *start, size_t len, int prot, int flags, int fd, off_t off);
-int munmap(void *start, size_t len);
+void *mmap (void *start, size_t len, int prot, int flags, int fd, off_t off);
+int munmap (void *start, size_t len);
 
 #ifdef __cplusplus
 }

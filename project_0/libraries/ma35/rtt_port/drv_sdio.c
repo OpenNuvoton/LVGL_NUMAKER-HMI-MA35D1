@@ -766,7 +766,7 @@ void nu_sdh_host_initial(nu_sdh_t sdh)
     nu_sdh_irq_update(host, 1);
 
     /* ready to change */
-    mmcsd_change(host);
+    //mmcsd_change(host);
 }
 
 void nu_sd_attach(void)

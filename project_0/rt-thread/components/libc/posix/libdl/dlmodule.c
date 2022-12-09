@@ -15,11 +15,11 @@
 #include "dlelf.h"
 
 #ifdef RT_USING_POSIX_FS
-    #include <stdio.h>
-    #include <fcntl.h>
-    #include <unistd.h>
-    #include <sys/stat.h>
-    #include <sys/statfs.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/statfs.h>
 #endif
 
 #define DBG_TAG    "DLMD"
@@ -129,7 +129,7 @@ static void _dlmodule_exit(void)
 
                 /* stop timer and suspend thread*/
                 if ((thread->stat & RT_THREAD_STAT_MASK) != RT_THREAD_CLOSE &&
-                        (thread->stat & RT_THREAD_STAT_MASK) != RT_THREAD_INIT)
+                    (thread->stat & RT_THREAD_STAT_MASK) != RT_THREAD_INIT)
                 {
                     rt_timer_stop(&(thread->thread_timer));
                     rt_thread_suspend(thread);
@@ -142,12 +142,12 @@ static void _dlmodule_exit(void)
     return;
 }
 
-static void _dlmodule_thread_entry(void *parameter)
+static void _dlmodule_thread_entry(void* parameter)
 {
     int argc = 0;
     char *argv[RT_MODULE_ARG_MAX];
 
-    struct rt_dlmodule *module = (struct rt_dlmodule *)parameter;
+    struct rt_dlmodule *module = (struct rt_dlmodule*)parameter;
 
     if (module == RT_NULL || module->cmd_line == RT_NULL)
         /* malloc for module_cmd_line failed. */
@@ -164,8 +164,8 @@ static void _dlmodule_thread_entry(void *parameter)
     module->stat = RT_DLMODULE_STAT_RUNNING;
 
     LOG_D("run main entry: 0x%p with %s",
-          module->entry_addr,
-          module->cmd_line);
+        module->entry_addr,
+        module->cmd_line);
 
     if (module->entry_addr)
         module->entry_addr(argc, argv);
@@ -180,7 +180,7 @@ struct rt_dlmodule *dlmodule_create(void)
 {
     struct rt_dlmodule *module = RT_NULL;
 
-    module = (struct rt_dlmodule *) rt_object_allocate(RT_Object_Class_Module, "module");
+    module = (struct rt_dlmodule*) rt_object_allocate(RT_Object_Class_Module, "module");
     if (module)
     {
         module->stat = RT_DLMODULE_STAT_INIT;
@@ -206,7 +206,7 @@ void dlmodule_destroy_subthread(struct rt_dlmodule *module, rt_thread_t thread)
     rt_list_remove(&(thread->tlist));
 
     if ((thread->stat & RT_THREAD_STAT_MASK) != RT_THREAD_CLOSE &&
-            (thread->thread_timer.parent.type == (RT_Object_Class_Static | RT_Object_Class_Timer)))
+        (thread->thread_timer.parent.type == (RT_Object_Class_Static | RT_Object_Class_Timer)))
     {
         /* release thread timer */
         rt_timer_detach(&(thread->thread_timer));
@@ -241,7 +241,7 @@ void dlmodule_destroy_subthread(struct rt_dlmodule *module, rt_thread_t thread)
 #endif
 }
 
-rt_err_t dlmodule_destroy(struct rt_dlmodule *module)
+rt_err_t dlmodule_destroy(struct rt_dlmodule* module)
 {
     int i;
 
@@ -271,7 +271,7 @@ rt_err_t dlmodule_destroy(struct rt_dlmodule *module)
         struct rt_list_node *node = RT_NULL;
 
         /* detach/delete all threads in this module */
-        for (node = module->object_list.next; node != &(module->object_list);)
+        for (node = module->object_list.next; node != &(module->object_list); )
         {
             int object_type;
 
@@ -315,12 +315,12 @@ rt_err_t dlmodule_destroy(struct rt_dlmodule *module)
 #endif
 #ifdef RT_USING_MEMHEAP
                 case RT_Object_Class_MemHeap:
-                    rt_memheap_detach((struct rt_memheap *)object);
+                    rt_memheap_detach((struct rt_memheap*)object);
                     break;
 #endif
 #ifdef RT_USING_MEMPOOL
                 case RT_Object_Class_MemPool:
-                    rt_mp_detach((struct rt_mempool *)object);
+                    rt_mp_detach((struct rt_mempool*)object);
                     break;
 #endif
                 case RT_Object_Class_Timer:
@@ -364,11 +364,11 @@ rt_err_t dlmodule_destroy(struct rt_dlmodule *module)
                     break;
 #endif
 #ifdef RT_USING_MEMHEAP
-                    /* no delete operation */
+                /* no delete operation */
 #endif
 #ifdef RT_USING_MEMPOOL
                 case RT_Object_Class_MemPool:
-                    rt_mp_delete((struct rt_mempool *)object);
+                    rt_mp_delete((struct rt_mempool*)object);
                     break;
 #endif
                 case RT_Object_Class_Timer:
@@ -409,7 +409,7 @@ struct rt_dlmodule *dlmodule_self(void)
     tid = rt_thread_self();
     if (tid)
     {
-        ret = (struct rt_dlmodule *) tid->module_id;
+        ret = (struct rt_dlmodule*) tid->module_id;
     }
 
     return ret;
@@ -423,7 +423,7 @@ struct rt_dlmodule *rt_module_self(void)
     return dlmodule_self();
 }
 
-struct rt_dlmodule *dlmodule_load(const char *filename)
+struct rt_dlmodule* dlmodule_load(const char* filename)
 {
 #ifdef RT_USING_POSIX_FS
     int fd = -1, length = 0;
@@ -441,7 +441,7 @@ struct rt_dlmodule *dlmodule_load(const char *filename)
 
         if (length == 0) goto __exit;
 
-        module_ptr = (uint8_t *) rt_malloc(length);
+        module_ptr = (uint8_t*) rt_malloc (length);
         if (!module_ptr) goto __exit;
 
         if (read(fd, module_ptr, length) != length)
@@ -461,14 +461,14 @@ struct rt_dlmodule *dlmodule_load(const char *filename)
 
     /* check ELF header */
     if (rt_memcmp(elf_module->e_ident, RTMMAG, SELFMAG) != 0 &&
-            rt_memcmp(elf_module->e_ident, ELFMAG, SELFMAG) != 0)
+        rt_memcmp(elf_module->e_ident, ELFMAG, SELFMAG) != 0)
     {
         rt_kprintf("Module: magic error\n");
         goto __exit;
     }
 
     /* check ELF class */
-    if ((elf_module->e_ident[EI_CLASS] != ELFCLASS32) && (elf_module->e_ident[EI_CLASS] != ELFCLASS64))
+    if ((elf_module->e_ident[EI_CLASS] != ELFCLASS32)&&(elf_module->e_ident[EI_CLASS] != ELFCLASS64))
     {
         rt_kprintf("Module: ELF class error\n");
         goto __exit;
@@ -533,7 +533,7 @@ __exit:
     return RT_NULL;
 }
 
-struct rt_dlmodule *dlmodule_exec(const char *pgname, const char *cmd, int cmd_size)
+struct rt_dlmodule* dlmodule_exec(const char* pgname, const char* cmd, int cmd_size)
 {
     struct rt_dlmodule *module = RT_NULL;
 
@@ -551,8 +551,8 @@ struct rt_dlmodule *dlmodule_exec(const char *pgname, const char *cmd, int cmd_s
             if (module->priority > RT_THREAD_PRIORITY_MAX) module->priority = RT_THREAD_PRIORITY_MAX - 1;
             if (module->stack_size < 2048 || module->stack_size > (1024 * 32)) module->stack_size = 2048;
 
-            tid = rt_thread_create(module->parent.name, _dlmodule_thread_entry, (void *)module,
-                                   module->stack_size, module->priority, 10);
+            tid = rt_thread_create(module->parent.name, _dlmodule_thread_entry, (void*)module,
+                module->stack_size, module->priority, 10);
             if (tid)
             {
                 tid->module_id = module;
@@ -573,7 +573,7 @@ struct rt_dlmodule *dlmodule_exec(const char *pgname, const char *cmd, int cmd_s
 }
 
 #if defined(RT_USING_CUSTOM_DLMODULE)
-struct rt_dlmodule *dlmodule_load_custom(const char *filename, struct rt_dlmodule_ops *ops)
+struct rt_dlmodule* dlmodule_load_custom(const char* filename, struct rt_dlmodule_ops* ops)
 {
 #ifdef RT_USING_POSIX_FS
     int fd = -1, length = 0;
@@ -599,7 +599,7 @@ struct rt_dlmodule *dlmodule_load_custom(const char *filename, struct rt_dlmodul
 
             if (length == 0) goto __exit;
 
-            module_ptr = (uint8_t *) rt_malloc(length);
+            module_ptr = (uint8_t*) rt_malloc (length);
             if (!module_ptr) goto __exit;
 
             if (read(fd, module_ptr, length) != length)
@@ -620,7 +620,7 @@ struct rt_dlmodule *dlmodule_load_custom(const char *filename, struct rt_dlmodul
 
     /* check ELF header */
     if (rt_memcmp(elf_module->e_ident, RTMMAG, SELFMAG) != 0 &&
-            rt_memcmp(elf_module->e_ident, ELFMAG, SELFMAG) != 0)
+        rt_memcmp(elf_module->e_ident, ELFMAG, SELFMAG) != 0)
     {
         rt_kprintf("Module: magic error\n");
         goto __exit;
@@ -710,7 +710,7 @@ __exit:
     return RT_NULL;
 }
 
-struct rt_dlmodule *dlmodule_exec_custom(const char *pgname, const char *cmd, int cmd_size, struct rt_dlmodule_ops *ops)
+struct rt_dlmodule* dlmodule_exec_custom(const char* pgname, const char* cmd, int cmd_size, struct rt_dlmodule_ops* ops)
 {
     struct rt_dlmodule *module = RT_NULL;
 
@@ -728,8 +728,8 @@ struct rt_dlmodule *dlmodule_exec_custom(const char *pgname, const char *cmd, in
             if (module->priority > RT_THREAD_PRIORITY_MAX) module->priority = RT_THREAD_PRIORITY_MAX - 1;
             if (module->stack_size < 2048 || module->stack_size > (1024 * 32)) module->stack_size = 2048;
 
-            tid = rt_thread_create(module->parent.name, _dlmodule_thread_entry, (void *)module,
-                                   module->stack_size, module->priority, 10);
+            tid = rt_thread_create(module->parent.name, _dlmodule_thread_entry, (void*)module,
+                module->stack_size, module->priority, 10);
             if (tid)
             {
                 tid->module_id = module;
@@ -844,7 +844,7 @@ struct rt_dlmodule *dlmodule_find(const char *name)
     object = rt_object_find(name, RT_Object_Class_Module);
     if (object)
     {
-        ret = (struct rt_dlmodule *) object;
+        ret = (struct rt_dlmodule*) object;
     }
 
     return ret;
@@ -860,8 +860,8 @@ int list_symbols(void)
     struct rt_module_symtab *index;
 
     for (index = _rt_module_symtab_begin;
-            index != _rt_module_symtab_end;
-            index ++)
+         index != _rt_module_symtab_end;
+         index ++)
     {
         rt_kprintf("%s => 0x%08x\n", index->name, index->addr);
     }

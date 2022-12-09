@@ -13,8 +13,7 @@
 #include <stdint.h>
 #include <rtthread.h>
 
-namespace rtthread
-{
+namespace rtthread {
 
 /** The Semaphore class is used to manage and protect access to a set of shared resources. */
 class Semaphore

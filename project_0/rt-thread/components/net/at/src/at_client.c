@@ -502,17 +502,17 @@ rt_size_t at_client_obj_recv(at_client_t client, char *buf, rt_size_t size, rt_i
         rt_sem_control(client->rx_notice, RT_IPC_CMD_RESET, RT_NULL);
 
         read_len = rt_device_read(client->device, 0, buf + len, size);
-        if (read_len > 0)
+        if(read_len > 0)
         {
             len += read_len;
             size -= read_len;
-            if (size == 0)
+            if(size == 0)
                 break;
 
             continue;
         }
 
-        if (rt_sem_take(client->rx_notice, rt_tick_from_millisecond(timeout)) != RT_EOK)
+        if(rt_sem_take(client->rx_notice, rt_tick_from_millisecond(timeout)) != RT_EOK)
             break;
     }
 
@@ -580,7 +580,7 @@ int at_obj_set_urc_table(at_client_t client, const struct at_urc *urc_table, rt_
         struct at_urc_table *new_urc_table = RT_NULL;
 
         /* realloc urc table space */
-        new_urc_table = (struct at_urc_table *) rt_realloc(client->urc_table, client->urc_table_size * sizeof(struct at_urc_table) + sizeof(struct at_urc_table));
+        new_urc_table = (struct at_urc_table *) rt_realloc(client->urc_table,client->urc_table_size * sizeof(struct at_urc_table) + sizeof(struct at_urc_table));
         if (new_urc_table == RT_NULL)
         {
             return -RT_ENOMEM;
@@ -724,7 +724,7 @@ static void client_parser(at_client_t client)
 {
     const struct at_urc *urc;
 
-    while (1)
+    while(1)
     {
         if (at_recv_readline(client) > 0)
         {
@@ -765,13 +765,13 @@ static void client_parser(at_client_t client)
                     client->resp_status = AT_RESP_OK;
                 }
                 else if (rt_memcmp(client->recv_line_buf, AT_RESP_END_OK, rt_strlen(AT_RESP_END_OK)) == 0
-                         && resp->line_num == 0)
+                        && resp->line_num == 0)
                 {
                     /* get the end data by response result, return response state END_OK. */
                     client->resp_status = AT_RESP_OK;
                 }
                 else if (rt_strstr(client->recv_line_buf, AT_RESP_END_ERROR)
-                         || (rt_memcmp(client->recv_line_buf, AT_RESP_END_FAIL, rt_strlen(AT_RESP_END_FAIL)) == 0))
+                        || (rt_memcmp(client->recv_line_buf, AT_RESP_END_FAIL, rt_strlen(AT_RESP_END_FAIL)) == 0))
                 {
                     client->resp_status = AT_RESP_ERROR;
                 }
@@ -866,11 +866,11 @@ static int at_client_para_init(at_client_t client)
 
     rt_snprintf(name, RT_NAME_MAX, "%s%d", AT_CLIENT_THREAD_NAME, at_client_num);
     client->parser = rt_thread_create(name,
-                                      (void (*)(void *parameter))client_parser,
-                                      client,
-                                      1024 + 512,
-                                      RT_THREAD_PRIORITY_MAX / 3 - 1,
-                                      5);
+                                     (void (*)(void *parameter))client_parser,
+                                     client,
+                                     1024 + 512,
+                                     RT_THREAD_PRIORITY_MAX / 3 - 1,
+                                     5);
     if (client->parser == RT_NULL)
     {
         result = -RT_ENOMEM;

@@ -50,7 +50,7 @@ struct rt_mtd_nand_device
 
     void *priv;
 };
-typedef struct rt_mtd_nand_device *rt_mtd_nand_t;
+typedef struct rt_mtd_nand_device* rt_mtd_nand_t;
 
 struct rt_mtd_nand_driver_ops
 {

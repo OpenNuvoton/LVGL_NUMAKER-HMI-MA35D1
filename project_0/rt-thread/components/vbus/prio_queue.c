@@ -13,8 +13,7 @@
 
 #include "prio_queue.h"
 
-struct rt_prio_queue_item
-{
+struct rt_prio_queue_item {
     struct rt_prio_queue_item *next;
     /* data follows */
 };
@@ -36,7 +35,7 @@ static void _do_push(struct rt_prio_queue *que,
     que->tail[prio] = item;
 }
 
-static struct rt_prio_queue_item *_do_pop(struct rt_prio_queue *que)
+static struct rt_prio_queue_item* _do_pop(struct rt_prio_queue *que)
 {
     int ffs;
     struct rt_prio_queue_item *item;
@@ -103,16 +102,16 @@ void rt_prio_queue_detach(struct rt_prio_queue *que)
 }
 
 #ifdef RT_USING_HEAP
-struct rt_prio_queue *rt_prio_queue_create(const char *name,
-        rt_size_t item_nr,
-        rt_size_t item_sz)
+struct rt_prio_queue* rt_prio_queue_create(const char *name,
+                                           rt_size_t item_nr,
+                                           rt_size_t item_sz)
 {
     struct rt_prio_queue *que;
     rt_size_t bufsz;
 
     bufsz = item_nr * (sizeof(struct rt_prio_queue_item)
                        + item_sz
-                       + sizeof(void *));
+                       + sizeof(void*));
 
     RT_ASSERT(item_nr);
 
@@ -120,7 +119,7 @@ struct rt_prio_queue *rt_prio_queue_create(const char *name,
     if (!que)
         return RT_NULL;
 
-    rt_prio_queue_init(que, name, que + 1, bufsz, item_sz);
+    rt_prio_queue_init(que, name, que+1, bufsz, item_sz);
 
     return que;
 }
@@ -149,7 +148,7 @@ rt_err_t rt_prio_queue_push(struct rt_prio_queue *que,
     if (item == RT_NULL)
         return -RT_ENOMEM;
 
-    rt_memcpy(item + 1, data, que->item_sz);
+    rt_memcpy(item+1, data, que->item_sz);
     item->next = RT_NULL;
 
     level = rt_hw_interrupt_disable();
@@ -191,8 +190,8 @@ rt_err_t rt_prio_queue_pop(struct rt_prio_queue *que,
 
     level = rt_hw_interrupt_disable();
     for (item = _do_pop(que);
-            item == RT_NULL;
-            item = _do_pop(que))
+         item == RT_NULL;
+         item = _do_pop(que))
     {
         rt_thread_t thread;
 
@@ -230,7 +229,7 @@ rt_err_t rt_prio_queue_pop(struct rt_prio_queue *que,
 
     rt_hw_interrupt_enable(level);
 
-    rt_memcpy(data, item + 1, que->item_sz);
+    rt_memcpy(data, item+1, que->item_sz);
     rt_mp_free(item);
 
     return RT_EOK;
@@ -247,8 +246,8 @@ void rt_prio_queue_dump(struct rt_prio_queue *que)
 
         rt_kprintf("%2d: ", level);
         for (item = que->head[level];
-                item;
-                item = item->next)
+             item;
+             item = item->next)
         {
             rt_kprintf("%p, ", item);
         }

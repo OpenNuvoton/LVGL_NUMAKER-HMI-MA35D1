@@ -25,17 +25,17 @@ rt_uint32_t Baudrate   = BITRATE;    /* console baudrate */
 
 rt_uint32_t get_device_baud(void)
 {
-    return (Baudrate);
+    return(Baudrate);
 }
 
 rt_uint32_t get_sys_time(void)
 {
-    return (0L);
+    return(0L);
 }
 
 void zsend_byte(rt_uint16_t ch)
 {
-    rt_device_write(zmodem.device, 0, &ch, 1);
+    rt_device_write(zmodem.device, 0, &ch,1);
 
     return;
 }
@@ -61,19 +61,19 @@ rt_int16_t zread_line(rt_uint16_t timeout)
         return (*str++ & 0377);
     }
     Line_left = 0;
-    timeout /= 5;
+    timeout/=5;
     while (1)
     {
         Line_left = rt_device_read(shell->device, 0, buf, 1);
         if (Line_left)
         {
-            Line_left = Line_left;
-            str = buf;
-            break;
+             Line_left = Line_left;
+             str = buf;
+             break;
         }
     }
     if (Line_left < 1) return TIMEOUT;
-    Line_left -= 1;
+    Line_left -=1;
 
     return (*str++ & 0377);
 }
@@ -90,24 +90,24 @@ void zsend_break(char *cmd)
         switch (*cmd)
         {
         case '\336':
-            continue;
+             continue;
         case '\335':
-            rt_thread_delay(RT_TICK_PER_SECOND);
-            continue;
+             rt_thread_delay(RT_TICK_PER_SECOND);
+             continue;
         default:
-            zsend_line(*cmd);
-            break;
+             zsend_line(*cmd);
+             break;
         }
     }
 }
 /* send cancel string to get the other end to shut up */
 void zsend_can(void)
 {
-    static char cmd[] = {24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 0};
+    static char cmd[] = {24,24,24,24,24,24,24,24,24,24,0};
 
     zsend_break(cmd);
     rt_kprintf("\x0d");
-    Line_left = 0;         /* clear Line_left */
+    Line_left=0;           /* clear Line_left */
 
     return;
 }

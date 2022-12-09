@@ -17,25 +17,25 @@
 
 #include <rtthread.h>
 #ifdef RT_USING_POSIX_DEVIO
-    #include <rtdevice.h> /* for wqueue_init */
+#include <rtdevice.h> /* for wqueue_init */
 #endif /* RT_USING_POSIX_DEVIO */
 
 #ifdef RT_USING_DEVICE
 
 #ifdef RT_USING_DEVICE_OPS
-    #define device_init     (dev->ops->init)
-    #define device_open     (dev->ops->open)
-    #define device_close    (dev->ops->close)
-    #define device_read     (dev->ops->read)
-    #define device_write    (dev->ops->write)
-    #define device_control  (dev->ops->control)
+#define device_init     (dev->ops->init)
+#define device_open     (dev->ops->open)
+#define device_close    (dev->ops->close)
+#define device_read     (dev->ops->read)
+#define device_write    (dev->ops->write)
+#define device_control  (dev->ops->control)
 #else
-    #define device_init     (dev->init)
-    #define device_open     (dev->open)
-    #define device_close    (dev->close)
-    #define device_read     (dev->read)
-    #define device_write    (dev->write)
-    #define device_control  (dev->control)
+#define device_init     (dev->init)
+#define device_open     (dev->open)
+#define device_close    (dev->close)
+#define device_read     (dev->read)
+#define device_write    (dev->write)
+#define device_control  (dev->control)
 #endif /* RT_USING_DEVICE_OPS */
 
 /**
@@ -179,7 +179,7 @@ rt_err_t rt_device_init(rt_device_t dev)
             if (result != RT_EOK)
             {
                 RT_DEBUG_LOG(RT_DEBUG_DEVICE, ("To initialize device:%s failed. The error code is %d\n",
-                                               dev->parent.name, result));
+                           dev->parent.name, result));
             }
             else
             {
@@ -217,7 +217,7 @@ rt_err_t rt_device_open(rt_device_t dev, rt_uint16_t oflag)
             if (result != RT_EOK)
             {
                 RT_DEBUG_LOG(RT_DEBUG_DEVICE, ("To initialize device:%s failed. The error code is %d\n",
-                                               dev->parent.name, result));
+                           dev->parent.name, result));
 
                 return result;
             }
@@ -228,7 +228,7 @@ rt_err_t rt_device_open(rt_device_t dev, rt_uint16_t oflag)
 
     /* device is a stand alone device and opened */
     if ((dev->flag & RT_DEVICE_FLAG_STANDALONE) &&
-            (dev->open_flag & RT_DEVICE_OFLAG_OPEN))
+        (dev->open_flag & RT_DEVICE_OFLAG_OPEN))
     {
         return -RT_EBUSY;
     }
@@ -421,7 +421,7 @@ RTM_EXPORT(rt_device_control);
  */
 rt_err_t rt_device_set_rx_indicate(rt_device_t dev,
                                    rt_err_t (*rx_ind)(rt_device_t dev,
-                                           rt_size_t size))
+                                   rt_size_t size))
 {
     /* parameter check */
     RT_ASSERT(dev != RT_NULL);
@@ -445,7 +445,7 @@ RTM_EXPORT(rt_device_set_rx_indicate);
  */
 rt_err_t rt_device_set_tx_complete(rt_device_t dev,
                                    rt_err_t (*tx_done)(rt_device_t dev,
-                                           void *buffer))
+                                   void *buffer))
 {
     /* parameter check */
     RT_ASSERT(dev != RT_NULL);

@@ -14,10 +14,10 @@
 #include <hwcrypto.h>
 
 #ifndef RT_HWCRYPTO_IV_MAX_SIZE
-    #define RT_HWCRYPTO_IV_MAX_SIZE  (16)
+#define RT_HWCRYPTO_IV_MAX_SIZE  (16)
 #endif
 #ifndef RT_HWCRYPTO_KEYBIT_MAX_SIZE
-    #define RT_HWCRYPTO_KEYBIT_MAX_SIZE  (256)
+#define RT_HWCRYPTO_KEYBIT_MAX_SIZE  (256)
 #endif
 
 #define SYMMTRIC_MODIFY_KEY    (0x1 << 0)

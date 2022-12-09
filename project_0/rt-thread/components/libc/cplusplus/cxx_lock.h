@@ -13,20 +13,13 @@
 #include <stdint.h>
 #include <string.h>
 
-namespace rtthread
-{
+namespace rtthread {
 
 class Lock
 {
 public:
-    Lock(Mutex &mutex) : m(mutex)
-    {
-        m.lock();
-    }
-    ~Lock()
-    {
-        m.unlock();
-    }
+    Lock(Mutex& mutex) : m(mutex) {m.lock();}
+    ~Lock() {m.unlock();}
 
 protected:
     Mutex &m;

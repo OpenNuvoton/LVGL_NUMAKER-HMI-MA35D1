@@ -21,7 +21,7 @@
  * PING_DEBUG: Enable debugging for PING.
  */
 #ifndef PING_DEBUG
-    #define PING_DEBUG     LWIP_DBG_ON
+#define PING_DEBUG     LWIP_DBG_ON
 #endif
 
 /** ping receive timeout - in milliseconds */
@@ -31,12 +31,12 @@
 
 /** ping identifier - must fit on a u16_t */
 #ifndef PING_ID
-    #define PING_ID        0xAFAF
+#define PING_ID        0xAFAF
 #endif
 
 /** ping additional data size to include in the packet */
 #ifndef PING_DATA_SIZE
-    #define PING_DATA_SIZE 32
+#define PING_DATA_SIZE 32
 #endif
 
 /* ping variables */
@@ -47,7 +47,7 @@ struct _ip_addr
 };
 
 /** Prepare a echo ICMP request */
-static void ping_prepare_echo(struct icmp_echo_hdr *iecho, u16_t len)
+static void ping_prepare_echo( struct icmp_echo_hdr *iecho, u16_t len)
 {
     size_t i;
     size_t data_len = len - sizeof(struct icmp_echo_hdr);
@@ -61,13 +61,13 @@ static void ping_prepare_echo(struct icmp_echo_hdr *iecho, u16_t len)
     /* fill the additional data buffer with some data */
     for (i = 0; i < data_len; i++)
     {
-        ((char *) iecho)[sizeof(struct icmp_echo_hdr) + i] = (char) i;
+        ((char*) iecho)[sizeof(struct icmp_echo_hdr) + i] = (char) i;
     }
 
 #ifdef RT_LWIP_USING_HW_CHECKSUM
-    iecho->chksum = 0;
+      iecho->chksum = 0;
 #else
-    iecho->chksum = inet_chksum(iecho, len);
+      iecho->chksum = inet_chksum(iecho, len);
 #endif
 
 }
@@ -99,7 +99,7 @@ err_t lwip_ping_send(int s, ip_addr_t *addr, int size)
 #error Not supported IPv6.
 #endif
 
-    err = lwip_sendto(s, iecho, ping_size, 0, (struct sockaddr *) &to, sizeof(to));
+    err = lwip_sendto(s, iecho, ping_size, 0, (struct sockaddr*) &to, sizeof(to));
     rt_free(iecho);
 
     return (err == ping_size ? ERR_OK : ERR_VAL);
@@ -113,12 +113,12 @@ int lwip_ping_recv(int s, int *ttl)
     struct ip_hdr *iphdr;
     struct icmp_echo_hdr *iecho;
 
-    while ((len = lwip_recvfrom(s, buf, sizeof(buf), 0, (struct sockaddr *) &from, (socklen_t *) &fromlen)) > 0)
+    while ((len = lwip_recvfrom(s, buf, sizeof(buf), 0, (struct sockaddr*) &from, (socklen_t*) &fromlen)) > 0)
     {
         if (len >= (int)(sizeof(struct ip_hdr) + sizeof(struct icmp_echo_hdr)))
         {
             iphdr = (struct ip_hdr *) buf;
-            iecho = (struct icmp_echo_hdr *)(buf + (IPH_HL(iphdr) * 4));
+            iecho = (struct icmp_echo_hdr *) (buf + (IPH_HL(iphdr) * 4));
             if ((iecho->id == PING_ID) && (iecho->seqno == htons(ping_seq_num)))
             {
                 *ttl = iphdr->_ttl;
@@ -133,7 +133,7 @@ int lwip_ping_recv(int s, int *ttl)
 #ifndef RT_USING_NETDEV
 
 /* using the lwIP custom ping */
-rt_err_t ping(char *target_name, rt_uint32_t times, rt_size_t size)
+rt_err_t ping(char* target_name, rt_uint32_t times, rt_size_t size)
 {
 #if LWIP_VERSION_MAJOR >= 2U
     struct timeval timeout = { PING_RCV_TIMEO / RT_TICK_PER_SECOND, PING_RCV_TIMEO % RT_TICK_PER_SECOND };
@@ -192,7 +192,7 @@ rt_err_t ping(char *target_name, rt_uint32_t times, rt_size_t size)
             {
                 elapsed_time = (rt_tick_get() - recv_start_tick) * 1000UL / RT_TICK_PER_SECOND;
                 rt_kprintf("%d bytes from %s icmp_seq=%d ttl=%d time=%d ms\n", recv_len, inet_ntoa(ina), send_times,
-                           ttl, elapsed_time);
+                        ttl, elapsed_time);
             }
             else
             {

@@ -17,7 +17,7 @@
 #include <lwip/netif.h>
 
 #ifdef SAL_USING_POSIX
-    #include <poll.h>
+#include <poll.h>
 #endif
 
 #include <sal_low_lvl.h>
@@ -26,17 +26,17 @@
 #include <netdev.h>
 
 #if (LWIP_VERSION < 0x2000000) && NETDEV_IPV6
-    #error "The lwIP version is not support IPV6, please disable netdev IPV6 configuration "
+#error "The lwIP version is not support IPV6, please disable netdev IPV6 configuration "
 #elif (LWIP_VERSION > 0x2000000) && (NETDEV_IPV6 != LWIP_IPV6)
-    #error "IPV6 configuration error, Please check and synchronize netdev and lwip IPV6 configuration."
+#error "IPV6 configuration error, Please check and synchronize netdev and lwip IPV6 configuration."
 #endif
 
 #if LWIP_VERSION < 0x2000000
-    #define SELWAIT_T int
+#define SELWAIT_T int
 #else
-    #ifndef SELWAIT_T
-        #define SELWAIT_T u8_t
-    #endif
+#ifndef SELWAIT_T
+#define SELWAIT_T u8_t
+#endif
 #endif
 
 #ifdef SAL_USING_LWIP
@@ -51,8 +51,7 @@
  *
  * NOTE: please make sure the definitions same in lwip::net_socket.c
  */
-struct lwip_sock
-{
+struct lwip_sock {
     /** sockets currently are built on netconns, each socket has one netconn */
     struct netconn *conn;
     /** data that was left from the previous read */
@@ -67,11 +66,11 @@ struct lwip_sock
     u16_t sendevent;
     /** error happened for this socket, set by event_callback(), tested by select */
     u16_t errevent;
-    /** last error that occurred on this socket */
+   /** last error that occurred on this socket */
 #if LWIP_VERSION < 0x2000000
-    int err;
+   int err;
 #else
-    u8_t err;
+   u8_t err;
 #endif
     /** counter of how many threads are waiting for this socket using select */
     SELWAIT_T select_waiting;
@@ -152,9 +151,9 @@ static void event_callback(struct netconn *conn, enum netconn_evt evt, u16_t len
     }
 
 #if LWIP_VERSION >= 0x20100ff
-    if ((void *)(sock->lastdata.pbuf) || (sock->rcvevent > 0))
+    if ((void*)(sock->lastdata.pbuf) || (sock->rcvevent > 0))
 #else
-    if ((void *)(sock->lastdata) || (sock->rcvevent > 0))
+    if ((void*)(sock->lastdata) || (sock->rcvevent > 0))
 #endif
         event |= POLLIN;
     if (sock->sendevent)
@@ -166,7 +165,7 @@ static void event_callback(struct netconn *conn, enum netconn_evt evt, u16_t len
 
     if (event)
     {
-        rt_wqueue_wakeup(&sock->wait_head, (void *) event);
+        rt_wqueue_wakeup(&sock->wait_head, (void*) event);
     }
 }
 #endif /* SAL_USING_POSIX */
@@ -245,7 +244,7 @@ static int inet_poll(struct dfs_fd *file, struct rt_pollreq *req)
     struct sal_socket *sal_sock;
 
     sal_sock = sal_get_socket((int) file->data);
-    if (!sal_sock)
+    if(!sal_sock)
     {
         return -1;
     }
@@ -260,9 +259,9 @@ static int inet_poll(struct dfs_fd *file, struct rt_pollreq *req)
         level = rt_hw_interrupt_disable();
 
 #if LWIP_VERSION >= 0x20100ff
-        if ((void *)(sock->lastdata.pbuf) || sock->rcvevent)
+        if ((void*)(sock->lastdata.pbuf) || sock->rcvevent)
 #else
-        if ((void *)(sock->lastdata) || sock->rcvevent)
+        if ((void*)(sock->lastdata) || sock->rcvevent)
 #endif
         {
             mask |= POLLIN;

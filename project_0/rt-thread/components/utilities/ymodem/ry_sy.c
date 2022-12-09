@@ -19,7 +19,7 @@
 #include <string.h>
 
 #ifndef DFS_USING_POSIX
-    #error "Please enable DFS_USING_POSIX"
+#error "Please enable DFS_USING_POSIX"
 #endif
 
 struct custom_ctx
@@ -153,6 +153,10 @@ static enum rym_code _rym_send_data(
         ctx->stage = RYM_STAGE_FINISHING;
     }
 
+    if (read_size > 128)
+    {
+        return RYM_CODE_STX;
+    }
     return RYM_CODE_SOH;
 }
 

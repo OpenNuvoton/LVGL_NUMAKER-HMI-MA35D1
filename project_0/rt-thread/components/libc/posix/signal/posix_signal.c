@@ -18,12 +18,12 @@
 
 #define sig_valid(sig_no)   (sig_no >= 0 && sig_no < RT_SIG_MAX)
 
-void (*signal(int sig, void (*func)(int)))(int)
+void (*signal(int sig, void (*func)(int))) (int)
 {
     return rt_signal_install(sig, func);
 }
 
-int sigprocmask(int how, const sigset_t *set, sigset_t *oset)
+int sigprocmask (int how, const sigset_t *set, sigset_t *oset)
 {
     rt_base_t level;
     rt_thread_t tid;
@@ -35,7 +35,7 @@ int sigprocmask(int how, const sigset_t *set, sigset_t *oset)
 
     if (set)
     {
-        switch (how)
+        switch(how)
         {
         case SIG_BLOCK:
             tid->sig_mask |= *set;
@@ -55,13 +55,13 @@ int sigprocmask(int how, const sigset_t *set, sigset_t *oset)
     return 0;
 }
 
-int sigpending(sigset_t *set)
+int sigpending (sigset_t *set)
 {
     sigprocmask(SIG_SETMASK, RT_NULL, set);
     return 0;
 }
 
-int sigsuspend(const sigset_t *set)
+int sigsuspend (const sigset_t *set)
 {
     int ret  = 0;
     sigset_t origin_set;
@@ -143,7 +143,7 @@ int raise(int sig)
 }
 
 #include <sys/types.h>
-int sigqueue(pid_t pid, int signo, const union sigval value)
+int sigqueue (pid_t pid, int signo, const union sigval value)
 {
     /* no support, signal queue */
 

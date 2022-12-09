@@ -248,9 +248,10 @@ static double get_mdps_value(int32_t i32AccelVal)
     return 0.0f;
 }
 
-static rt_size_t bmx055_fetch_data(rt_sensor_t sensor, void *buf, rt_size_t len)
+static rt_ssize_t bmx055_fetch_data(rt_sensor_t sensor, rt_sensor_data_t data, rt_size_t len)
 {
-    struct rt_sensor_data *data = (struct rt_sensor_data *)buf;
+    RT_ASSERT(data);
+
     switch (sensor->info.type)
     {
     case RT_SENSOR_CLASS_ACCE:

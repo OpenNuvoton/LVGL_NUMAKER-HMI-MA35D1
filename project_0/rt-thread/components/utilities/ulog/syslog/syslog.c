@@ -26,7 +26,7 @@
 #include <sys/time.h>
 
 #ifndef ULOG_SYSLOG_IDENT_MAX_LEN
-    #define ULOG_SYSLOG_IDENT_MAX_LEN      ULOG_FILTER_TAG_MAX_LEN
+#define ULOG_SYSLOG_IDENT_MAX_LEN      ULOG_FILTER_TAG_MAX_LEN
 #endif
 
 static char local_ident[ULOG_SYSLOG_IDENT_MAX_LEN + 1];
@@ -150,34 +150,21 @@ int setlogmask(int mask)
 
 static const char *get_month_str(uint8_t month)
 {
-    switch (month)
+    switch(month)
     {
-    case 1:
-        return "Jan";
-    case 2:
-        return "Feb";
-    case 3:
-        return "Mar";
-    case 4:
-        return "Apr";
-    case 5:
-        return "May";
-    case 6:
-        return "June";
-    case 7:
-        return "July";
-    case 8:
-        return "Aug";
-    case 9:
-        return "Sept";
-    case 10:
-        return "Oct";
-    case 11:
-        return "Nov";
-    case 12:
-        return "Dec";
-    default:
-        return "Unknown";
+    case 1: return "Jan";
+    case 2: return "Feb";
+    case 3: return "Mar";
+    case 4: return "Apr";
+    case 5: return "May";
+    case 6: return "June";
+    case 7: return "July";
+    case 8: return "Aug";
+    case 9: return "Sept";
+    case 10: return "Oct";
+    case 11: return "Nov";
+    case 12: return "Dec";
+    default: return "Unknown";
     }
 }
 
@@ -202,10 +189,10 @@ RT_WEAK rt_size_t syslog_formater(char *log_buf, int level, const char *tag, rt_
 
 #ifdef ULOG_OUTPUT_LEVEL
         rt_snprintf(log_buf + log_len, ULOG_LINE_BUF_SIZE - log_len, "<%d>%s%3d %02d:%02d:%02d", level,
-                    get_month_str(tm->tm_mon + 1), tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
+                get_month_str(tm->tm_mon + 1), tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
 #else
         rt_snprintf(log_buf + log_len, ULOG_LINE_BUF_SIZE - log_len, "%s%3d %02d:%02d:%02d",
-                    get_month_str(tm->tm_mon + 1), tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
+                get_month_str(tm->tm_mon + 1), tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
 #endif /* ULOG_OUTPUT_LEVEL */
 
         log_len += rt_strlen(log_buf + log_len);
