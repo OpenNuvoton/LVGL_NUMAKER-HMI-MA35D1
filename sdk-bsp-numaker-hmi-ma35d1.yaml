@@ -69,7 +69,7 @@ features_zh:
 - 7 吋 TFT-LCD 屏
 pkg_type: Board_Support_Packages
 pkg_vendor: Nuvoton
-pkg_version: 1.0.1
+pkg_version: 1.0.2
 template_projects:
 - builtin_files:
   - files_and_folders:

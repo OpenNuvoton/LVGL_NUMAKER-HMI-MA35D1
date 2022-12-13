@@ -165,9 +165,8 @@ MSH_CMD_EXPORT(nu_tempsen_go, go tempsen);
 uint32_t nu_chipcfg_ddrsize(void)
 {
     uint32_t u32ChipCfg = *((vu32 *)REG_SYS_CHIPCFG);
-    uint32_t u32ChipCfg_DDRSize = ((u32ChipCfg & 0xF0000) != 0) ? 1 << ((u32ChipCfg & 0xF0000) >> 16) : 0;
 
-    return u32ChipCfg_DDRSize;
+    return ((u32ChipCfg & 0xF0000) != 0) ? (1 << ((u32ChipCfg & 0xF0000) >> 16)) << 20 : 0;
 }
 
 void nu_chipcfg_dump(void)
