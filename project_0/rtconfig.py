@@ -16,7 +16,8 @@ if os.getenv('RTT_ROOT'):
 if  CROSS_TOOL == 'gcc':
 	PLATFORM = 'gcc'
 	EXEC_PATH = r'C:\Program Files (x86)\GNU Tools ARM Embedded\6 2017-q1-update\bin'
-elif os.getenv('RTT_EXEC_PATH'):
+
+if os.getenv('RTT_EXEC_PATH'):
 	EXEC_PATH = os.getenv('RTT_EXEC_PATH')
 
 #BUILD = 'debug'
