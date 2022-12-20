@@ -10,7 +10,8 @@
 
 #include <lvgl.h>
 
-RT_WEAK void lv_user_gui_init(void)
+#if !defined(PKG_USING_LVGL_SQUARELINE)
+void lv_user_gui_init(void)
 {
     /* display demo; you may replace with your LVGL application at here and disable related definitions. */
 
@@ -29,3 +30,4 @@ RT_WEAK void lv_user_gui_init(void)
 #endif
 
 }
+#endif

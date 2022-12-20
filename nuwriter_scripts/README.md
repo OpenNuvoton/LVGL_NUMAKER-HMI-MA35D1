@@ -51,6 +51,33 @@ Program header, DDR timing setting and rtthread.bin binary file into SPI NAND fl
 
 Program header, DDR timing setting and rtthread.bin binary file into NAND flash.
 
+
+## **Bash Scripts for Linux**
+
+If your NuWriter_MA35 python running is ready, you can do following bash script files for Linux directly.
+If not, the **install_linux.sh** will help user to install related python module installation.
+
+```bash
+# ./install_linux.sh
+```
+
+### **nuwriter_ddr_download_and_run.sh**
+
+Download rtthread.bin binary file into DDR. The address is 0x80400000.
+
+### **nuwriter_sd_programming.sh**
+
+Program header, DDR timing setting and rtthread.bin binary file into SD card or EMMC.
+
+### **nuwriter_spinand_programming.sh**
+
+Program header, DDR timing setting and rtthread.bin binary file into SPI NAND flash.
+
+### **nuwriter_nand_programming.sh**
+
+Program header, DDR timing setting and rtthread.bin binary file into NAND flash.
+
+
 ## **Troubleshoot**
 
 ### **Fail to create symbolic folder**

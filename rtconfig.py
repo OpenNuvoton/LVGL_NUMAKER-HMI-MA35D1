@@ -43,7 +43,7 @@ if PLATFORM == 'gcc':
 
     DEVICE = ' -march=armv8-a -mfpu=neon-vfpv4 -ftree-vectorize -ffast-math -mfloat-abi=softfp'
 #    DEVICE = ' -march=armv7-a -mfpu=vfpv3-d16 -ftree-vectorize -ffast-math -mfloat-abi=softfp'
-    CFLAGS = DEVICE + ' -Wall -fno-zero-initialized-in-bss '
+    CFLAGS = DEVICE + ' -Wall -fno-zero-initialized-in-bss  -DLV_LVGL_H_INCLUDE_SIMPLE=1 '
     AFLAGS = ' -c' + DEVICE + ' -x assembler-with-cpp -D__ASSEMBLY__ -I.'
     LFLAGS = DEVICE + ' -nostartfiles  -Wl,--gc-sections,-cref,-Map=' + MAP_FILE + ',-cref,-u,system_vectors' + ' -T ' + LINK_FILE + '.ld'
     CXXFLAGS = '  -march=armv8-a -mfpu=neon-vfpv4 -std=c++11 '

@@ -1,0 +1,7 @@
+pyusb
+usb
+crypto
+ecdsa
+crcmod
+tqdm
+pycryptodome

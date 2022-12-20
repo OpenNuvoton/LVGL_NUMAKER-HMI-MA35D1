@@ -18,7 +18,25 @@
 #define LV_VER_RES_MAX                  BSP_LCD_HEIGHT
 
 #define LV_FONT_MONTSERRAT_12           1
+#define LV_FONT_MONTSERRAT_14           1
 #define LV_FONT_MONTSERRAT_16           1
+#define LV_FONT_MONTSERRAT_18           1
+#define LV_FONT_MONTSERRAT_20           1
+#define LV_FONT_MONTSERRAT_22           1
+#define LV_FONT_MONTSERRAT_24           1
+#define LV_FONT_MONTSERRAT_26           1
+#define LV_FONT_MONTSERRAT_28           1
+#define LV_FONT_MONTSERRAT_30           1
+#define LV_FONT_MONTSERRAT_32           1
+#define LV_FONT_MONTSERRAT_34           1
+#define LV_FONT_MONTSERRAT_36           1
+#define LV_FONT_MONTSERRAT_38           1
+#define LV_FONT_MONTSERRAT_40           1
+#define LV_FONT_MONTSERRAT_42           1
+#define LV_FONT_MONTSERRAT_44           1
+#define LV_FONT_MONTSERRAT_46           1
+#define LV_FONT_MONTSERRAT_48           1
+
 #define LV_USE_PERF_MONITOR             1
 //#define CONFIG_LV_LOG_LEVEL LV_LOG_LEVEL_TRACE
 

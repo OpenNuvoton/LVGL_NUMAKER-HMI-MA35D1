@@ -13,15 +13,15 @@
 
 #include <string.h>
 
-#define DBG_TAG "st1663i"
+#define DBG_TAG "ft5446"
 #define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
-#include "st1663i.h"
+#include "ft5446.h"
 
-static struct rt_i2c_client st1663i_client;
-static void st1663i_touch_up(void *buf, rt_int8_t id);
-static rt_err_t st1663i_write_reg(struct rt_i2c_client *dev, rt_uint8_t reg, rt_uint8_t value)
+static struct rt_i2c_client ft5446_client;
+static void ft5446_touch_up(void *buf, rt_int8_t id);
+static rt_err_t ft5446_write_reg(struct rt_i2c_client *dev, rt_uint8_t reg, rt_uint8_t value)
 {
     struct rt_i2c_msg msgs;
     rt_uint8_t buf[2];
@@ -44,14 +44,14 @@ static rt_err_t st1663i_write_reg(struct rt_i2c_client *dev, rt_uint8_t reg, rt_
     }
 }
 
-static rt_err_t st1663i_read_reg(struct rt_i2c_client *dev, rt_uint8_t reg, rt_uint8_t *data, rt_uint8_t len)
+static rt_err_t ft5446_read_reg(struct rt_i2c_client *dev, rt_uint8_t reg, rt_uint8_t *data, rt_uint8_t len)
 {
     struct rt_i2c_msg msgs[2];
 
     msgs[0].addr  = dev->client_addr;
     msgs[0].flags = RT_I2C_WR;
     msgs[0].buf   = &reg;
-    msgs[0].len   = ST_REGITER_LEN;
+    msgs[0].len   = FT_REGITER_LEN;
 
     msgs[1].addr  = dev->client_addr;
     msgs[1].flags = RT_I2C_RD;
@@ -68,12 +68,12 @@ static rt_err_t st1663i_read_reg(struct rt_i2c_client *dev, rt_uint8_t reg, rt_u
     }
 }
 
-static rt_int16_t pre_x[ST_MAX_TOUCH];
-static rt_int16_t pre_y[ST_MAX_TOUCH];
-static rt_int16_t pre_w[ST_MAX_TOUCH];
-static rt_uint8_t s_tp_dowm[ST_MAX_TOUCH];
+static rt_int16_t pre_x[FT_MAX_TOUCH];
+static rt_int16_t pre_y[FT_MAX_TOUCH];
+static rt_int16_t pre_w[FT_MAX_TOUCH];
+static rt_uint8_t s_tp_dowm[FT_MAX_TOUCH];
 
-static void st1663i_touch_up(void *buf, rt_int8_t id)
+static void ft5446_touch_up(void *buf, rt_int8_t id)
 {
     struct rt_touch_data *read_data = (struct rt_touch_data *)buf;
 
@@ -100,7 +100,7 @@ static void st1663i_touch_up(void *buf, rt_int8_t id)
     //LOG_I("%s (%d)\n", __func__, id);
 }
 
-static void st1663i_touch_down(void *buf, rt_int8_t id, rt_int16_t x, rt_int16_t y, rt_int16_t w)
+static void ft5446_touch_down(void *buf, rt_int8_t id, rt_int16_t x, rt_int16_t y, rt_int16_t w)
 {
     struct rt_touch_data *read_data = (struct rt_touch_data *)buf;
 
@@ -128,11 +128,11 @@ static void st1663i_touch_down(void *buf, rt_int8_t id, rt_int16_t x, rt_int16_t
     //LOG_I("%s (%d %d %d %d)\n", __func__, id, x, y, w );
 }
 
-static int8_t pre_id[ST_MAX_TOUCH];
-static S_ST_REGMAP sStRegMap;
+static int8_t pre_id[FT_MAX_TOUCH];
+static S_FT_REGMAP sFtRegMap;
 static rt_uint8_t pre_touch = 0;
 
-static rt_size_t st1663i_read_point(struct rt_touch_device *touch, void *buf, rt_size_t read_num)
+static rt_size_t ft5446_read_point(struct rt_touch_device *touch, void *buf, rt_size_t read_num)
 {
     int i;
 
@@ -142,61 +142,66 @@ static rt_size_t st1663i_read_point(struct rt_touch_device *touch, void *buf, rt
     RT_ASSERT(touch);
     RT_ASSERT(buf);
     RT_ASSERT(read_num != 0);
-    RT_ASSERT(read_num <= ST_MAX_TOUCH);
+    RT_ASSERT(read_num <= FT_MAX_TOUCH);
 
-    error = st1663i_read_reg(&st1663i_client, 0x10, (rt_uint8_t *)&sStRegMap, sizeof(sStRegMap));
+    error = ft5446_read_reg(&ft5446_client, 0, (rt_uint8_t *)&sFtRegMap, sizeof(sFtRegMap));
     if (error)
     {
         LOG_E("get touch data failed, err:%d\n", error);
         goto exit_read_point;
     }
 
-    if (sStRegMap.u8Fingers > ST_MAX_TOUCH)
+    if (sFtRegMap.u8TDStatus > FT_MAX_TOUCH)
     {
-        LOG_E("FW report max point:%d > panel info. max:%d\n", sStRegMap.u8Fingers, ST_MAX_TOUCH);
+        LOG_E("FW report max point:%d > panel info. max:%d\n", sFtRegMap.u8TDStatus, FT_MAX_TOUCH);
         goto exit_read_point;
     }
 
-    if (pre_touch > sStRegMap.u8Fingers)               /* point up */
+    if (pre_touch > sFtRegMap.u8TDStatus)               /* point up */
     {
-        for (i = 0; i < ST_MAX_TOUCH; i++)
+        for (i = 0; i < FT_MAX_TOUCH; i++)
         {
             rt_uint8_t j;
-            for (j = 0; j < sStRegMap.u8Fingers; j++)  /* this time touch num */
+            for (j = 0; j < sFtRegMap.u8TDStatus; j++)  /* this time touch num */
             {
-                touchid = i;
+                touchid = sFtRegMap.m_sTP[j].u8TouchID;
+                if (touchid >= 0x0f)
+                    continue;
 
                 if (pre_id[i] == touchid)                /* this id is not free */
                     break;
             }
 
-            if ((j == sStRegMap.u8Fingers) && (pre_id[i] != -1))         /* free this node */
+            if ((j == sFtRegMap.u8TDStatus) && (pre_id[i] != -1))         /* free this node */
             {
                 // LOG_I("free %d tid=%d\n", i, pre_id[i]);
-                st1663i_touch_up(buf, pre_id[i]);
+                ft5446_touch_up(buf, pre_id[i]);
                 pre_id[i] = -1;
             }
         }
     }
 
-    for (i = 0; i < sStRegMap.u8Fingers; i++)
+    for (i = 0; i < sFtRegMap.u8TDStatus; i++)
     {
-        touch_event = sStRegMap.m_sTP[i].u8Valid;
-        touchid = i;
+        touch_event = sFtRegMap.m_sTP[i].u8EvtFlag;
+        touchid = sFtRegMap.m_sTP[i].u8TouchID;
 
-        //LOG_I("(%d/%d) %d %d\n", i, sStRegMap.u8Fingers, touchid, touch_event);
+        //LOG_I("(%d/%d) %d %d\n", i, sFtRegMap.u8TDStatus, touchid, touch_event );
+
+        if (touchid >= 0x0f)
+            continue;
 
         pre_id[i] = touchid;
 
-        if (touch_event)
+        if ((touch_event == FT_EVENTFLAG_PRESS_DOWN) || (touch_event == FT_EVENTFLAG_CONTACT))
         {
             rt_uint16_t  x, y, w;
 
-            x = ((uint16_t)sStRegMap.m_sTP[i].u8X0_H << 8) |  sStRegMap.m_sTP[i].m_u8X0_L;
-            y = ((uint16_t)sStRegMap.m_sTP[i].u8Y0_H << 8) |  sStRegMap.m_sTP[i].m_u8Y0_L;
-            w = sStRegMap.m_sTP[i].m_u8Z;
+            x = ((uint16_t)sFtRegMap.m_sTP[i].u8X_11_8 << 8) |  sFtRegMap.m_sTP[i].u8X_7_0;
+            y = ((uint16_t)sFtRegMap.m_sTP[i].u8Y_11_8 << 8) |  sFtRegMap.m_sTP[i].u8Y_7_0;
+            w = sFtRegMap.m_sTP[i].m_u8Weight;
 
-            //LOG_I("[%d] (%d %d %d %d)\n", touch_event, touchid, x, y, w);
+            //LOG_I("[%d] (%d %d %d %d)\n", touch_event, touchid, x, y, w );
 
             if (x >= touch->info.range_x || y >= touch->info.range_y)
             {
@@ -206,17 +211,17 @@ static rt_size_t st1663i_read_point(struct rt_touch_device *touch, void *buf, rt
                 continue;
             }
 
-            st1663i_touch_down(buf, touchid, x, y, w);
+            ft5446_touch_down(buf, touchid, x, y, w);
         }
         else
         {
             // Up
-            st1663i_touch_up(buf, touchid);
+            ft5446_touch_up(buf, touchid);
         }
 
-    } // for (i = 0; i < sStRegMap.u8TDStatus; i++)
+    } // for (i = 0; i < sFtRegMap.u8TDStatus; i++)
 
-    pre_touch = sStRegMap.u8Fingers;
+    pre_touch = sFtRegMap.u8TDStatus;
 
     return read_num;
 
@@ -227,7 +232,7 @@ exit_read_point:
     return 0;
 }
 
-static rt_err_t st1663i_control(struct rt_touch_device *touch, int cmd, void *arg)
+static rt_err_t ft5446_control(struct rt_touch_device *touch, int cmd, void *arg)
 {
     switch (cmd)
     {
@@ -255,18 +260,18 @@ static rt_err_t st1663i_control(struct rt_touch_device *touch, int cmd, void *ar
     return RT_EOK;
 }
 
-static struct rt_touch_ops st1663i_touch_ops =
+static struct rt_touch_ops ft5446_touch_ops =
 {
-    .touch_readpoint = st1663i_read_point,
-    .touch_control = st1663i_control,
+    .touch_readpoint = ft5446_read_point,
+    .touch_control = ft5446_control,
 };
 
-static void st1663i_init(struct rt_i2c_client *dev)
+static void ft5446_init(struct rt_i2c_client *dev)
 {
-    st1663i_write_reg(dev, 0x0, 0);
+    ft5446_write_reg(dev, 0x0, 0);
 }
 
-int rt_hw_st1663i_init(const char *name, struct rt_touch_config *cfg)
+int rt_hw_ft5446_init(const char *name, struct rt_touch_config *cfg)
 {
     struct rt_touch_device *touch_device = RT_NULL;
     rt_uint32_t bus_speed = 400000;
@@ -289,49 +294,49 @@ int rt_hw_st1663i_init(const char *name, struct rt_touch_config *cfg)
 
     rt_pin_mode(cfg->irq_pin.pin, cfg->irq_pin.mode);
 
-    st1663i_client.bus = (struct rt_i2c_bus_device *)rt_device_find(cfg->dev_name);
+    ft5446_client.bus = (struct rt_i2c_bus_device *)rt_device_find(cfg->dev_name);
 
-    if (st1663i_client.bus == RT_NULL)
+    if (ft5446_client.bus == RT_NULL)
     {
         LOG_E("Can't find %s device", cfg->dev_name);
         return -RT_ERROR;
     }
 
-    if (rt_device_open((rt_device_t)st1663i_client.bus, RT_DEVICE_FLAG_RDWR) != RT_EOK)
+    if (rt_device_open((rt_device_t)ft5446_client.bus, RT_DEVICE_FLAG_RDWR) != RT_EOK)
     {
         LOG_E("open %s device failed", cfg->dev_name);
         return -RT_ERROR;
     }
 
-    if (rt_device_control((rt_device_t)st1663i_client.bus, RT_I2C_DEV_CTRL_CLK, &bus_speed) != RT_EOK)
+    if (rt_device_control((rt_device_t)ft5446_client.bus, RT_I2C_DEV_CTRL_CLK, &bus_speed) != RT_EOK)
     {
         LOG_E("control %s device failed", cfg->dev_name);
         return -RT_ERROR;
     }
 
-    st1663i_client.client_addr = ST1663I_ADDRESS;
+    ft5446_client.client_addr = FT5446_ADDRESS;
 
-    st1663i_init(&st1663i_client);
+    ft5446_init(&ft5446_client);
 
-    rt_memset(&pre_x[0], 0xff,  ST_MAX_TOUCH * sizeof(int16_t));
-    rt_memset(&pre_y[0], 0xff,  ST_MAX_TOUCH * sizeof(int16_t));
-    rt_memset(&pre_w[0], 0xff,  ST_MAX_TOUCH * sizeof(int16_t));
-    rt_memset(&s_tp_dowm[0], 0, ST_MAX_TOUCH * sizeof(int16_t));
-    rt_memset(&pre_id[0], 0xff,  ST_MAX_TOUCH * sizeof(int8_t));
+    rt_memset(&pre_x[0], 0xff,  FT_MAX_TOUCH * sizeof(rt_int16_t));
+    rt_memset(&pre_y[0], 0xff,  FT_MAX_TOUCH * sizeof(rt_int16_t));
+    rt_memset(&pre_w[0], 0xff,  FT_MAX_TOUCH * sizeof(rt_int16_t));
+    rt_memset(&s_tp_dowm[0], 0, FT_MAX_TOUCH * sizeof(rt_int8_t));
+    rt_memset(&pre_id[0], 0xff,  FT_MAX_TOUCH * sizeof(rt_int8_t));
 
     /* register touch device */
     touch_device->info.type = RT_TOUCH_TYPE_CAPACITANCE;
-    touch_device->info.vendor = RT_TOUCH_VENDOR_UNKNOWN;
+    touch_device->info.vendor = RT_TOUCH_VENDOR_FT;
     touch_device->info.range_x = BSP_LCD_WIDTH;
     touch_device->info.range_y = BSP_LCD_HEIGHT;
-    touch_device->info.point_num = ST_MAX_TOUCH;
+    touch_device->info.point_num = FT_MAX_TOUCH;
 
     rt_memcpy(&touch_device->config, cfg, sizeof(struct rt_touch_config));
-    touch_device->ops = &st1663i_touch_ops;
+    touch_device->ops = &ft5446_touch_ops;
 
     rt_hw_touch_register(touch_device, name, RT_DEVICE_FLAG_INT_RX, RT_NULL);
 
-    LOG_I("touch device st1663i init success");
+    LOG_I("touch device ft5446 init success");
 
     return RT_EOK;
 }
