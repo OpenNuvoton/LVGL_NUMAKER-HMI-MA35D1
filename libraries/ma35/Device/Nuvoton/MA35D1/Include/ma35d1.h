@@ -49,11 +49,7 @@
 #ifndef __MA35D1_H__
 #define __MA35D1_H__
 
-#ifdef __has_include
-    #if __has_include("rtconfig.h")
-        #include "rtconfig.h"
-    #endif
-#endif
+#include "rtconfig.h"
 
 #ifdef __cplusplus
 extern "C" {
