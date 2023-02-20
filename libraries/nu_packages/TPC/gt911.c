@@ -13,7 +13,7 @@
 #include <rtdevice.h>
 
 #define DBG_TAG "gt911"
-#define DBG_LVL DBG_INFO
+#define DBG_LVL LOG_LVL_DBG
 #include <rtdbg.h>
 
 #include "touch.h"
@@ -21,9 +21,13 @@
 
 static struct rt_i2c_client gt911_client;
 
+#define USE_CUSTOM_CFG 0
+
+#if USE_CUSTOM_CFG
 /* hardware section */
 static rt_uint8_t GT911_CFG_TBL[] =
 {
+#if 0
     0x6b, 0x00, 0x04, 0x58, 0x02, 0x05, 0x0d, 0x00, 0x01, 0x0f,
     0x28, 0x0f, 0x50, 0x32, 0x03, 0x05, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x8a, 0x2a, 0x0c,
@@ -43,7 +47,23 @@ static rt_uint8_t GT911_CFG_TBL[] =
     0x02, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x79, 0x01,
+#else
+    0x41,0x20,0x03,0xE0,0x01,0x0A,0x0C,0x00,0x01,0x08,0x28,0x05,0x50,0x32,0x03,0x07,
+		0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x8C,0x2B,0x0D,0x17,0x15,
+		0x31,0x0D,0x00,0x00,0x10,0xD2,0x04,0x1D,0x00,0x00,0x00,0x00,0x00,0x03,0x64,0x32,
+		0x00,0x00,0x00,0x0F,0x23,0x94,0xC5,0x02,0x07,0x00,0x00,0x04,0xA0,0x10,0x00,0x8B,
+		0x13,0x00,0x7C,0x16,0x00,0x6A,0x1B,0x00,0x5E,0x20,0x00,0x5E,0x00,0x00,0x00,0x00,
+		0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+		0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+		0x02,0x04,0x06,0x08,0x0A,0x0C,0x0E,0x10,0x12,0x14,0x16,0x18,0x1A,0xFF,0x00,0x00,
+		0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x02,
+		0x04,0x06,0x08,0x0A,0x0C,0x0F,0x10,0x12,0x13,0x14,0x16,0x18,0x1C,0x1D,0x1E,0x1F,
+		0x20,0x21,0x22,0x24,0x26,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+		0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xBB,0x01
+#endif
 };
+#endif
+
 static void gt911_touch_up(void *buf, rt_int8_t id);
 static rt_err_t gt911_write_reg(struct rt_i2c_client *dev, rt_uint8_t *data, rt_uint8_t len)
 {
@@ -88,6 +108,21 @@ static rt_err_t gt911_read_regs(struct rt_i2c_client *dev, rt_uint8_t *reg, rt_u
     }
 }
 
+uint8_t gt911_get_checksum(uint8_t* pu8config)
+{
+    /* Calculate 0x8047 to 0x80FE, length is 184B */
+
+	  uint8_t value = 0;
+	  int i;
+
+    for (i = 0; i < 184; i++)
+    {
+        value += pu8config[i];
+    }
+		
+    return (~value) + 1;
+}
+
 static rt_err_t gt911_get_product_id(struct rt_i2c_client *dev, rt_uint8_t *data, rt_uint8_t len)
 {
     rt_uint8_t reg[2];
@@ -103,16 +138,40 @@ static rt_err_t gt911_get_product_id(struct rt_i2c_client *dev, rt_uint8_t *data
     return RT_EOK;
 }
 
+static rt_err_t gt911_get_product_info(struct rt_i2c_client *dev)
+{
+    rt_uint8_t reg[2];
+    rt_uint8_t out_info[10];
+
+    reg[0] = (rt_uint8_t)(GT911_PRODUCT_ID >> 8);
+    reg[1] = (rt_uint8_t)(GT911_PRODUCT_ID & 0xff);
+
+    if (gt911_read_regs(dev, reg, out_info, sizeof(out_info)) != RT_EOK)
+    {
+        LOG_E("read product_info failed");
+        return -RT_ERROR;
+    }
+		
+		rt_kprintf("product id=%c%c%c%c\n", out_info[0], out_info[1], out_info[2], out_info[3]);
+		rt_kprintf("fw version=%02x\n", (out_info[5]<<8) | out_info[4]);
+		rt_kprintf("x coordinate resolution=%d\n", (out_info[7]<<8) | out_info[6]);
+		rt_kprintf("y coordinate resolution=%d\n", (out_info[9]<<8) | out_info[8]);
+
+    return RT_EOK;
+
+}
+
 static rt_err_t gt911_get_info(struct rt_i2c_client *dev, struct rt_touch_info *info)
 {
     rt_uint8_t reg[2];
-    rt_uint8_t out_info[7];
-    rt_uint8_t out_len = 7;
+    rt_uint8_t out_info[8];
 
+		gt911_get_product_info(dev);
+	
     reg[0] = (rt_uint8_t)(GT911_CONFIG_REG >> 8);
     reg[1] = (rt_uint8_t)(GT911_CONFIG_REG & 0xFF);
 
-    if (gt911_read_regs(dev, reg, out_info, out_len) != RT_EOK)
+    if (gt911_read_regs(dev, reg, out_info, sizeof(out_info)) != RT_EOK)
     {
         LOG_E("read info failed");
         return -RT_ERROR;
@@ -122,8 +181,44 @@ static rt_err_t gt911_get_info(struct rt_i2c_client *dev, struct rt_touch_info *
     info->range_y = (out_info[4] << 8) | out_info[3];
     info->point_num = out_info[5] & 0x0f;
 
+		rt_kprintf("info->range_x=%d\n", info->range_x);
+		rt_kprintf("info->range_y=%d\n", info->range_y);
+		rt_kprintf("info->point_num=%d\n", info->point_num);
+		rt_kprintf("Module_Switch1=0x%02x\n", out_info[6]);
+
     return RT_EOK;
 }
+
+#if USE_CUSTOM_CFG
+static rt_err_t gt911_read_config(struct rt_i2c_client *dev)
+{
+    rt_uint8_t *config = (rt_uint8_t *)rt_calloc(1, sizeof(GT911_CFG_TBL) + GT911_REGITER_LEN);
+    if (config == RT_NULL)
+    {
+        LOG_D("malloc config memory failed\n");
+        return -RT_ERROR;
+    }
+
+		rt_memset(&config[0], 0, sizeof(GT911_CFG_TBL) + GT911_REGITER_LEN);
+
+    config[0] = (rt_uint8_t)((GT911_CONFIG_REG >> 8) & 0xFF);
+    config[1] = (rt_uint8_t)(GT911_CONFIG_REG & 0xFF);
+
+    if (gt911_read_regs(dev, &config[0], &config[2], sizeof(GT911_CFG_TBL)) != RT_EOK)
+    {
+        LOG_E("read config failed");
+        return -RT_ERROR;
+    }
+
+  	rt_kprintf("\n\n");
+		LOG_HEX("gt911_config", 16, &config[2], sizeof(GT911_CFG_TBL));
+  	rt_kprintf("\n\n");
+
+		rt_free(config);
+		
+    return RT_EOK;
+}
+#endif
 
 static rt_err_t gt911_soft_reset(struct rt_i2c_client *dev)
 {
@@ -318,8 +413,8 @@ static rt_err_t gt911_control(struct rt_touch_device *touch, int cmd, void *arg)
         return gt911_get_info(&gt911_client, arg);
     }
 
+#if USE_CUSTOM_CFG		
     rt_uint8_t buf[4];
-    rt_uint8_t i = 0;
     rt_uint8_t *config;
 
     config = (rt_uint8_t *)rt_calloc(1, sizeof(GT911_CFG_TBL) + GT911_REGITER_LEN);
@@ -398,20 +493,21 @@ static rt_err_t gt911_control(struct rt_touch_device *touch, int cmd, void *arg)
 
     buf[0] = (rt_uint8_t)((GT911_CHECK_SUM >> 8) & 0xFF);
     buf[1] = (rt_uint8_t)(GT911_CHECK_SUM & 0xFF);
-    buf[2] = 0;
-
-    for (i = GT911_ADDR_LEN; i < sizeof(GT911_CFG_TBL) + GT911_ADDR_LEN; i++)
-    {
-        buf[GT911_ADDR_LEN] += config[i];
-    }
-
-    buf[2] = (~buf[2]) + 1;
+		buf[2] = gt911_get_checksum(&config[2]);  // skip first 2 byte
     buf[3] = 1;
 
     gt911_write_reg(&gt911_client, buf, 4);
     rt_free(config);
 
-    return RT_EOK;
+		gt911_read_config(&gt911_client);
+
+		return RT_EOK;
+
+#else
+
+		return -RT_ERROR;
+#endif
+
 }
 
 static struct rt_touch_ops gt911_touch_ops =
@@ -483,6 +579,7 @@ int rt_hw_gt911_init(const char *name, struct rt_touch_config *cfg)
     rt_hw_touch_register(touch_device, name, RT_DEVICE_FLAG_INT_RX, RT_NULL);
 
     LOG_I("touch device gt911 init success");
+		//gt911_get_checksum(GT911_CFG_TBL);
 
     return RT_EOK;
 }

@@ -1,0 +1,16 @@
+{
+  "codename": "BigNumber",
+  "ttf_path": "\\assets\\fonts\\Sora-ExtraLight.ttf",
+  "bin_path": "\\assets\\fonts\\ui_font_BigNumber.bin",
+  "c_path": "\\assets\\fonts\\ui_font_BigNumber.c",
+  "cfg_path": "\\assets\\fonts\\ui_font_BigNumber.fcfg",
+  "size": 52,
+  "bpp": 8,
+  "letters": 3,
+  "ranges": [
+    "0x20-0xff"
+  ],
+  "symbols": "",
+  "customparams": "--no-compress --no-prefilter",
+  "uploaded": false
+}

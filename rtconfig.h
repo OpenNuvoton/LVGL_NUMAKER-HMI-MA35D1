@@ -140,6 +140,7 @@
 #define RT_AUDIO_RECORD_PIPE_SIZE 2048
 #define RT_USING_SENSOR
 #define RT_USING_TOUCH
+#define RT_TOUCH_PIN_IRQ
 
 /* Using USB */
 
@@ -255,28 +256,6 @@
 #define UTEST_THR_STACK_SIZE 4096
 #define UTEST_THR_PRIORITY 20
 
-/* RT-Thread Utestcases */
-
-#define RT_USING_UTESTCASES
-
-/* Utest Self Testcase */
-
-#define UTEST_SELF_PASS_TC
-
-/* Kernel Testcase */
-
-#define UTEST_MEMHEAP_TC
-#define UTEST_SMALL_MEM_TC
-
-/* CPP11 Testcase */
-
-
-/* Utest Serial Testcase */
-
-
-/* RTT Posix Testcase */
-
-
 /* RT-Thread online packages */
 
 /* IoT - internet of things */
@@ -312,7 +291,7 @@
 #define PKG_LVGL_THREAD_PRIO 20
 #define PKG_LVGL_THREAD_STACK_SIZE 4096
 #define PKG_LVGL_DISP_REFR_PERIOD 16
-#define PKG_LVGL_USING_DEMOS
+#define PKG_USING_LVGL_SQUARELINE
 #define PKG_LVGL_USING_V8_3_LATEST_VERSION
 #define PKG_LVGL_VER_NUM 0x0803F
 
@@ -413,9 +392,6 @@
 
 /* Uncategorized */
 
-#define UTEST_CMD_PREFIX "bsp.nuvoton.utest."
-#define BOARD_USE_UTEST
-
 /* Hardware Drivers Config */
 
 /* On-chip Peripheral Drivers */
@@ -470,11 +446,11 @@
 #define BSP_USING_QSPI
 #define BSP_USING_QSPI0
 #define BSP_USING_DISP
-#define LCM_USING_FW070TFT_WSVGA
-#define DISP_USING_LCD_IDX 0
+#define LCM_USING_FW070TFT_WVGA
+#define DISP_USING_LCD_IDX 1
 #define BSP_LCD_BPP 32
-#define BSP_LCD_WIDTH 1024
-#define BSP_LCD_HEIGHT 600
+#define BSP_LCD_WIDTH 800
+#define BSP_LCD_HEIGHT 480
 #define DISP_USING_OVERLAY
 #define BSP_USING_HWSEM
 #define BSP_USING_HWSEM0
@@ -499,15 +475,16 @@
 /* Board extended module drivers */
 
 #define BOARD_USING_LCM
-#define BOARD_USING_LCM_FW070TFT_WSVGA
-#define BOARD_USING_ADCTOUCH
+#define BOARD_USING_LCM_FW070TFT_WVGA
+#define BOARD_USING_GT911
 
 /* Nuvoton Packages Config */
 
 #define NU_PKG_USING_UTILS
 #define NU_PKG_USING_DEMO
 #define NU_PKG_USING_NAU8822
-#define NU_PKG_USING_ADC_TOUCH
+#define NU_PKG_USING_TPC
+#define NU_PKG_USING_TPC_GT911
 #define NU_PKG_USING_SPINAND
 
 #endif
