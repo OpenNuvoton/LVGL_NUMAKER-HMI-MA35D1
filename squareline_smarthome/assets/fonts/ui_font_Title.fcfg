@@ -1,0 +1,16 @@
+{
+  "codename": "Title",
+  "ttf_path": "\\assets\\fonts\\Sora-Medium.ttf",
+  "bin_path": "\\assets\\fonts\\ui_font_Title.bin",
+  "c_path": "\\assets\\fonts\\ui_font_Title.c",
+  "cfg_path": "\\assets\\fonts\\ui_font_Title.fcfg",
+  "size": 18,
+  "bpp": 8,
+  "letters": 3,
+  "ranges": [
+    "0x20-0x7f"
+  ],
+  "symbols": "",
+  "customparams": "--no-compress --no-prefilter",
+  "uploaded": false
+}
