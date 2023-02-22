@@ -14,10 +14,6 @@ if GetDepend('BSP_LCD_BPP') and GetDepend('BSP_LCD_WIDTH') and GetDepend('BSP_LC
         src += Glob(cwd + '/smarthome_800x480_32bit/*.c')
         CPPPATH += [cwd + '/smarthome_800x480_32bit/']
 
-    if GetConfigValue('BSP_LCD_BPP')==32 and GetConfigValue('BSP_LCD_WIDTH')==480 and GetConfigValue('BSP_LCD_HEIGHT')==272:
-        src += Glob(cwd + '/smarthome_480x272_32bit/*.c')
-        CPPPATH += [cwd + '/smarthome_480x272_32bit/']
-
 group = group + DefineGroup('LVGL-SquareLine', src, depend = ['PKG_USING_LVGL_SQUARELINE'], CPPPATH = CPPPATH)
 
 Return('group')
