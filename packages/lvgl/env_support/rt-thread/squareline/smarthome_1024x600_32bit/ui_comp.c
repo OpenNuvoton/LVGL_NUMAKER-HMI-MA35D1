@@ -993,7 +993,7 @@ lv_obj_t * ui_WeatheGroupList_create(lv_obj_t * comp_parent)
     cui_Degree1 = lv_label_create(cui_Degree_Grup);
     lv_obj_set_width(cui_Degree1, LV_SIZE_CONTENT);   /// 38
     lv_obj_set_height(cui_Degree1, LV_SIZE_CONTENT);    /// 68
-    lv_obj_set_x(cui_Degree1, -28);
+    lv_obj_set_x(cui_Degree1, -15);
     lv_obj_set_y(cui_Degree1, 0);
     lv_obj_set_align(cui_Degree1, LV_ALIGN_RIGHT_MID);
     lv_label_set_text(cui_Degree1, "24°");
