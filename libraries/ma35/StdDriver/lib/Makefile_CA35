@@ -1,0 +1,82 @@
+TARGET	?= libstddriver_gcc_CA35
+
+#################################
+# GNU ARM Embedded Toolchain
+#################################
+CC=arm-none-eabi-gcc
+CXX=arm-none-eabi-g++
+LD=arm-none-eabi-ld
+AR=arm-none-eabi-ar
+AS=arm-none-eabi-as
+CP=arm-none-eabi-objcopy
+OD=arm-none-eabi-objdump
+NM=arm-none-eabi-nm
+SIZE=arm-none-eabi-size
+A2L=arm-none-eabi-addr2line
+
+#################################
+# Working directories
+#################################
+STDDRIVER_DIR = ../
+ROOT		 = ../lib
+CMSIS_DIR	 = $(STDDRIVER_DIR)/../CMSIS
+DEVICE_DIR   = $(STDDRIVER_DIR)/../Device/Nuvoton/MA35D1/Include
+OBJECT_DIR	 = $(ROOT)/build/gcc
+BIN_DIR		 = $(ROOT)/build/gcc
+
+#################################
+# Source Files
+#################################
+
+# Search path and source files for the ST stdperiph library
+
+CSOURCES =  $(notdir $(wildcard $(STDDRIVER_DIR)/src/*.c))
+
+INCLUDE_DIRS  =	-I$(ROOT)
+INCLUDE_DIRS += -I$(STDDRIVER_DIR)/inc 
+INCLUDE_DIRS +=	-I$(CMSIS_DIR)/Include
+INCLUDE_DIRS +=	-I$(DEVICE_DIR)
+INCLUDE_DIRS +=	-I.
+
+#################################
+# Object List
+#################################
+OBJECTS=
+
+#################################
+# Target Output Files
+#################################
+TARGET_A=$(TARGET).a
+
+#################################
+# Flags
+#################################
+
+MCFLAGS=-march=armv8-a -mfpu=neon-vfpv4 -ftree-vectorize -ffast-math -mfloat-abi=softfp
+OPTIMIZE = -O2
+DEFS=
+CFLAGS=-c $(MCFLAGS) $(DEFS) $(OPTIMIZE) $(addprefix -I,$(INCLUDE_DIRS)) -std=c99
+CXXFLAGS=-c $(MCFLAGS) $(DEFS) $(OPTIMIZE) $(addprefix -I,$(INCLUDE_DIRS)) -std=c++11
+LDSCRIPT=
+LDFLAGS =
+
+#################################
+# Build
+#################################
+all: clean $(TARGET_A)
+
+$(TARGET_A):
+	@echo -n "Build $@ ..."
+	@cd $(STDDRIVER_DIR)/src && \
+		$(CC) -c $(INCLUDE_DIRS) $(CFLAGS) $(CSOURCES)
+	$(AR) cr -o $@ \
+		$(STDDRIVER_DIR)/src/*.o
+	$(SIZE) $(TARGET_A)
+
+#################################
+# Recipes
+#################################
+.PHONY: all clean
+
+clean:
+	rm -f $(STDDRIVER_DIR)/src/*.o $(TARGET_A)
