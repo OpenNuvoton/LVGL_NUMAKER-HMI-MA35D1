@@ -99,38 +99,23 @@ void nu_sys_check_register(S_NU_REG *psNuReg)
     }
 }
 
-static int nu_tempsen_init()
+int nu_tempsen_get_value(double *pfTemperture)
 {
+    rt_tick_t begin_tick = rt_tick_get();
+
     SYS->TSENSRFCR &= ~SYS_TSENSRFCR_PD_Msk; // Disable power down, don't wait, takes double conv time (350ms * 2)
-    return 0;
-}
-
-static int nu_tempsen_get_value()
-{
-    char sztmp[32];
-    double temp;
-    static rt_tick_t _old_tick = 0;
-    static int32_t count = 0;
-
-    _old_tick = rt_tick_get();
 
     // Wait valid bit set
     while ((SYS->TSENSRFCR & SYS_TSENSRFCR_DATAVALID_Msk) == 0)
     {
         // 700 ms after clear pd bit. other conversion takes 350 ms
-        if (rt_tick_get() > (500 + _old_tick))
+        if (rt_tick_get() > (500 + begin_tick))
         {
             return -1;
         }
     }
 
-    if (++count == 8)
-    {
-        count = 0;
-        temp = (double)((SYS->TSENSRFCR & 0x0FFF0000) >> 16) * 274.3531 / 4096.0 - 93.3332;
-        snprintf(sztmp, sizeof(sztmp), "Temperature: %.1f\n", temp);
-        LOG_I("%s", sztmp);
-    }
+    *pfTemperture = (double)((SYS->TSENSRFCR & 0x0FFF0000) >> 16) * 274.3531 / 4096.0 - 93.3332;
 
     // Clear Valid bit
     SYS->TSENSRFCR = SYS_TSENSRFCR_DATAVALID_Msk;
@@ -140,7 +125,19 @@ static int nu_tempsen_get_value()
 
 void nu_tempsen_hook(void)
 {
-    nu_tempsen_get_value();
+    static rt_tick_t last_tick = 0;
+
+    if ((last_tick + 5000) < rt_tick_get())
+    {
+        double temp;
+        if (nu_tempsen_get_value(&temp) == 0)
+        {
+            char sztmp[32];
+            snprintf(sztmp, sizeof(sztmp), "Temperature: %.1f\n", temp);
+            LOG_I("%s", sztmp);
+            last_tick = rt_tick_get();
+        }
+    }
 }
 
 static int nu_tempsen_go(void)
@@ -152,8 +149,6 @@ static int nu_tempsen_go(void)
         LOG_E("set %s idle hook failed!\n", __func__);
         return -1;
     }
-
-    nu_tempsen_init();
 
     return 0;
 }
@@ -273,9 +268,9 @@ void nu_clock_raise(void)
     else
 #endif
     {
-#if defined(DEF_RAISING_CPU_VOLTAGE)
+//#if defined(DEF_RAISING_CPU_VOLTAGE)
         ma35d1_set_cpu_voltage(CLK_GetPLLClockFreq(SYSPLL), 0x5F);
-#endif
+//#endif
         CLK_SetPLLFreq(CAPLL, PLL_OPMODE_INTEGER, u32PllRefClk, 800000000ul);
     }
 

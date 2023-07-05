@@ -882,7 +882,7 @@ static rt_err_t nu_pdma_uart_rx_config(nu_uart_t psNuUart, uint8_t *pu8Buf, int3
     }
 
     /* Assign head descriptor & go */
-    result = nu_pdma_sg_transfer(psNuUart->pdma_chanid_rx, psNuUart->pdma_rx_desc, 500);
+    result = nu_pdma_sg_transfer(psNuUart->pdma_chanid_rx, psNuUart->pdma_rx_desc, 100);
     if (result != RT_EOK)
     {
         goto exit_nu_pdma_uart_rx_config;
@@ -1037,6 +1037,33 @@ static int nu_hw_uart_dma_allocate(nu_uart_t psNuUart)
     }
 
     return RT_EOK;
+}
+
+int8_t nu_uart_get_rx_pdma_chnid(struct rt_serial_device *serial)
+{
+    nu_uart_t psNuUart = (nu_uart_t)serial;
+
+    RT_ASSERT(serial);
+
+    return psNuUart->pdma_chanid_rx;
+}
+
+struct nu_rxbuf_ctx* nu_uart_get_rx_pdma_bufaddr(struct rt_serial_device *serial)
+{
+    nu_uart_t psNuUart = (nu_uart_t)serial;
+
+    RT_ASSERT(serial);
+
+    return &psNuUart->dmabuf;
+}
+
+int8_t nu_uart_get_tx_pdma_chnid(struct rt_serial_device *serial)
+{
+    nu_uart_t psNuUart = (nu_uart_t)serial;
+
+    RT_ASSERT(serial);
+
+    return psNuUart->pdma_chanid_tx;
 }
 #endif
 

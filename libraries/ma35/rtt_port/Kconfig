@@ -21,7 +21,7 @@
         default y
 
     config BSP_USING_RTP
-        bool
+        bool "Enable RTP core."
         depends on SOC_SERIES_MA35D1 && !USE_MA35D1_SUBM
         default y
 
@@ -58,6 +58,11 @@
 
     config RT_USING_FPU
         bool
+
+    config USE_SECONDARY_CORE_AS_PRIMARY
+        bool "Use secondary as primary cpu"
+        depends on !USE_MA35D1_SUBM
+        default n
 
     config BSP_USE_STDDRIVER_SOURCE
         bool "Build StdDriver source"
@@ -1078,6 +1083,13 @@
 
                 config LCM_USING_FHD
                     bool "eDispLcd_1920x1080(1920x1080-RGB888)"
+
+                config LCM_USING_XVGA
+                    bool "eDispLcd_1024x768(1024x768-RGB888)"
+
+                config LCM_USING_RGB2LVDS
+                    bool "eDispLcd_1920x1200(1920x1200-RGB888)"
+
             endchoice
 
             config DISP_USING_LCD_IDX
@@ -1085,28 +1097,41 @@
                 default 0    if LCM_USING_FW070TFT_WSVGA
                 default 1    if LCM_USING_FW070TFT_WVGA
                 default 2    if LCM_USING_FHD
+                default 3    if LCM_USING_XVGA
+                default 4    if LCM_USING_RGB2LVDS
 
            config BSP_LCD_BPP
                 int
                 default 32   if LCM_USING_FW070TFT_WSVGA
                 default 32   if LCM_USING_FW070TFT_WVGA
                 default 32   if LCM_USING_FHD
+                default 32   if LCM_USING_XVGA
+                default 32   if LCM_USING_RGB2LVDS
 
            config BSP_LCD_WIDTH
                 int
                 default 1024   if LCM_USING_FW070TFT_WSVGA
                 default 800    if LCM_USING_FW070TFT_WVGA
                 default 1920   if LCM_USING_FHD
+                default 1024   if LCM_USING_XVGA
+                default 1920   if LCM_USING_RGB2LVDS
 
            config BSP_LCD_HEIGHT
                 int
                 default 600   if LCM_USING_FW070TFT_WSVGA
                 default 480   if LCM_USING_FW070TFT_WVGA
                 default 1080  if LCM_USING_FHD
+                default 768   if LCM_USING_XVGA
+                default 1200  if LCM_USING_RGB2LVDS
 
             config DISP_USING_OVERLAY
                 bool "Enable Overlay layer"
                 default n
+
+            config DISP_USING_CURSOR
+                bool "Enable cursor layer"
+                default n
+
         endif
 
     config BSP_USING_WDT
@@ -1157,6 +1182,11 @@
             depends on !USE_MA35D1_SUBM
             default n
         endif
+
+    config BSP_USING_VDE
+        bool "Enable Video Decoding Engine(VDE)"
+        depends on !USE_MA35D1_SUBM
+        default n
 
     config BSP_USING_NFI
         bool "Enable Raw NAND flash Interface(NFI)"

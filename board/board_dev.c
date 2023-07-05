@@ -271,31 +271,36 @@ INIT_COMPONENT_EXPORT(rt_hw_nau8822_port);
 S_CALIBRATION_MATRIX g_sCalMat = { -17558, 1, 69298832, -10, 11142, -2549195, 65536 };
 #endif
 
-#if defined(NU_PKG_USING_TPC_GT911) && defined(BOARD_USING_GT911)
+#if defined(NU_PKG_USING_TPC_GT911) || defined(NU_PKG_USING_TPC_ILI)
 #include "drv_gpio.h"
 #include "gt911.h"
+#include "ili.h"
 
 #define TPC_RST_PIN   NU_GET_PININDEX(NU_PM, 12)
 #define TPC_IRQ_PIN   NU_GET_PININDEX(NU_PD, 12)
 
 extern int tpc_sample(const char *name);
-int rt_hw_gt911_port(void)
+int rt_hw_touchpad_port(void)
 {
     struct rt_touch_config cfg;
-    rt_uint8_t rst_pin;
+    rt_base_t rst_pin;
 
     rst_pin = TPC_RST_PIN;
+    cfg.user_data = &rst_pin;
     cfg.dev_name = "i2c5";
     cfg.irq_pin.pin = TPC_IRQ_PIN;
+#if defined(NU_PKG_USING_TPC_GT911)
     cfg.irq_pin.mode = PIN_MODE_INPUT_PULLDOWN;
-    cfg.user_data = &rst_pin;
+    rt_hw_gt911_init("ctp", &cfg);
+#elif defined(NU_PKG_USING_TPC_ILI)
+    cfg.irq_pin.mode = PIN_MODE_INPUT_PULLUP;
+    rt_hw_ili_tpc_init("ctp", &cfg);
+#endif
 
-    rt_hw_gt911_init("gt911", &cfg);
-
-    return tpc_sample("gt911");
+    return tpc_sample("ctp");
 }
-INIT_ENV_EXPORT(rt_hw_gt911_port);
-#endif /* if defined(BOARD_USING_GT911) && defined(PKG_USING_GT911) */
+INIT_ENV_EXPORT(rt_hw_touchpad_port);
+#endif /* if defined(NU_PKG_USING_TPC_GT911) || defined(NU_PKG_USING_TPC_ILI) */
 
 #if defined(BOARD_USING_BUZZER)
 
@@ -337,6 +342,13 @@ static void PlayRingTone(void)
         rt_kprintf("Can't find %s\n", EPWM_DEV_NAME);
     }
 }
+int buzzer_test(void)
+{
+    PlayRingTone();
+    return 0;
+}
+MSH_CMD_EXPORT(buzzer_test, Buzzer - Play ring tone);
+#endif /* BOARD_USING_BUZZER */
 
 #if defined(BOARD_USING_LCM)
 
@@ -344,18 +356,26 @@ static void PlayRingTone(void)
     #include <rtgui/driver.h>
 #endif
 
-#if defined(RT_USING_PIN)
-    #include <drv_gpio.h>
+#include <drv_gpio.h>
 
-    /* defined the LCM_BLEN pin: PK7 */
-    #define LCM_BACKLIGHT_CTRL  NU_GET_PININDEX(NU_PK, 7)
+/* defined the LCM_BLEN pin: PK7 */
+#define LCM_BACKLIGHT_CTRL  NU_GET_PININDEX(NU_PK, 7)
+
+#if defined(BOARD_USING_LCM_RGB888TOLVDS)
+
+    #define LCM_DS90C189_RSTn   NU_GET_PININDEX(NU_PK, 5)
+
+#else
+
+    #define EPWM_DEV_NAME       "epwm1"
+
+    #define LCM_PWM_CHANNEL      (1)
+
 #endif
-
-#define EPWM_DEV_NAME       "epwm1"
-#define LCM_PWM_CHANNEL      (1)
 
 void nu_lcd_backlight_on(void)
 {
+#if defined(BOARD_USING_LCM_FW070TFT_WSVGA)
     struct rt_device_pwm *pwm_dev;
 
     if ((pwm_dev = (struct rt_device_pwm *)rt_device_find(EPWM_DEV_NAME)) != RT_NULL)
@@ -367,13 +387,21 @@ void nu_lcd_backlight_on(void)
     {
         rt_kprintf("Can't find %s\n", EPWM_DEV_NAME);
     }
+#endif
 
     rt_pin_mode(LCM_BACKLIGHT_CTRL, PIN_MODE_OUTPUT);
     rt_pin_write(LCM_BACKLIGHT_CTRL, PIN_HIGH);
+
+#if defined(BOARD_USING_LCM_RGB888TOLVDS)
+    rt_pin_mode(LCM_DS90C189_RSTn, PIN_MODE_OUTPUT);
+    rt_pin_write(LCM_DS90C189_RSTn, PIN_HIGH);
+#endif
+
 }
 
 void nu_lcd_backlight_off(void)
 {
+#if defined(BOARD_USING_LCM_FW070TFT_WSVGA)
     struct rt_device_pwm *pwm_dev;
 
     if ((pwm_dev = (struct rt_device_pwm *)rt_device_find(EPWM_DEV_NAME)) != RT_NULL)
@@ -384,9 +412,16 @@ void nu_lcd_backlight_off(void)
     {
         rt_kprintf("Can't find %s\n", EPWM_DEV_NAME);
     }
+#endif
 
     rt_pin_mode(LCM_BACKLIGHT_CTRL, PIN_MODE_OUTPUT);
     rt_pin_write(LCM_BACKLIGHT_CTRL, PIN_LOW);
+
+#if defined(BOARD_USING_LCM_RGB888TOLVDS)
+    rt_pin_mode(LCM_DS90C189_RSTn, PIN_MODE_OUTPUT);
+    rt_pin_write(LCM_DS90C189_RSTn, PIN_LOW);
+#endif
+
 }
 
 int rt_hw_lcm_port(void)
@@ -399,21 +434,13 @@ int rt_hw_lcm_port(void)
         rtgui_graphic_set_device(lcm_vpost);
     }
 #endif
-
+#if defined(BOARD_USING_LCM_RGB888TOLVDS)
+    nu_lcd_backlight_on();
+#endif
     return 0;
 }
 INIT_COMPONENT_EXPORT(rt_hw_lcm_port);
 #endif /* BOARD_USING_LCM */
-
-int buzzer_test(void)
-{
-    PlayRingTone();
-    return 0;
-}
-#ifdef FINSH_USING_MSH
-    MSH_CMD_EXPORT(buzzer_test, Buzzer - Play ring tone);
-#endif
-#endif /* BOARD_USING_BUZZER */
 
 #if defined(BOARD_USING_SENSOR0)
 #include "ccap_sensor.h"
@@ -456,6 +483,7 @@ int rt_hw_sensors_port(void)
 INIT_COMPONENT_EXPORT(rt_hw_sensors_port);
 
 
+#if defined(BSP_USING_RTP)
 void nu_rtp_sspcc_setup(void)
 {
     SSPCC_SET_REALM(SSPCC_UART16, SSPCC_SSET_SUBM);
@@ -474,6 +502,7 @@ void nu_rtp_sspcc_setup(void)
     /* LED_1 Pin */
     SSPCC_SET_GPIO_REALM(PJ, 15, SSPCC_SSET_SUBM);
 }
+#endif
 
 #define CLK_CLKDIV0_DCUPDIV_2       CLK_CLKDIV0_DCUP(1)
 #define DISP_FRAMEBUFFERCONFIG0     (DISP_BASE + 0x1518U)

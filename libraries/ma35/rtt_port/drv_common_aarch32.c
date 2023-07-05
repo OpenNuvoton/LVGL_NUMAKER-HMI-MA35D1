@@ -133,6 +133,8 @@ RT_WEAK void rt_hw_board_init(void)
     /* Unlock protected registers */
     SYS_UnlockReg();
 
+#if !defined(USE_SECONDARY_CORE_AS_PRIMARY)
+
     /* initialize SSPCC */
     nu_sspcc_init();
 
@@ -141,6 +143,8 @@ RT_WEAK void rt_hw_board_init(void)
 
     /* initialize UMCTL2 */
     nu_umctl2_init();
+
+#endif
 
     /* initialize base clock */
     nu_clock_init();
@@ -172,7 +176,9 @@ RT_WEAK void rt_hw_board_init(void)
     rt_console_set_device(RT_CONSOLE_DEVICE_NAME);
 #endif
 
+#if !defined(USE_SECONDARY_CORE_AS_PRIMARY)
     nu_clock_raise();
+#endif
 
     /* initialize systick */
     rt_hw_systick_init();

@@ -101,6 +101,14 @@ menu "Hardware Drivers Config"
                     select LCM_USING_FW070TFT_WSVGA
                     help
                         Choose this option if you use 7" 1024x600x32b LCD panel.
+
+                config BOARD_USING_LCM_RGB888TOLVDS
+                    bool "NuDesign RGB888 to LVDS"
+                    select BSP_USING_DISP
+                    select LCM_USING_RGB2LVDS
+                    help
+                        Choose this option if you use 10" 1920x1200x32b LCD panel.
+
             endchoice
 
             choice
@@ -114,6 +122,14 @@ menu "Hardware Drivers Config"
                     select NU_PKG_USING_TPC_GT911
                     help
                         Choose this option if you use GT911 external TSC touching function.
+
+                config BOARD_USING_ILI2511
+                    bool "ILI2511 TPC"
+                    select BSP_USING_I2C
+                    select BSP_USING_I2C0
+                    select NU_PKG_USING_TPC_ILI
+                    help
+                        Choose this option if you use ILI external TSC touching function.
 
                 config BOARD_USING_ADCTOUCH
                     bool "ADC touching"

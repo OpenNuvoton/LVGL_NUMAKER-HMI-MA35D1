@@ -22,88 +22,6 @@
 
 static const DISP_LCD_INFO *g_psDispLcdInfo_Curr = NULL;
 
-const static DISP_LCD_INFO g_sLcdInfo_arr [eDispLcd_Cnt] =
-{
-    {
-        /* eDispLcd_1024x600 */
-        .u32ResolutionWidth  = 1024,
-        .u32ResolutionHeight = 600,
-        .sLcdTiming =
-        {
-            .u32PCF          = 51000000,
-            .u32HA           = 1024,
-            .u32HSL          = 1,
-            .u32HFP          = 160,
-            .u32HBP          = 160,
-            .u32VA           = 600,
-            .u32VSL          = 1,
-            .u32VFP          = 23,
-            .u32VBP          = 12,
-            .eHSPP           = ePolarity_Positive,
-            .eVSPP           = ePolarity_Positive
-        },
-        .sPanelConf =
-        {
-            .eDpiFmt         = eDPIFmt_D24,
-            .eDEP            = ePolarity_Positive,
-            .eDP             = ePolarity_Positive,
-            .eCP             = ePolarity_Positive
-        },
-    },
-    {
-        /* eDispLcd_800x480 */
-        .u32ResolutionWidth  = 800,
-        .u32ResolutionHeight = 480,
-        .sLcdTiming =
-        {
-            .u32PCF          = 45000000,
-            .u32HA           = 800,
-            .u32HSL          = 1,
-            .u32HFP          = 210,
-            .u32HBP          = 46,
-            .u32VA           = 480,
-            .u32VSL          = 1,
-            .u32VFP          = 22,
-            .u32VBP          = 23,
-            .eHSPP           = ePolarity_Positive,
-            .eVSPP           = ePolarity_Positive
-        },
-        .sPanelConf =
-        {
-            .eDpiFmt         = eDPIFmt_D24,
-            .eDEP            = ePolarity_Positive,
-            .eDP             = ePolarity_Positive,
-            .eCP             = ePolarity_Positive
-        },
-    },
-    {
-        /* eDispLcd_1920x1080 */
-        .u32ResolutionWidth  = 1920,
-        .u32ResolutionHeight = 1080,
-        .sLcdTiming =
-        {
-            .u32PCF          = 125000000,
-            .u32HA           = 1920,
-            .u32HSL          = 32,
-            .u32HFP          = 120,
-            .u32HBP          = 128,
-            .u32VA           = 1080,
-            .u32VSL          = 14,
-            .u32VFP          = 21,
-            .u32VBP          = 10,
-            .eHSPP           = ePolarity_Positive,
-            .eVSPP           = ePolarity_Positive
-        },
-        .sPanelConf =
-        {
-            .eDpiFmt         = eDPIFmt_D24,
-            .eDEP            = ePolarity_Positive,
-            .eDP             = ePolarity_Positive,
-            .eCP             = ePolarity_Positive
-        },
-    },
-};
-
 static uint32_t DISP_GetBitPerPixel(E_FB_FMT eFbFmt)
 {
     uint32_t u32bpp;
@@ -212,6 +130,31 @@ void DISP_SetTiming(DISP_LCD_TIMING *psLCDTiming)
     DISP->VSync0 = u32Value;
 }
 
+void DISP_SetCursorPosition(uint32_t u32X, uint32_t u32Y)
+{
+    DISP_CURSOR_SET_POSITION(u32X, u32Y);
+}
+
+void DISP_InitCursor(DISP_CURSOR_CONF *psCursorConf)
+{
+    DISP->CursorModuleClockGatingControl = 0;
+
+    DISP->CursorAddress = psCursorConf->u32FrameBuffer;
+    DISP->CursorBackground = psCursorConf->u32BGColor;
+    DISP->CursorForeground = psCursorConf->u32FGColor;
+
+    DISP->CursorLocation = ((psCursorConf->sInitPosition.u32X << DISP_CursorLocation_X_Pos) & DISP_CursorLocation_X_Msk) | \
+                           ((psCursorConf->sInitPosition.u32Y << DISP_CursorLocation_Y_Pos) & DISP_CursorLocation_Y_Msk);
+
+    DISP_CURSOR_SET_POSITION(psCursorConf->sInitPosition.u32X, psCursorConf->sInitPosition.u32Y);
+
+    DISP->CursorConfig = \
+                         ((psCursorConf->eFmt << DISP_CursorConfig_FORMAT_Pos) & DISP_CursorConfig_FORMAT_Msk) | \
+                         ((psCursorConf->sHotSpot.u32X << DISP_CursorConfig_HOT_SPOT_X_Pos) & DISP_CursorConfig_HOT_SPOT_X_Msk) | \
+                         ((psCursorConf->sHotSpot.u32Y << DISP_CursorConfig_HOT_SPOT_Y_Pos) & DISP_CursorConfig_HOT_SPOT_Y_Msk);
+
+}
+
 void DISP_SetPanelConf(DISP_PANEL_CONF *psPanelConf)
 {
     uint32_t u32Value = 0U;
@@ -258,11 +201,11 @@ int DISP_SetTransparencyMode(E_DISP_LAYER eLayer, E_TRANSPARENCY_MODE eTM)
     return 0;
 }
 
-uint32_t DISP_LCDTIMING_GetFPS(const DISP_LCD_TIMING* psDispLCDTiming)
+uint32_t DISP_LCDTIMING_GetFPS(const DISP_LCD_TIMING *psDispLCDTiming)
 {
     static uint32_t u32FPS = 0;
 
-    if ( psDispLCDTiming != NULL )
+    if (psDispLCDTiming != NULL)
     {
         uint32_t u32HTotal, u32VTotal;
 
@@ -275,12 +218,33 @@ uint32_t DISP_LCDTIMING_GetFPS(const DISP_LCD_TIMING* psDispLCDTiming)
     return u32FPS;
 }
 
+uint32_t DISP_LCDTIMING_SetFPS(uint32_t u32FPS)
+{
+    if (g_psDispLcdInfo_Curr != NULL)
+    {
+        uint32_t u32HTotal, u32VTotal;
+        const DISP_LCD_TIMING *psDispLCDTiming = &g_psDispLcdInfo_Curr->sLcdTiming;
+
+        u32HTotal = psDispLCDTiming->u32HA + psDispLCDTiming->u32HBP + psDispLCDTiming->u32HFP + psDispLCDTiming->u32HSL;
+        u32VTotal = psDispLCDTiming->u32VA + psDispLCDTiming->u32VBP + psDispLCDTiming->u32VFP + psDispLCDTiming->u32VSL;
+
+        DISP_SuspendPixelClk();
+
+        DISP_GeneratePixelClk(u32HTotal * u32VTotal * u32FPS);
+
+        return u32FPS;
+    }
+
+    return 0;
+}
+
+
 int DISP_Trigger(E_DISP_LAYER eLayer, uint32_t u32Action)
 {
     switch (eLayer)
     {
     case eLayer_Video:
-        if (u32Action)
+        if (g_psDispLcdInfo_Curr && u32Action)
         {
             /* Start engine clock. */
             CLK_EnableModuleClock(DCU_MODULE);
@@ -310,6 +274,17 @@ int DISP_Trigger(E_DISP_LAYER eLayer, uint32_t u32Action)
         else
         {
             DISP->OverlayConfig0 &= ~DISP_OverlayConfig0_ENABLE_Msk;
+        }
+        break;
+
+    case eLayer_Cursor:
+        if (u32Action)
+        {
+            DISP_CURSOR_SET_FORMAT(eCURSOR_FMT_ARGB8888);
+        }
+        else
+        {
+            DISP_CURSOR_SET_FORMAT(eCURSOR_FMT_DISABLE);
         }
         break;
 
@@ -391,13 +366,49 @@ int DISP_SetFBAddr(E_DISP_LAYER eLayer, uint32_t u32DMAFBStartAddr)
     switch (eLayer)
     {
     case eLayer_Video:
+    {
+        uint32_t u32ResWidth, u32ResHeight;
+
         /* Set frame buffer address registers */
+        // Y, RGB
         DISP->FrameBufferAddress0 = u32DMAFBStartAddr;
-        break;
+        u32ResWidth = (DISP->FrameBufferSize0 & DISP_FrameBufferSize0_WIDTH_Msk) >> DISP_FrameBufferSize0_WIDTH_Pos;
+        u32ResHeight = (DISP->FrameBufferSize0 & DISP_FrameBufferSize0_HEIGHT_Msk) >> DISP_FrameBufferSize0_HEIGHT_Pos;
+
+        // U
+        DISP->FrameBufferUPlanarAddress0 = u32DMAFBStartAddr + u32ResWidth * u32ResHeight;
+        DISP->FrameBufferUStride0 = u32ResWidth;
+
+        // V
+        DISP->FrameBufferVPlanarAddress0 = DISP->FrameBufferUPlanarAddress0 + u32ResWidth * u32ResHeight / 2;
+        DISP->FrameBufferVStride0 = u32ResWidth / 2;
+    }
+    break;
+
     case eLayer_Overlay:
+    {
+        uint32_t u32ResWidth, u32ResHeight;
+
         /* Set frame buffer address registers */
         DISP->OverlayAddress0 = u32DMAFBStartAddr;
+        u32ResWidth = (DISP->OverlaySize0 & DISP_OverlaySize0_WIDTH_Msk) >> DISP_OverlaySize0_WIDTH_Pos;
+        u32ResHeight = (DISP->OverlaySize0 & DISP_OverlaySize0_HEIGHT_Msk) >> DISP_OverlaySize0_HEIGHT_Pos;
+
+        // U
+        DISP->OverlayUPlanarAddress0 = u32DMAFBStartAddr + u32ResWidth * u32ResHeight;
+        DISP->OverlayUStride0 = u32ResWidth;
+
+        // V
+        DISP->OverlayVPlanarAddress0 = DISP->OverlayUPlanarAddress0 + u32ResWidth * u32ResHeight / 2;
+        DISP->OverlayVStride0 = u32ResWidth / 2;
+    }
+    break;
+
+    case eLayer_Cursor:
+        /* Set frame buffer address registers */
+        DISP->CursorAddress = u32DMAFBStartAddr;
         break;
+
     default:
         return -1;
     }
@@ -411,7 +422,6 @@ int DISP_SetFBFmt(E_DISP_LAYER eLayer, E_FB_FMT eFbFmt, uint32_t u32Pitch)
     case eLayer_Video:
     {
         uint32_t u32FBConf = DISP->FrameBufferConfig0;
-
         DISP->FrameBufferConfig0 = 0;
         DISP->FrameBufferStride0 = u32Pitch;
         u32FBConf = (u32FBConf & ~DISP_FrameBufferConfig0_FORMAT_Msk) |
@@ -443,10 +453,11 @@ int DISP_SetFBConfig(E_DISP_LAYER eLayer, E_FB_FMT eFbFmt, uint32_t u32ResWidth,
     switch (eLayer)
     {
     case eLayer_Video:
-        DISP->FrameBufferUPlanarAddress0 = 0U;
-        DISP->FrameBufferVPlanarAddress0 = 0U;
-        DISP->FrameBufferUStride0 = 0U;
-        DISP->FrameBufferVStride0 = 0U;
+
+        DISP->FrameBufferUPlanarAddress0 = u32DMAFBStartAddr + u32ResWidth * u32ResHeight;
+        DISP->FrameBufferVPlanarAddress0 = DISP->FrameBufferUPlanarAddress0 + u32ResWidth * u32ResHeight / 2;
+        DISP->FrameBufferUStride0 = u32ResWidth;
+        DISP->FrameBufferVStride0 = u32ResWidth / 2;
         DISP->IndexColorTableIndex0 = 0U;
 
         DISP->FrameBufferSize0 = (u32ResHeight << DISP_FrameBufferSize0_HEIGHT_Pos) |
@@ -479,13 +490,13 @@ int DISP_SetFBConfig(E_DISP_LAYER eLayer, E_FB_FMT eFbFmt, uint32_t u32ResWidth,
         /* Set frame buffer address registers */
         DISP->OverlayAddress0 = u32DMAFBStartAddr;
 
-        DISP->OverlayVStride0 = 0U;
-
-        DISP->OverlayUStride0 = 0U;
-        DISP->OverlayVStride0 = 0U;
-
         DISP->OverlaySize0 = (u32ResHeight << DISP_OverlaySize0_HEIGHT_Pos) |
                              (u32ResWidth << DISP_OverlaySize0_WIDTH_Pos);
+
+        DISP->OverlayUPlanarAddress0 = u32DMAFBStartAddr + u32ResWidth * u32ResHeight;
+        DISP->OverlayVPlanarAddress0 = DISP->OverlayUPlanarAddress0 + u32ResWidth * u32ResHeight / 2;
+        DISP->OverlayUStride0 = u32ResWidth;
+        DISP->OverlayVStride0 = u32ResWidth / 2;
 
         DISP->OverlayTL0 = (0U << DISP_OverlayTL0_Y_Pos) | (0 << DISP_OverlayTL0_X_Pos);
         DISP->OverlayBR0 = (u32ResHeight << DISP_OverlayBR0_Y_Pos) | (u32ResWidth << DISP_OverlayBR0_X_Pos);
@@ -494,9 +505,6 @@ int DISP_SetFBConfig(E_DISP_LAYER eLayer, E_FB_FMT eFbFmt, uint32_t u32ResWidth,
         DISP_SetBlendOpMode(DC_BLEND_MODE_SRC_OVER, eGloAM_NORMAL, eGloAM_NORMAL);
         DISP->OverlayClearValue0 = 0U;
         DISP_SetColorKeyValue(0U, 0U);
-
-        DISP->OverlayUPlanarAddress0 = 0U;
-        DISP->OverlayVPlanarAddress0 = 0U;
 
         break;
 
@@ -556,14 +564,6 @@ int32_t DISP_LCDDeinit(void)
     g_psDispLcdInfo_Curr = NULL;
 
     return 0;
-}
-
-const DISP_LCD_INFO *DISP_GetLCDInst(E_DISP_LCD eDispLcd)
-{
-    if (eDispLcd < eDispLcd_Cnt)
-        return &g_sLcdInfo_arr[eDispLcd];
-
-    return (const DISP_LCD_INFO *)NULL;
 }
 
 /*@}*/ /* end of group DISP_EXPORTED_FUNCTIONS */

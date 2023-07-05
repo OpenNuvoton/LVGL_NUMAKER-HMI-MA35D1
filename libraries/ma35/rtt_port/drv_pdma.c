@@ -104,7 +104,6 @@ static rt_size_t nu_pdma_memfun(void *dest, void *src, uint32_t u32DataWidth, un
 static void nu_pdma_memfun_cb(void *pvUserData, uint32_t u32Events);
 static void nu_pdma_memfun_actor_init(void);
 static int nu_pdma_memfun_employ(void);
-static int nu_pdma_non_transfer_count_get(int32_t i32ChannID);
 
 /* Public functions -------------------------------------------------------------*/
 
@@ -326,6 +325,11 @@ static inline void nu_pdma_channel_reset(int i32ChannID)
 
     /* Wait for cleared channel CHCTL. */
     while ((PDMA->CHCTL & (1 << u32ModChannId)));
+}
+
+void nu_pdma_channel_reset_user(int i32ChannID)
+{
+    nu_pdma_channel_reset(i32ChannID);
 }
 
 static rt_err_t nu_pdma_timeout_set(int i32ChannID, int i32Timeout_us)
@@ -560,7 +564,7 @@ exit_nu_pdma_callback_hijack:
     return sChnCB_Tmp.m_pfnCBHandler;
 }
 
-static int nu_pdma_non_transfer_count_get(int32_t i32ChannID)
+int nu_pdma_non_transfer_count_get(int32_t i32ChannID)
 {
     PDMA_T *PDMA = NU_PDMA_GET_BASE(i32ChannID);
     return ((PDMA->DSCT[NU_PDMA_GET_MOD_CHIDX(i32ChannID)].CTL & PDMA_DSCT_CTL_TXCNT_Msk) >> PDMA_DSCT_CTL_TXCNT_Pos) + 1;
@@ -793,6 +797,8 @@ static void _nu_pdma_transfer(int i32ChannID, uint32_t u32Peripheral, nu_pdma_de
             uint32_t u32FlushLen  = u32TxCnt * u32DataWidth;
 
 #if 0
+            rt_kprintf("[%s] CACHE_LINE_SIZE=%d\n", __func__, CACHE_LINE_SIZE);
+
             rt_kprintf("[%s] i32ChannID=%d\n", __func__, i32ChannID);
             rt_kprintf("[%s] PDMA=0x%08x\n", __func__, (uint32_t)PDMA);
             rt_kprintf("[%s] u32TxCnt=%d\n", __func__, u32TxCnt);
@@ -800,8 +806,11 @@ static void _nu_pdma_transfer(int i32ChannID, uint32_t u32Peripheral, nu_pdma_de
             rt_kprintf("[%s] u32SrcCtl=0x%08x\n", __func__, u32SrcCtl);
             rt_kprintf("[%s] u32DstCtl=0x%08x\n", __func__, u32DstCtl);
             rt_kprintf("[%s] u32FlushLen=%d\n", __func__, u32FlushLen);
+            rt_kprintf("[%s] ADDR=%08x\n", __func__, next);
+            rt_kprintf("[%s] CTL=%08x\n", __func__, next->CTL);
             rt_kprintf("[%s] DA=%08x\n", __func__, next->DA);
             rt_kprintf("[%s] SA=%08x\n", __func__, next->SA);
+            rt_kprintf("[%s] NEXT=%08x\n", __func__, next->NEXT);
 #endif
 
             /* Flush Src buffer into memory. */
@@ -850,13 +859,22 @@ static void _nu_pdma_transfer(int i32ChannID, uint32_t u32Peripheral, nu_pdma_de
                         (head->NEXT != 0) ? 1 : 0,
                         (uint32_t)head);
 
+    #if 0
     /* PDMA fetchs description on-demand if SG enabled. We check it valid in here. */
     if ( (u32Peripheral != PDMA_MEM) &&
         (head->NEXT != 0) &&
         (head->DA != psDesc->DA) )
     {
+        rt_kprintf("[%s] head=%08X reg=%08x\n", __func__, head, psDesc);
+
+        rt_kprintf("[%s] headCTL=%08x regCTL=%08x\n", __func__, head->CTL, psDesc->CTL);
+        rt_kprintf("[%s] headSA=%08x regSA=%08x\n", __func__, head->SA, psDesc->SA);
+        rt_kprintf("[%s] headDA=%08x regDA=%08x\n", __func__, head->DA, psDesc->DA);
+        rt_kprintf("[%s] headNEXT=%08x regNEXT=%08x\n", __func__, head->NEXT, psDesc->NEXT);
+
         RT_ASSERT(0);
     }
+    #endif
 
     PDMA_EnableInt(PDMA, NU_PDMA_GET_MOD_CHIDX(i32ChannID), PDMA_INT_TRANS_DONE);
 

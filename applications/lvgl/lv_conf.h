@@ -13,6 +13,9 @@
 
 #include "rtconfig.h"
 
+//#define NU_PKG_LVGL_RENDERING_LAYER    "overlay"
+//#define NU_OVERLAY_COLOR_KEY           0xFFFFFFFF
+
 #define LV_COLOR_DEPTH                  BSP_LCD_BPP
 #define LV_HOR_RES_MAX                  BSP_LCD_WIDTH
 #define LV_VER_RES_MAX                  BSP_LCD_HEIGHT
@@ -37,10 +40,13 @@
 #define LV_FONT_MONTSERRAT_46           1
 #define LV_FONT_MONTSERRAT_48           1
 
+#define CONFIG_LV_MEM_SIZE              (512*1024)
+#define CONFIG_LV_LAYER_SIMPLE_BUF_SIZE (256*1024)
+
 #define LV_USE_PERF_MONITOR             1
 //#define CONFIG_LV_LOG_LEVEL LV_LOG_LEVEL_TRACE
 
-#define LV_USE_DEMO_RTT_MUSIC         1
+//#define LV_USE_DEMO_RTT_MUSIC         1
 #if LV_USE_DEMO_RTT_MUSIC
     #define LV_COLOR_SCREEN_TRANSP        1
     #define LV_DEMO_RTT_MUSIC_AUTO_PLAY   1
@@ -50,7 +56,7 @@
 #endif
 
 /* Please comment LV_USE_DEMO_RTT_MUSIC declaration before un-comment below */
-//#define LV_USE_DEMO_WIDGETS         1
+#define LV_USE_DEMO_WIDGETS         1
 //#define LV_USE_DEMO_BENCHMARK       1
 
 #endif

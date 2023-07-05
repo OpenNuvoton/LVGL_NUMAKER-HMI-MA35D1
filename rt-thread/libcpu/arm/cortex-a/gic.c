@@ -232,8 +232,8 @@ void arm_gic_set_cpu(rt_uint32_t index, int irq, unsigned int cpumask)
 
     old_tgt = GIC_DIST_TARGET(_gic_table[index].dist_hw_base, irq);
 
-    old_tgt &= ~(0x0FFUL << ((irq % 4U)*8U));
-    old_tgt |= cpumask << ((irq % 4U)*8U);
+    old_tgt &= ~(0x0FFUL << ((irq % 4U) * 8U));
+    old_tgt |= cpumask << ((irq % 4U) * 8U);
 
     GIC_DIST_TARGET(_gic_table[index].dist_hw_base, irq) = old_tgt;
 }
@@ -352,7 +352,7 @@ void arm_gic_set_group(rt_uint32_t index, int irq, rt_uint32_t group)
     igroupr = GIC_DIST_IGROUP(_gic_table[index].dist_hw_base, irq);
     shift = (irq % 32U);
     igroupr &= (~(1U << shift));
-    igroupr |= ( (group & 0x1U) << shift);
+    igroupr |= ((group & 0x1U) << shift);
 
     GIC_DIST_IGROUP(_gic_table[index].dist_hw_base, irq) = igroupr;
 }
@@ -372,10 +372,16 @@ int arm_gic_dist_init(rt_uint32_t index, rt_uint32_t dist_base, int irq_start)
     unsigned int gic_type, i;
     rt_uint32_t cpumask = 1U << 0U;
 
+#ifdef ARM_SPI_BIND_CPU_ID
+    cpumask = 1U << ARM_SPI_BIND_CPU_ID;
+#endif
+
     RT_ASSERT(index < ARM_GIC_MAX_NR);
 
     _gic_table[index].dist_hw_base = dist_base;
     _gic_table[index].offset = irq_start;
+
+#if !defined(USE_SECONDARY_CORE_AS_PRIMARY)
 
     /* Find out how many interrupts are supported. */
     gic_type = GIC_DIST_TYPE(dist_base);
@@ -423,6 +429,8 @@ int arm_gic_dist_init(rt_uint32_t index, rt_uint32_t dist_base, int irq_start)
 
     /* Enable group0 and group1 interrupt forwarding. */
     GIC_DIST_CTRL(dist_base) = 0x01U;
+
+#endif
 
     return 0;
 }

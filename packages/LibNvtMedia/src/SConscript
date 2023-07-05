@@ -1,0 +1,18 @@
+from building import *
+import os
+cwd = GetCurrentDir()
+src = Glob('*.c')
+cpppath = [cwd]
+if os.path.isfile(os.path.join(cwd, 'libNvtMedia_gcc.a')):
+    libpath = [cwd]
+    libs = ['libNvtMedia_gcc']
+    group = DefineGroup('NvtMedia', src, depend = [''], CPPPATH = cpppath, LIBS = libs, LIBPATH = libpath)
+else:
+    group = DefineGroup('NvtMedia', src, depend = [''], CPPPATH = cpppath)
+    list = os.listdir(cwd)
+
+    for item in list:
+        if os.path.isfile(os.path.join(cwd, item, 'SConscript')):
+            group = group + SConscript(os.path.join(item, 'SConscript'))
+
+Return('group')

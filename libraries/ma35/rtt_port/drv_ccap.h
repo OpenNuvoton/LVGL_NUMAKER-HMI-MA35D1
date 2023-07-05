@@ -31,7 +31,17 @@ typedef enum
     CCAP_CMD_SET_PIPES,
     CCAP_CMD_SET_OPMODE,
     CCAP_CMD_SET_BASEADDR,
+    CCAP_CMD_BINARIZATION_FLUSH, // Flush binarization data to specified buffer.
 } ccap_cmd;
+
+typedef struct
+{
+    ccap_view_info sPipeInfo_Src; //Planar Y
+    ccap_view_info sPipeInfo_Dst; //Destination View
+    uint32_t u32Stride_Dst;
+    uint32_t u32Threshold;
+} ccap_bin_config;
+typedef ccap_bin_config *ccap_bin_config_t;
 
 typedef struct
 {

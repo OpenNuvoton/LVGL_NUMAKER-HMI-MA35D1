@@ -33,14 +33,15 @@
 #endif
 
 #if defined(PKG_USING_RAMDISK)
-    #define RAMDISK_NAME         "ramdisk0"
-    #define RAMDISK_UDC          "ramdisk1"
+    #define RAMDISK_NAME         "rd0"
+    #define RAMDISK_SIZE         (16*1024*1024)
+    //#define RAMDISK_UDC          "rd1"
     #define MOUNT_POINT_RAMDISK0 "/"
 #endif
 
 #if defined(BOARD_USING_STORAGE_SPIFLASH)
-    #define PARTITION_NAME_FILESYSTEM "filesystem"
-    #define MOUNT_POINT_SPIFLASH0 "/mnt/"PARTITION_NAME_FILESYSTEM
+    #define PARTITION_NAME_FILESYSTEM  "filesystem"
+    #define MOUNT_POINT_SPIFLASH0      "/mnt/"PARTITION_NAME_FILESYSTEM
 #endif
 
 #ifdef RT_USING_DFS_MNTTABLE
@@ -55,9 +56,6 @@ const void   *data;
 
 const struct dfs_mount_tbl mount_table[] =
 {
-#if defined(PKG_USING_RAMDISK)
-    { RAMDISK_UDC, "/mnt/ram_usbd", "elm", 0, RT_NULL },
-#endif
 #if defined(PKG_USING_DFS_YAFFS)
     { "nand1", "/mnt/nand1", "yaffs", 0, RT_NULL },
     { "rawnd1", "/mnt/nfi", "yaffs", 0, RT_NULL },
@@ -82,17 +80,18 @@ int ramdisk_device_init(void)
 {
     rt_err_t result = RT_EOK;
 
-    /* Create a 16MB RAMDISK */
+    /* Create a 32MB RAMDISK */
     result = ramdisk_init(RAMDISK_NAME, NULL, 512, 16 * 4096);
     RT_ASSERT(result == RT_EOK);
 
-    /* Create a 16MB RAMDISK */
+#if defined(RAMDISK_UDC)
+    /* Create a 32MB RAMDISK */
     result = ramdisk_init(RAMDISK_UDC, NULL, 512, 16 * 4096);
     RT_ASSERT(result == RT_EOK);
+#endif
 
     return 0;
 }
-INIT_DEVICE_EXPORT(ramdisk_device_init);
 
 /* Recursive mkdir */
 static int mkdir_p(const char *dir, const mode_t mode)
@@ -196,13 +195,19 @@ int yaffs_dev_init(void)
 
     return 0;
 }
-INIT_APP_EXPORT(yaffs_dev_init);
 #endif
 
 /* Initialize the filesystem */
 int filesystem_init(void)
 {
     rt_err_t result = RT_EOK;
+
+    if (ramdisk_device_init() != 0)
+    {
+        LOG_E("cannot init ramdisk");
+        result = -RT_ERROR;
+        goto exit_filesystem_init;
+    }
 
 #if defined(RT_USING_FAL)
     extern int fal_init_check(void);
@@ -252,17 +257,24 @@ int filesystem_init(void)
         }
     }
 
+#if defined(RAMDISK_UDC)
     if (!rt_device_find(RAMDISK_UDC))
     {
         LOG_E("cannot find %s device", RAMDISK_UDC);
-        goto exit_filesystem_init;
     }
     else
     {
         /* Format these ramdisk */
         result = (rt_err_t)dfs_mkfs("elm", RAMDISK_UDC);
         RT_ASSERT(result == RT_EOK);
+
+        /* mount ramdisk0 as root directory */
+        if (dfs_mount(RAMDISK_UDC, "/mnt/ram_usbd", "elm", 0, RT_NULL) == 0)
+        {
+            LOG_I("ramdisk mounted on \"/mnt/ram_usbd\".");
+        }
     }
+#endif
 
 #if defined(BOARD_USING_STORAGE_SPIFLASH)
     {
@@ -272,6 +284,10 @@ int filesystem_init(void)
             rt_kprintf("Failed to create block device for %s.\n", PARTITION_NAME_FILESYSTEM);
         }
     }
+#endif
+
+#if defined(PKG_USING_DFS_YAFFS) && defined(RT_USING_DFS_MNTTABLE)
+    yaffs_dev_init();
 #endif
 
 exit_filesystem_init:

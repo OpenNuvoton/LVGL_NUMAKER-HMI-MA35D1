@@ -17,6 +17,7 @@
 #include <rtdevice.h>
 #include <drivers/mmcsd_core.h>
 #include <drivers/sdio.h>
+#include <stdlib.h>
 
 #include "NuMicro.h"
 #include "drv_common.h"

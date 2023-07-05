@@ -49,9 +49,9 @@ class XUsbCom:
     def get_info(self, data) -> bytes:
         try:
             self.dev.ctrl_transfer(0x40, 0xB0, wValue=GET_INFO_CMD, wIndex=0, data_or_wLength='')
-            self.dev.ctrl_transfer(0x40, 0xA0, wValue=XFER_LEN_CMD, wIndex=76, data_or_wLength='')
+            self.dev.ctrl_transfer(0x40, 0xA0, wValue=XFER_LEN_CMD, wIndex=80, data_or_wLength='')
             self.dev.write(0x01, data, timeout=1000)
-            self.info = self.dev.read(0x81, 76, timeout=1000)
+            self.info = self.dev.read(0x81, 80, timeout=1000)
             # not used
             self.dev.read(0x81, 4, timeout=5000)
 

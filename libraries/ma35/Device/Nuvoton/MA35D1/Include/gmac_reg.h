@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  * @copyright (C) 2021 Nuvoton Technology Corp. All rights reserved.
  *****************************************************************************/
-#ifndef __GAMAC_REG_H__
+#ifndef __GMAC_REG_H__
 #define __GMAC_REG_H__
 
 #if defined ( __CC_ARM   )

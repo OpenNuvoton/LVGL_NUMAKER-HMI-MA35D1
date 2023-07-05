@@ -91,5 +91,6 @@ void nu_sys_ipclk_enable(uint32_t eIPClkIdx);
 void nu_sys_ipclk_disable(uint32_t eIPClkIdx);
 E_SYS_USB0_ID nu_sys_usb0_role(void);
 void nu_sys_check_register(S_NU_REG *psNuReg);
+int nu_tempsen_get_value(double* pfTemperture);
 
 #endif

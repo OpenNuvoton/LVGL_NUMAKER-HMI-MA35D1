@@ -1,11 +1,12 @@
 /*
- * Copyright (c) 2006-2020, RT-Thread Development Team
+ * Copyright (c) 2006-2023, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Change Logs:
  * Date           Author       Notes
  * 2020-04-17    Jianjia Ma   first version
+ * 2023-03-31    Vandoul      fix bug and add test cmd.
  */
 
 #include "board.h"
@@ -132,14 +133,15 @@ rt_err_t ramdisk_init(const char *dev_name, rt_uint8_t* disk_addr, rt_size_t blo
 
     /* set up ops */
 #ifdef RT_USING_DEVICE_OPS
-    ramdisk_dev->parent->ops  = &ramdisk_ops;
-#endif
+    ramdisk_dev->parent.ops  = &ramdisk_ops;
+#else
     ramdisk_dev->parent.init   = rt_ramdisk_init;
     ramdisk_dev->parent.open   = rt_ramdisk_open;
     ramdisk_dev->parent.read   = rt_ramdisk_read;
     ramdisk_dev->parent.write  = rt_ramdisk_write;
     ramdisk_dev->parent.close  = rt_ramdisk_close;
     ramdisk_dev->parent.control= rt_ramdisk_control;
+#endif
 
     /* no callback no private data */
     ramdisk_dev->parent.user_data = RT_NULL;
@@ -162,7 +164,57 @@ rt_err_t ramdisk_init(const char *dev_name, rt_uint8_t* disk_addr, rt_size_t blo
     return result;
 }
 
+#include <finsh.h>
 
+static int str2num(char *str)
+{
+    if(str == RT_NULL || str[0] == '\0')
+    {
+        return 0;
+    }
+    if(str[0] == '0' && ((str[1] == 'x') || (str[1] == 'X')))
+    {
+        int value = 0;
+        for(int i=2; str[i] && i < 10; i++)
+        {
+            value <<= 4;
+            if(str[i] >= '0' && str[i] <= '9')
+            {
+                value += str[i] - '0';
+            }
+            else if(str[i] >= 'a' && str[i] <= 'f')
+            {
+                value += str[i] - 'a';
+            }
+            else if(str[i] >= 'A' && str[i] <= 'F')
+            {
+                value += str[i] - 'A';
+            }
+            else
+            {
+                return value >> 4;
+            }
+        }
+        return value;
+    }
+    else
+    {
+        return atoi(str);
+    }
+}
+int ramdisk_cmd(int argc, char *argv[])
+{
+    if(argc != 4)
+    {
+        rt_kprintf("usage: %s <name> <block_size> <block_num>\n", argv[0]);
+        return 0;
+    }
+    const char *name = argv[1];
+    int bsize = str2num(argv[2]);
+    int bnum = str2num(argv[3]);
+    return ramdisk_init(name, RT_NULL, bsize, bnum);
+}
+MSH_CMD_EXPORT_ALIAS(ramdisk_cmd, ramdisk, create ramdisk device.);
 
 
 

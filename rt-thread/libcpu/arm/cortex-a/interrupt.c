@@ -291,12 +291,17 @@ unsigned int rt_hw_interrupt_get_prior_group_bits(void)
  * @param old_handler the old interrupt service routine
  */
 rt_isr_handler_t rt_hw_interrupt_install(int vector, rt_isr_handler_t handler,
-                                         void *param, const char *name)
+        void *param, const char *name)
 {
     rt_isr_handler_t old_handler = RT_NULL;
 
     if (vector < MAX_HANDLERS)
     {
+#if defined(USE_SECONDARY_CORE_AS_PRIMARY)
+        rt_hw_interrupt_set_target_cpus(vector, 1 << 1);
+        arm_gic_set_group(0, vector, 0);
+#endif
+
         old_handler = isr_table[vector].handler;
 
         if (handler != RT_NULL)

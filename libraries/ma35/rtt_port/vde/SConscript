@@ -1,0 +1,30 @@
+﻿# RT-Thread building script for component
+
+import os
+Import('RTT_ROOT')
+from building import *
+
+cwd = GetCurrentDir()
+objs = []
+libs = []
+group = []
+if GetDepend('BSP_USING_VDE'):
+
+    src = Glob('*.c') + Glob('*.cpp')
+    cpppath = [cwd]
+    libpath = [cwd]
+
+    if os.path.isfile('libvc8000_gcc.a'):
+        libs += ['libvc8000_gcc']
+        objs = DefineGroup('Drivers', src, depend = [''], CPPPATH = cpppath, LIBS = libs, LIBPATH = libpath)
+    else:
+        group = DefineGroup('Drivers', src, depend = [''], CPPPATH = cpppath)
+        list = os.listdir(cwd)
+        for d in list:
+            path = os.path.join(cwd, d)
+        if os.path.isfile(os.path.join(path, 'SConscript')):
+            objs = objs + SConscript(os.path.join(d, 'SConscript'))
+
+    objs += group
+
+Return('objs')

@@ -14,6 +14,7 @@
 #include <nu_bitutil.h>
 
 #define DBG_TAG "ili_tpc"
+//#define DBG_LVL DBG_LOG
 #define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
@@ -130,6 +131,8 @@ static int ili_get_ptl_ver(ili_ts_data_t psIliTs,
     if (error)
         return error;
 
+    LOG_HEX("ptl_ver", 16, &outbuf[0], 3);
+
     psIliTs->ptl.ver = nu_get16_be(outbuf);
     psIliTs->ptl.ver_major = outbuf[0];
 
@@ -146,6 +149,8 @@ static int ili_get_mcu_ver(ili_ts_data_t psIliTs,
     error = ili_i2c_write_and_read(psIliTs->client, buf, 1, 5, outbuf, 32);
     if (error)
         return error;
+
+    LOG_HEX("mcu_ver", 16, &outbuf[0], 32);
 
     psIliTs->mcu_ver = nu_get16_le(outbuf);
     rt_memset(psIliTs->product_id, 0, sizeof(psIliTs->product_id));
@@ -165,6 +170,8 @@ static int ili_get_fw_ver(ili_ts_data_t psIliTs,
     if (error)
         return error;
 
+    LOG_HEX("fw_ver", 16, &outbuf[0], 8);
+
     rt_memcpy(psIliTs->firmware_ver, outbuf, 8);
 
     return 0;
@@ -180,6 +187,8 @@ static int ili_get_scrn_res(ili_ts_data_t psIliTs,
     error = ili_i2c_write_and_read(psIliTs->client, buf, 1, 5, outbuf, 8);
     if (error)
         return error;
+
+    LOG_HEX("scrn_res", 16, &outbuf[0], 8);
 
     psIliTs->screen_min_x = nu_get16_le(outbuf);
     psIliTs->screen_min_y = nu_get16_le(outbuf + 2);
@@ -200,7 +209,13 @@ static int ili_get_tp_res(ili_ts_data_t psIliTs,
     if (error)
         return error;
 
-    psIliTs->max_tp = outbuf[8];
+    LOG_HEX("tp_res", 16, &outbuf[0], 15);
+
+    if (psIliTs->mcu_ver == 0x2511)
+        psIliTs->max_tp = outbuf[6];
+    else
+        psIliTs->max_tp = outbuf[8];
+
     if (psIliTs->max_tp > ILI_MAX_TOUCH)
     {
         return -RT_EINVAL;
@@ -219,6 +234,8 @@ static int ili_get_ic_mode(ili_ts_data_t psIliTs,
     error = ili_i2c_write_and_read(psIliTs->client, buf, 1, 5, outbuf, 2);
     if (error)
         return error;
+
+    LOG_HEX("ic_mode", 16, &outbuf[0], 2);
 
     psIliTs->ic_mode = outbuf[0];
     return 0;
@@ -301,42 +318,42 @@ exit_ili_get_info:
 
 static void ili_info_dump(ili_ts_data_t psIliTs)
 {
-    rt_kprintf("reset_pin: %d\n", psIliTs->reset_pin);
-    rt_kprintf("irq_pin: %d\n", psIliTs->irq_pin);
-    rt_kprintf("ptl.ver: %x \n", psIliTs->ptl.ver_major);
-    rt_kprintf("mcu_ver: %x\n", psIliTs->mcu_ver);
-    rt_kprintf("firmware_ver:[%02X%02X.%02X%02X.%02X%02X.%02X%02X]\n",
-               psIliTs->firmware_ver[0],
-               psIliTs->firmware_ver[1],
-               psIliTs->firmware_ver[2],
-               psIliTs->firmware_ver[3],
-               psIliTs->firmware_ver[4],
-               psIliTs->firmware_ver[5],
-               psIliTs->firmware_ver[6],
-               psIliTs->firmware_ver[7]);
+    LOG_I("reset_pin: %04x", psIliTs->reset_pin);
+    LOG_I("irq_pin: %04x", psIliTs->irq_pin);
+    LOG_I("ptl.ver: %x", psIliTs->ptl.ver_major);
+    LOG_I("mcu_ver: %x", psIliTs->mcu_ver);
+    LOG_I("firmware_ver:[%02X%02X.%02X%02X.%02X%02X.%02X%02X]",
+          psIliTs->firmware_ver[0],
+          psIliTs->firmware_ver[1],
+          psIliTs->firmware_ver[2],
+          psIliTs->firmware_ver[3],
+          psIliTs->firmware_ver[4],
+          psIliTs->firmware_ver[5],
+          psIliTs->firmware_ver[6],
+          psIliTs->firmware_ver[7]);
 
-    rt_kprintf("product_id: %s\n", psIliTs->product_id);
+    LOG_I("product_id: %s", psIliTs->product_id);
 
-    rt_kprintf("screen_max_x: %d\n", psIliTs->screen_max_x);
-    rt_kprintf("screen_max_y: %d\n", psIliTs->screen_max_y);
-    rt_kprintf("screen_min_x: %d\n", psIliTs->screen_min_x);
-    rt_kprintf("screen_min_y: %d\n", psIliTs->screen_min_y);
-    rt_kprintf("max_tp: %d\n", psIliTs->max_tp);
-    rt_kprintf("ic_mode: %d\n", psIliTs->ic_mode);
+    LOG_I("screen_max_x: %d", psIliTs->screen_max_x);
+    LOG_I("screen_max_y: %d", psIliTs->screen_max_y);
+    LOG_I("screen_min_x: %d", psIliTs->screen_min_x);
+    LOG_I("screen_min_y: %d", psIliTs->screen_min_y);
+    LOG_I("max_tp: %d", psIliTs->max_tp);
+    LOG_I("ic_mode: %d", psIliTs->ic_mode);
 }
 
 static rt_int16_t pre_x[ILI_MAX_TOUCH];
 static rt_int16_t pre_y[ILI_MAX_TOUCH];
 static rt_int16_t pre_w[ILI_MAX_TOUCH];
-static rt_uint8_t s_tp_dowm[ILI_MAX_TOUCH];
+static rt_uint8_t s_tp_down[ILI_MAX_TOUCH];
 
 static void ili_touch_up(void *buf, int8_t id)
 {
     struct rt_touch_data *read_data = (struct rt_touch_data *)buf;
 
-    if (s_tp_dowm[id] == 1)
+    if (s_tp_down[id] == 1)
     {
-        s_tp_dowm[id] = 0;
+        s_tp_down[id] = 0;
         read_data[id].event = RT_TOUCH_EVENT_UP;
     }
     else
@@ -359,15 +376,14 @@ static void ili_touch_down(void *buf, int8_t id, int16_t x, int16_t y, int16_t w
 {
     struct rt_touch_data *read_data = (struct rt_touch_data *)buf;
 
-    if (s_tp_dowm[id] == 1)
+    if (s_tp_down[id] == 1)
     {
         read_data[id].event = RT_TOUCH_EVENT_MOVE;
-
     }
     else
     {
         read_data[id].event = RT_TOUCH_EVENT_DOWN;
-        s_tp_dowm[id] = 1;
+        s_tp_down[id] = 1;
     }
 
     read_data[id].timestamp = rt_touch_get_ts();
@@ -386,104 +402,182 @@ static rt_uint8_t pre_touch = 0;
 static rt_size_t ili_read_point(struct rt_touch_device *touch, void *buf, rt_size_t read_num)
 {
 #define DIV_ROUND_UP(n,d) (((n) + (d) - 1) / (d))
-
+#define PKT_MAX_POINT 10
     struct ili_ts_data *ts = (ili_ts_data_t)touch;
-    rt_uint8_t tmpbuf[256] = {0};
+    rt_uint8_t tmpbuf[128] = {0};
     rt_err_t error = 0;
     rt_int32_t packet_len = 5;
-    rt_int32_t packet_max_point = 10;
-    rt_int8_t touch_num;
+    rt_int8_t touch_num = 0;
     rt_int32_t i, count;
     rt_uint16_t x, y;
     rt_int32_t   tip, point_id;
+    uint32_t range_x = touch->info.range_x;
+    uint32_t range_y = touch->info.range_y;
 
     RT_ASSERT(touch);
     RT_ASSERT(buf);
     RT_ASSERT(read_num != 0);
     RT_ASSERT(read_num <= ILI_MAX_TOUCH);
 
-    error = ili_i2c_write_and_read(ts->client, NULL, 0, 0, tmpbuf, 64);
-    if (error)
+    if (ts->mcu_ver == 0x2511)
     {
-        LOG_E("get touch info failed, err:%d\n", error);
-        goto exit_ili_read_point;
-    }
+        rt_uint8_t cmdbuf[8] = {0};
 
-    touch_num = tmpbuf[REPORT_COUNT_ADDRESS];
-    if (touch_num > ts->max_tp)
-    {
-        LOG_E("FW report max point:%d > panel info. max:%d\n", touch_num, ts->max_tp);
-        goto exit_ili_read_point;
-    }
-
-    count = DIV_ROUND_UP(touch_num, packet_max_point);
-    for (i = 1; i < count; i++)
-    {
-        error = ili_i2c_write_and_read(ts->client, NULL, 0, 0, tmpbuf + i * 64, 64);
-        if (error)
+        if (read_num > ts->max_tp)
         {
-            LOG_E("get touch info. failed, cnt:%d, err:%d\n",   count, error);
+            LOG_E("FW report max point:%d > panel info. max:%d\n", read_num, ts->max_tp);
             goto exit_ili_read_point;
         }
-    }
 
-    if (pre_touch > touch_num)                                       /* point up */
-    {
-        for (i = 0; i < ILI_MAX_TOUCH; i++)
+        cmdbuf[0] = 0x10; //REG_TOUCHDATA
+        error = ili_i2c_write_and_read(ts->client, &cmdbuf[0], 1, 0, &tmpbuf[0], 1 + packet_len * 6);
+        if (error)
         {
-            rt_uint8_t j;
-            for (j = 0; j < touch_num; j++)                          /* this time touch num */
+            LOG_E("get touch info failed, err:%d\n", error);
+            goto exit_ili_read_point;
+        }
+
+        if (tmpbuf[0] == 1)
+        {
+            touch_num = 6;
+        }
+        else if (tmpbuf[0] == 2)
+        {
+            cmdbuf[0] = 0x14; //REG_TOUCHDATA2
+            error = ili_i2c_write_and_read(ts->client, &cmdbuf[0], 1, 0, &tmpbuf[1 + packet_len * 6], packet_len * 4);
+            if (error)
             {
-                point_id = tmpbuf[j * packet_len + 1] & 0x3F;
-
-                if (pre_id[i] == point_id)                   /* this id is not free */
-                    break;
-
+                LOG_E("get touch info failed, err:%d\n", error);
+                goto exit_ili_read_point;
             }
-            if ((j == touch_num) && (pre_id[i] != -1))
+            touch_num = 6 + 4;
+        }
+        LOG_HEX("raw", 16, &tmpbuf[0], 1 + packet_len * touch_num);
+
+        if (read_num <= touch_num)
+        {
+            for (i = 0; i < read_num; i++)
             {
-                ili_touch_up(buf, pre_id[i]);
-                pre_id[i] = -1;
+                int offset = 1 + i * packet_len;
+                tip = tmpbuf[offset] & 0x80;
+                if (!tip)
+                {
+                    // Up
+                    ili_touch_up(buf, i);
+                    continue;
+                }
+
+                x = ((tmpbuf[offset + 0] & 0x3f) << 8) | tmpbuf[offset + 1];
+                y = (tmpbuf[offset + 2] << 8) | tmpbuf[offset + 3] ;
+
+                if (x > ts->screen_max_x || x < ts->screen_min_x ||
+                        y > ts->screen_max_y || y < ts->screen_min_y)
+                {
+                    LOG_E("[%d %d] invalid position, X[%d,%d,%d], Y[%d,%d,%d]\n",
+                          i,
+                          offset,
+                          ts->screen_min_x, x, ts->screen_max_x,
+                          ts->screen_min_y, y, ts->screen_max_y);
+                    continue;
+                }
+
+                x = (uint16_t)(range_x * x / ts->screen_max_x);
+                y = (uint16_t)(range_y * y / ts->screen_max_y);
+
+                //LOG_I("[%d/%d] x:%d y:%d\n", i, read_num, x, y);
+
+                ili_touch_down(buf, i, x, y, 255);
             }
         }
-    }
 
-    if (touch_num > 0)
+    }
+    else
     {
-        uint32_t range_x = touch->info.range_x;
-        uint32_t range_y = touch->info.range_y;
-
-        for (i = 0; i < touch_num; i++)
+        error = ili_i2c_write_and_read(ts->client, NULL, 0, 0, tmpbuf, 64);
+        if (error)
         {
-            tip = tmpbuf[i * packet_len + 1] & 0x40;
-            point_id = tmpbuf[i * packet_len + 1] & 0x3F;
-            pre_id[i] = point_id;
-            if (!tip)
-            {
-                // Up
-                ili_touch_up(buf, point_id);
-                continue;
-            }
-
-            x = nu_get16_le(tmpbuf + i * packet_len + 2);
-            y = nu_get16_le(tmpbuf + i * packet_len + 4);
-
-            if (x > ts->screen_max_x || x < ts->screen_min_x ||
-                    y > ts->screen_max_y || y < ts->screen_min_y)
-            {
-                LOG_E("invalid position, X[%d,%u,%d], Y[%d,%u,%d]\n",
-                      ts->screen_min_x, x, ts->screen_max_x,
-                      ts->screen_min_y, y, ts->screen_max_y);
-                continue;
-            }
-            x = (uint16_t)(range_x * x / ts->screen_max_x);
-            y = (uint16_t)(range_y * y / ts->screen_max_y);
-
-            ili_touch_down(buf, point_id, x, y, 255);
+            LOG_E("get touch info failed, err:%d\n", error);
+            goto exit_ili_read_point;
         }
-    }
+
+        //LOG_HEX("read", 16, &tmpbuf[0], 64);
+
+        touch_num = tmpbuf[REPORT_COUNT_ADDRESS];
+        if (touch_num > ts->max_tp)
+        {
+            LOG_E("FW report max point:%d > panel info. max:%d\n", touch_num, ts->max_tp);
+            goto exit_ili_read_point;
+        }
+        rt_kprintf("%s %d    %d\n", __func__, __LINE__, touch_num);
+
+        count = DIV_ROUND_UP(touch_num, PKT_MAX_POINT);
+        for (i = 1; i < count; i++)
+        {
+            error = ili_i2c_write_and_read(ts->client, NULL, 0, 0, tmpbuf + i * 64, 64);
+            if (error)
+            {
+                LOG_E("get touch info. failed, cnt:%d, err:%d\n",   count, error);
+                goto exit_ili_read_point;
+            }
+        }
+
+        if (pre_touch > touch_num)                                       /* point up */
+        {
+            for (i = 0; i < ILI_MAX_TOUCH; i++)
+            {
+                rt_uint8_t j;
+                for (j = 0; j < touch_num; j++)                          /* this time touch num */
+                {
+                    point_id = tmpbuf[j * packet_len + 1] & 0x3F;
+
+                    if (pre_id[i] == point_id)                   /* this id is not free */
+                        break;
+
+                }
+                if ((j == touch_num) && (pre_id[i] != -1))
+                {
+                    ili_touch_up(buf, pre_id[i]);
+                    pre_id[i] = -1;
+                }
+            }
+        }
+
+        if (touch_num > 0)
+        {
+            for (i = 0; i < touch_num; i++)
+            {
+                tip = tmpbuf[i * packet_len + 1] & 0x40;
+                point_id = tmpbuf[i * packet_len + 1] & 0x3F;
+                pre_id[i] = point_id;
+                if (!tip)
+                {
+                    // Up
+                    ili_touch_up(buf, point_id);
+                    continue;
+                }
+
+                x = nu_get16_le(tmpbuf + i * packet_len + 2);
+                y = nu_get16_le(tmpbuf + i * packet_len + 4);
+
+                if (x > ts->screen_max_x || x < ts->screen_min_x ||
+                        y > ts->screen_max_y || y < ts->screen_min_y)
+                {
+                    LOG_E("invalid position, X[%d,%u,%d], Y[%d,%u,%d]\n",
+                          ts->screen_min_x, x, ts->screen_max_x,
+                          ts->screen_min_y, y, ts->screen_max_y);
+                    continue;
+                }
+                x = (uint16_t)(range_x * x / ts->screen_max_x);
+                y = (uint16_t)(range_y * y / ts->screen_max_y);
+
+                ili_touch_down(buf, point_id, x, y, 255);
+            }
+        }
+
+    } // if (ts->mcu_ver == 0x2511)
 
     pre_touch = touch_num;
+
 
     return read_num;
 
@@ -512,7 +606,7 @@ static rt_err_t ili_control(struct rt_touch_device *touch, int cmd, void *arg)
 
         touch->info.type      = RT_TOUCH_TYPE_CAPACITANCE;
         touch->info.vendor    = RT_TOUCH_VENDOR_UNKNOWN;
-        touch->info.point_num = g_iliTsData.max_tp;
+        touch->info.point_num = (g_iliTsData.max_tp >= ILI_MAX_TOUCH) ? ILI_MAX_TOUCH : g_iliTsData.max_tp ;
 
         rt_memcpy(arg, &touch->info, sizeof(struct rt_touch_info));
     }
@@ -618,7 +712,7 @@ int rt_hw_ili_tpc_init(const char *name, struct rt_touch_config *cfg)
     rt_memset(&pre_x[0], 0xff, ILI_MAX_TOUCH * sizeof(rt_int16_t));
     rt_memset(&pre_y[0], 0xff, ILI_MAX_TOUCH * sizeof(rt_int16_t));
     rt_memset(&pre_w[0], 0xff, ILI_MAX_TOUCH * sizeof(rt_int16_t));
-    rt_memset(&s_tp_dowm[0], 0, ILI_MAX_TOUCH * sizeof(rt_uint8_t));
+    rt_memset(&s_tp_down[0], 0, ILI_MAX_TOUCH * sizeof(rt_uint8_t));
     rt_memset(&pre_id[0], 0xff,  ILI_MAX_TOUCH * sizeof(rt_uint8_t));
 
     /* register touch device */

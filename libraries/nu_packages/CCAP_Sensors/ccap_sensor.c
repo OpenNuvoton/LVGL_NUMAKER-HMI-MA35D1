@@ -58,6 +58,41 @@ rt_err_t ccap_sensor_i2c_read(struct rt_i2c_bus_device *i2cdev, rt_uint16_t addr
     return RT_EOK;
 }
 
+static rt_err_t ccap_sensor_pack_txdata(sensor_priv_t pdev, const sensor_reg_val *psRegVal, uint8_t *pu8TxData)
+{
+    switch (pdev->u16AddrBL)
+    {
+    case 2:
+        pu8TxData[0] = (uint8_t)((psRegVal->u16Addr >> 8) & 0x00FF); //addr [15:8]
+        pu8TxData[1] = (uint8_t)((psRegVal->u16Addr) & 0x00FF); //addr [ 7:0]
+        break;
+
+    case 1:
+        pu8TxData[0] = (uint8_t)((psRegVal->u16Addr) & 0x00FF); //addr [ 7:0]
+        break;
+
+    default:
+        return -RT_ERROR;
+    }
+
+    switch (pdev->u16ValBL)
+    {
+    case 2:
+        pu8TxData[pdev->u16AddrBL] = (uint8_t)((psRegVal->u16Val >> 8) & 0x00FF); //data [15:8]
+        pu8TxData[pdev->u16AddrBL + 1] = (uint8_t)((psRegVal->u16Val) & 0x00FF); //data [ 7:0]
+        break;
+
+    case 1:
+        pu8TxData[pdev->u16AddrBL] = (uint8_t)((psRegVal->u16Val) & 0x00FF);  //data [ 7:0]
+        break;
+
+    default:
+        return -RT_ERROR;
+    }
+
+    return RT_EOK;
+}
+
 static rt_err_t ccap_sensor_set_mode_general(struct rt_i2c_bus_device *i2cdev, sensor_priv *pdev, sensor_mode_info *psInfo)
 {
     uint8_t au8TxData[4];
@@ -76,42 +111,14 @@ static rt_err_t ccap_sensor_set_mode_general(struct rt_i2c_bus_device *i2cdev, s
     for (i = 0; i < psInfo->u32RegArrSize; i++)
     {
         const sensor_reg_val *psRegVal = &psInfo->psRegArr[i];
-
-        switch (pdev->u16AddrBL)
+        if (RT_EOK == ccap_sensor_pack_txdata(pdev, psRegVal, &au8TxData[0]))
         {
-        case 2:
-            au8TxData[0] = (uint8_t)((psRegVal->u16Addr >> 8) & 0x00FF); //addr [15:8]
-            au8TxData[1] = (uint8_t)((psRegVal->u16Addr) & 0x00FF); //addr [ 7:0]
-            break;
-
-        case 1:
-            au8TxData[0] = (uint8_t)((psRegVal->u16Addr) & 0x00FF); //addr [ 7:0]
-            break;
-
-        default:
-            return -RT_ERROR;
-        }
-
-        switch (pdev->u16ValBL)
-        {
-        case 2:
-            au8TxData[pdev->u16AddrBL] = (uint8_t)((psRegVal->u16Val >> 8) & 0x00FF); //data [15:8]
-            au8TxData[pdev->u16AddrBL + 1] = (uint8_t)((psRegVal->u16Val) & 0x00FF); //data [ 7:0]
-            break;
-
-        case 1:
-            au8TxData[pdev->u16AddrBL] = (uint8_t)((psRegVal->u16Val) & 0x00FF);  //data [ 7:0]
-            break;
-
-        default:
-            return -RT_ERROR;
-        }
-
-        //LOG_I("SlaveID=0x%02x, Addr: [0x%02X,0x%02X], Value: [0x%02X,0x%02X], Length: %d", msg.addr, au8TxData[0], au8TxData[1], au8TxData[2], au8TxData[3], msg.len  );
-        if (ccap_sensor_i2c_write(i2cdev, pdev->u16DevAddr, (rt_uint8_t *)&au8TxData[0], pdev->u16AddrBL + pdev->u16ValBL) != RT_EOK)
-        {
-            LOG_E("[Failed] addr=%x, data=%d\n", psRegVal->u16Addr, psRegVal->u16Val);
-            return -RT_ERROR;
+            //LOG_I("SlaveID=0x%02x, Addr: [0x%02X,0x%02X], Value: [0x%02X,0x%02X], Length: %d", msg.addr, au8TxData[0], au8TxData[1], au8TxData[2], au8TxData[3], msg.len  );
+            if (ccap_sensor_i2c_write(i2cdev, pdev->u16DevAddr, (rt_uint8_t *)&au8TxData[0], pdev->u16AddrBL + pdev->u16ValBL) != RT_EOK)
+            {
+                LOG_E("[Failed] addr=%x, data=%d\n", psRegVal->u16Addr, psRegVal->u16Val);
+                return -RT_ERROR;
+            }
         }
     }
 
@@ -129,7 +136,13 @@ static rt_err_t ccap_sensor_setpower(ccap_sensor_dev *pdev, rt_bool_t bOn)
     psIo = pdev->psIo;
     psSensorPriv = (sensor_priv_t)((rt_device_t)pdev)->user_data;
 
-    LOG_I("sensor power pin: %d, Active low: %s", psIo->PwrDwnPin, bOn ? "TRUE" : "FALSE");
+    if (psIo->PwrDwnPin == NU_PIN_UNUSED)
+    {
+        LOG_I("sensor power pin: unused");
+        return RT_EOK;
+    }
+    else
+        LOG_I("sensor power pin: %d, Active low: %s", psIo->PwrDwnPin, bOn ? "TRUE" : "FALSE");
 
     rt_pin_mode(psIo->PwrDwnPin, PIN_MODE_OUTPUT);
 
@@ -156,7 +169,13 @@ static rt_err_t ccap_sensor_reset(ccap_sensor_dev *pdev)
     psIo = pdev->psIo;
     psSensorPriv = (sensor_priv_t)((rt_device_t)pdev)->user_data;
 
-    LOG_I("sensor reset pin: %d, Active low: %s", psIo->RstPin, psSensorPriv->RstActLow ? "TRUE" : "FALSE");
+    if (psIo->RstPin == NU_PIN_UNUSED)
+    {
+        LOG_I("sensor reset pin: unused");
+        return RT_EOK;
+    }
+    else
+        LOG_I("sensor reset pin: %d, Active low: %s", psIo->RstPin, psSensorPriv->RstActLow ? "TRUE" : "FALSE");
 
     rt_pin_mode(psIo->RstPin, PIN_MODE_OUTPUT);
 
@@ -233,8 +252,11 @@ static rt_err_t ccap_sensor_control(rt_device_t dev, int cmd, void *args)
 {
     rt_err_t result = RT_EOK;
     ccap_sensor_dev *pdev = (ccap_sensor_dev *)dev;
+    sensor_priv_t psSensorPriv;
 
     RT_ASSERT(dev);
+    psSensorPriv = (sensor_priv_t)dev->user_data;
+    RT_ASSERT(psSensorPriv);
 
     switch (cmd)
     {
@@ -254,7 +276,6 @@ static rt_err_t ccap_sensor_control(rt_device_t dev, int cmd, void *args)
         ccap_sensor_io *psIo = pdev->psIo;
         struct rt_i2c_bus_device *i2cbus;
         sensor_mode_info *psInfo;
-        sensor_priv *psSensorPriv = (sensor_priv *)dev->user_data;
 
         RT_ASSERT(args);
         RT_ASSERT(psIo);
@@ -275,11 +296,9 @@ static rt_err_t ccap_sensor_control(rt_device_t dev, int cmd, void *args)
     case CCAP_SENSOR_CMD_GET_SUIT_MODE:
     {
         /* Get private data of sensor */
-        sensor_priv_t psSensorPriv = (sensor_priv_t)dev->user_data;
         ccap_view_info_t psViewInfo;
 
         RT_ASSERT(args);
-        RT_ASSERT(psSensorPriv);
 
         psViewInfo = *((ccap_view_info_t *)args);
         RT_ASSERT(psViewInfo);
@@ -287,6 +306,53 @@ static rt_err_t ccap_sensor_control(rt_device_t dev, int cmd, void *args)
         psViewInfo = ccap_find_suit_mode(psViewInfo, (sensor_priv_t)psSensorPriv);
 
         *((ccap_view_info_t *)args) = psViewInfo;
+    }
+    break;
+
+    case CCAP_SENSOR_CMD_READ_REG:
+    case CCAP_SENSOR_CMD_WRITE_REG:
+    {
+        ccap_sensor_io *psIo = pdev->psIo;
+        struct rt_i2c_bus_device *i2cbus;
+        sensor_reg_val_t psRegVal = (sensor_reg_val_t)args;
+        uint8_t au8TxData[4];
+
+        RT_ASSERT(args);
+        RT_ASSERT(psIo);
+        RT_ASSERT(psIo->I2cName);
+
+        i2cbus = (struct rt_i2c_bus_device *)rt_device_find(psIo->I2cName);
+        RT_ASSERT(i2cbus);
+
+        LOG_D("[%s] %04x, %04x", dev->parent.name, psRegVal->u16Addr, psRegVal->u16Val);
+
+        if (RT_EOK == ccap_sensor_pack_txdata(psSensorPriv, psRegVal, &au8TxData[0]))
+        {
+            if ((cmd == CCAP_SENSOR_CMD_WRITE_REG) &&
+                    (ccap_sensor_i2c_write(i2cbus,
+                                           psSensorPriv->u16DevAddr,
+                                           (rt_uint8_t *)&au8TxData[0],
+                                           psSensorPriv->u16AddrBL + psSensorPriv->u16ValBL) != RT_EOK))
+            {
+                LOG_E("[Fail to write] addr=%x, data=%d\n", psRegVal->u16Addr, psRegVal->u16Val);
+                result = -RT_ERROR;
+            }
+            else if ((cmd == CCAP_SENSOR_CMD_READ_REG) &&
+                     (ccap_sensor_i2c_read(i2cbus,
+                                           psSensorPriv->u16DevAddr,
+                                           (rt_uint8_t *)&au8TxData[0],
+                                           psSensorPriv->u16AddrBL,
+                                           (rt_uint8_t *)&psRegVal->u16Val,
+                                           psSensorPriv->u16ValBL) != RT_EOK))
+            {
+                LOG_E("[Fail to read] addr=%x\n", psRegVal->u16Addr);
+                result = -RT_ERROR;
+            }
+        }
+        else
+        {
+            result = -RT_ERROR;
+        }
     }
     break;
 

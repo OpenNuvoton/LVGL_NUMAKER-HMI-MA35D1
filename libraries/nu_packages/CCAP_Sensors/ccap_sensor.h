@@ -31,6 +31,8 @@ typedef enum
     CCAP_SENSOR_CMD_SET_POWER,
     CCAP_SENSOR_CMD_SET_MODE,
     CCAP_SENSOR_CMD_GET_SUIT_MODE,
+    CCAP_SENSOR_CMD_WRITE_REG,
+    CCAP_SENSOR_CMD_READ_REG,
 } ccap_sensor_cmd;
 
 typedef struct

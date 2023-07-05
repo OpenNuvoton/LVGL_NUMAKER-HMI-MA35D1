@@ -156,6 +156,7 @@
 /* POSIX (Portable Operating System Interface) layer */
 
 #define RT_USING_POSIX_FS
+#define RT_USING_POSIX_DEVIO
 #define RT_USING_POSIX_POLL
 #define RT_USING_POSIX_SELECT
 #define RT_USING_POSIX_SOCKET
@@ -168,6 +169,10 @@
 
 /* Interprocess Communication (IPC) */
 
+#define RT_USING_POSIX_PIPE
+#define RT_USING_POSIX_PIPE_SIZE 512
+#define RT_USING_POSIX_MESSAGE_QUEUE
+#define RT_USING_POSIX_MESSAGE_SEMAPHORE
 
 /* Socket is in the 'Network' category */
 
@@ -313,8 +318,8 @@
 #define PKG_LVGL_THREAD_STACK_SIZE 4096
 #define PKG_LVGL_DISP_REFR_PERIOD 16
 #define PKG_LVGL_USING_DEMOS
-#define PKG_LVGL_USING_V8_3_LATEST_VERSION
-#define PKG_LVGL_VER_NUM 0x0803F
+#define PKG_LVGL_USING_V08035
+#define PKG_LVGL_VER_NUM 0x08035
 
 /* u8g2: a monochrome graphic library */
 
@@ -324,9 +329,6 @@
 #define PKG_WP_USING_RECORD
 #define PKG_WP_RECORD_DEVICE "sound0"
 #define PKG_USING_WAVPLAYER_LATEST_VERSION
-
-/* PainterEngine: A cross-platform graphics application framework written in C language */
-
 
 /* tools packages */
 
@@ -383,7 +385,7 @@
 /* Arduino libraries */
 
 
-/* Projects */
+/* Projects and Demos */
 
 
 /* Sensors */
@@ -408,13 +410,11 @@
 
 /* Other */
 
+
 /* Signal IO */
 
 
 /* Uncategorized */
-
-#define UTEST_CMD_PREFIX "bsp.nuvoton.utest."
-#define BOARD_USE_UTEST
 
 /* Hardware Drivers Config */
 
@@ -480,7 +480,7 @@
 #define BSP_USING_HWSEM0
 #define BSP_USING_WHC
 #define BSP_USING_WHC0
-#define BSP_USING_NFI
+#define BSP_USING_VDE
 #define BSP_USING_USBH
 #define BSP_USING_HSUSBH0
 #define BSP_USING_HSUSBH1
@@ -491,9 +491,6 @@
 #define BOARD_USING_NAU8822
 #define BOARD_USING_STORAGE_SDCARD
 #define BOARD_USING_STORAGE_EMMC
-#define BOARD_USING_STORAGE_RAWNAND
-#define BOARD_USING_STORAGE_SPINAND
-#define BOARD_USING_MPU6500
 #define BOARD_USING_USBHOST
 
 /* Board extended module drivers */
@@ -508,6 +505,8 @@
 #define NU_PKG_USING_DEMO
 #define NU_PKG_USING_NAU8822
 #define NU_PKG_USING_ADC_TOUCH
-#define NU_PKG_USING_SPINAND
+#define NU_PKG_USING_ADC_TOUCH_HW
+#define UTEST_CMD_PREFIX "bsp.nuvoton.utest."
+#define BOARD_USE_UTEST
 
 #endif

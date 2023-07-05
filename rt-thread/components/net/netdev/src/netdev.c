@@ -1077,19 +1077,15 @@ int netdev_cmd_ping(char* target_name, char *netdev_name, rt_uint32_t times, rt_
     if (netdev_name != RT_NULL)
     {
         netdev = netdev_get_by_name(netdev_name);
-        if (netdev == RT_NULL)
-        {
-            netdev = netdev_default;
-            rt_kprintf("ping: not found specified netif, using default netdev %s.\n", netdev->name);
-        }
     }
 
-    if (NETDEV_PING_IS_COMMONICABLE(netdev_default))
+    if (netdev == RT_NULL)
     {
-        /* using default network interface device for ping */
         netdev = netdev_default;
+        rt_kprintf("ping: not found specified netif, using default netdev %s.\n", netdev->name);
     }
-    else
+
+    if (!NETDEV_PING_IS_COMMONICABLE(netdev))
     {
         /* using first internet up status network interface device */
         netdev = netdev_get_first_by_flags(NETDEV_FLAG_LINK_UP);
@@ -1110,6 +1106,8 @@ int netdev_cmd_ping(char* target_name, char *netdev_name, rt_uint32_t times, rt_
         }
     }
 
+    rt_kprintf("netdev[%c%c]\n", netdev->name[0], netdev->name[1]);
+
     for (index = 0; index < times; index++)
     {
         int delay_tick = 0;
@@ -1121,25 +1119,25 @@ int netdev_cmd_ping(char* target_name, char *netdev_name, rt_uint32_t times, rt_
         if (ret == -RT_ETIMEOUT)
         {
             rt_kprintf("ping: from %s icmp_seq=%d timeout\n",
-                (ip_addr_isany(&(ping_resp.ip_addr))) ? target_name : inet_ntoa(ping_resp.ip_addr), index);
+                       (ip_addr_isany(&(ping_resp.ip_addr))) ? target_name : inet_ntoa(ping_resp.ip_addr), index);
         }
         else if (ret == -RT_ERROR)
         {
             rt_kprintf("ping: unknown %s %s\n",
-                (ip_addr_isany(&(ping_resp.ip_addr))) ? "host" : "address",
-                    (ip_addr_isany(&(ping_resp.ip_addr))) ? target_name : inet_ntoa(ping_resp.ip_addr));
+                       (ip_addr_isany(&(ping_resp.ip_addr))) ? "host" : "address",
+                       (ip_addr_isany(&(ping_resp.ip_addr))) ? target_name : inet_ntoa(ping_resp.ip_addr));
         }
         else
         {
             if (ping_resp.ttl == 0)
             {
                 rt_kprintf("%d bytes from %s icmp_seq=%d time=%d ms\n",
-                            ping_resp.data_len, inet_ntoa(ping_resp.ip_addr), index, ping_resp.ticks);
+                           ping_resp.data_len, inet_ntoa(ping_resp.ip_addr), index, ping_resp.ticks);
             }
             else
             {
                 rt_kprintf("%d bytes from %s icmp_seq=%d ttl=%d time=%d ms\n",
-                            ping_resp.data_len, inet_ntoa(ping_resp.ip_addr), index, ping_resp.ttl, ping_resp.ticks);
+                           ping_resp.data_len, inet_ntoa(ping_resp.ip_addr), index, ping_resp.ttl, ping_resp.ticks);
             }
         }
 

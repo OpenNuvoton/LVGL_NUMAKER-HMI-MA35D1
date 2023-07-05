@@ -102,6 +102,9 @@ mp_mode = False
 WINDOWS_PATH = "C:\\Program Files (x86)\\Nuvoton Tools\\NuWriter\\"
 LINUX_PATH = "/usr/share/nuwriter/"
 
+def switch_mp_mode(flag):
+    global mp_mode
+    mp_mode = not mp_mode
 
 def conv_env(env_file_name, blk_size) -> bytearray:
 
@@ -239,20 +242,35 @@ def conv_otp(opt_file_name) -> (bytearray, int):
                         data[8:12] = plm_val.to_bytes(4, byteorder='little')
             option |= OPT_OTPBLK2
         elif key == 'mac0':
+            if len(bytes.fromhex(d['mac0'])) != 6:
+                print("mac0 is 6 bytes, please check the size")
+                sys.exit(2)
             data[12:18] = bytes.fromhex(d['mac0'])
             option |= OPT_OTPBLK3
         elif key == 'mac1':
+            if len(bytes.fromhex(d['mac1'])) != 6:
+                print("mac1 is 6 bytes, please check the size")
+                sys.exit(2)
             data[20:26] = bytes.fromhex(d['mac1'])
             option |= OPT_OTPBLK4
         elif key == 'dplypwd':
+            if len(bytes.fromhex(d['dplypwd'])) != 4:
+                print("dplypwd is 4 bytes, please check the size")
+                sys.exit(2)
             data[28:32] = bytes.fromhex(d['dplypwd'])
             option |= OPT_OTPBLK5
         elif key == 'sec':
+            if len(bytes.fromhex(d['sec'])) > 88:
+                print("sec at most 88 bytes, please check the size")
+                sys.exit(2)
             newkey = bytes.fromhex(d['sec'])
             newkey += b'\x00' * (88 - len(newkey))
             data[32:120] = newkey
             option |= OPT_OTPBLK6
         elif key == 'nonsec':
+            if len(bytes.fromhex(d['nonsec'])) > 88:
+                print("nonsec at most 88 bytes, please check the size")
+                sys.exit(2)
             newkey = bytes.fromhex(d['nonsec'])
             newkey += b'\x00' * (88 - len(newkey))
             data[120:208] = newkey
@@ -440,7 +458,7 @@ def __img_erase(dev, media, start, length, option) -> int:
     if int.from_bytes(ack, byteorder="little") != ACK:
         print("Receive ACK error")
         return -1
-    bar = tqdm(total=100, position=dev.get_id(), ascii=True)
+    bar = tqdm(total=100, position=dev.get_id(), ascii=True, bar_format='{l_bar}{bar:10}{bar:-10b}')
     previous_progress = 0
     while True:
         # xusb ack with total erase progress.
@@ -649,7 +667,7 @@ def do_otp_read(media, start, out_file_name, length=0x1, option=OPT_NONE) -> Non
         print("Receive ACK error")
         return
     # FIXME: Don't know real length for "read all"
-    bar = tqdm(total=length, ascii=True)
+    bar = tqdm(total=length, ascii=True, bar_format='{l_bar}{bar:10}{bar:-10b}')
     data = b''
     remain = length
 
@@ -701,8 +719,8 @@ def __pack_program(dev, media, pack_image, option) -> int:
         if int.from_bytes(ack, byteorder="little") != ACK:
             print("Receive ACK error")
             return -1
-        text = f"Programming {i}/{image_cnt}"
-        bar = tqdm(total=img_length, position=dev.get_id(), ascii=True, desc=text)
+        text = f"Programming {i+1}/{image_cnt}"
+        bar = tqdm(total=img_length, position=dev.get_id(), ascii=True, desc=text, bar_format='{l_bar}{bar:10}{bar:-10b}')
         for offset in range(0, img_length, TRANSFER_SIZE):
             xfer_size = TRANSFER_SIZE if offset + TRANSFER_SIZE < img_length else img_length - offset
             dev.write(pack_image.img_content(i, offset, xfer_size))
@@ -731,7 +749,7 @@ def __pack_program(dev, media, pack_image, option) -> int:
                 return -1
             remain = img_length
             text = f"Verifying {i}/{image_cnt}"
-            bar = tqdm(total=img_length, position=dev.get_id(), ascii=True, desc=text)
+            bar = tqdm(total=img_length, position=dev.get_id(), ascii=True, desc=text, bar_format='{l_bar}{bar:10}{bar:-10b}')
             while remain > 0:
                 ack = dev.read(4)
                 # Get the transfer length of next read
@@ -798,7 +816,7 @@ def __img_program(dev, media, start, img_data, option) -> int:
         return -1
 
     img_length = len(img_data)
-    print(f"image length is {img_length}")
+    #print(f"image length is {img_length}")
     cmd = start.to_bytes(8, byteorder='little')
     cmd += img_length.to_bytes(8, byteorder='little')
     cmd += ACT_WRITE.to_bytes(4, byteorder='little')
@@ -815,7 +833,8 @@ def __img_program(dev, media, start, img_data, option) -> int:
         return -1
 
     # Set ascii=True is for Windows cmd terminal, position > 0 doesn't work as expected in cmd though...
-    bar = tqdm(total=img_length, position=dev.get_id(), ascii=True, desc="Programming")
+    text = f"Programming {dev.get_id()}"
+    bar = tqdm(total=img_length, position=dev.get_id(), ascii=True, desc=text, bar_format='{l_bar}{bar:10}{bar:-10b}')
     for offset in range(0, img_length, TRANSFER_SIZE):
         xfer_size = TRANSFER_SIZE if offset + TRANSFER_SIZE < img_length else img_length - offset
         dev.write(img_data[offset: offset + xfer_size])
@@ -840,7 +859,8 @@ def __img_program(dev, media, start, img_data, option) -> int:
             return -1
 
         remain = img_length
-        bar = tqdm(total=img_length, position=dev.get_id(), ascii=True, desc="Verifying")
+        text = f"Verifying {dev.get_id()}"
+        bar = tqdm(total=img_length, position=dev.get_id(), ascii=True, desc=text, bar_format='{l_bar}{bar:10}{bar:-10b}')
         while remain > 0:
             ack = dev.read(4)
             # Get the transfer length of next read
@@ -922,7 +942,7 @@ def do_img_read(media, start, out_file_name, length=0x1, option=OPT_NONE) -> Non
         print("Receive ACK error")
         return
     # FIXME: Don't know real length for "read all"
-    bar = tqdm(total=length, ascii=True)
+    bar = tqdm(total=length, ascii=True, bar_format='{l_bar}{bar:10}{bar:-10b}')
     data = b''
     remain = length
 
@@ -991,41 +1011,43 @@ def __get_info(dev, data) -> int:
                               'page_per_blk page_size blk_cnt bad_clk_cnt oob_size usr_cfg0 spi_id usr_cfg1 quad_cmd \
                               read_sts_cmd write_sts_cmd sts_val dummy_byte blk rsv use_cfg2 snand_id snand_page_size \
                               snand_oob snand_quad_cmd snand_read_sts_cmd snand_write_sts_cmd snand_sts_val \
-                              snand_dummy_byte snand_blk_cnt snand_page_per_blk')
-    info_struct = _info_struct._make(unpack('<IIIIIIIIBBBBIIIIIHHBBBBIII', info))
-    print("==== NAND ====")
-    print("Page per block: " + str(info_struct.page_per_blk))
-    print("Page size: " + str(info_struct.page_size))
-    print("Block per flash: " + str(info_struct.blk_cnt))
-    print("Bad block count: " + str(info_struct.bad_clk_cnt))
-    print("Spare size: " + str(info_struct.oob_size))
-    print("Is uer config: " + str(info_struct.usr_cfg0))
+                              snand_dummy_byte snand_blk_cnt snand_page_per_blk led_port led_pin led_on led_off')
+    info_struct = _info_struct._make(unpack('<IIIIIIIIBBBBIIIIIHHBBBBIIIBBBB', info))
+    text = "\n==== NAND ====\n"
+    text += "Page per block: " + str(info_struct.page_per_blk) + "\n"
+    text += "Page size: " + str(info_struct.page_size) + "\n"
+    text += "Block per flash: " + str(info_struct.blk_cnt) + "\n"
+    text += "Bad block count: " + str(info_struct.bad_clk_cnt) + "\n"
+    text += "Spare size: " + str(info_struct.oob_size) + "\n"
+    text += "Is uer config: " + str(info_struct.usr_cfg0) + "\n"
+    
+    text += "==== SPI NOR ====" + "\n"
+    text += "ID: " + str(info_struct.spi_id) + "\n"
+    text += "Is uer config: " + str(info_struct.usr_cfg1) + "\n"
+    text += "Quad read cmd: " + str(info_struct.quad_cmd) + "\n"
+    text += "Read sts cmd: " + str(info_struct.read_sts_cmd) + "\n"
+    text += "Write sts cmd: " + str(info_struct.write_sts_cmd) + "\n"
+    text += "Sts value: " + str(info_struct.sts_val) + "\n"
+    text += "Dummy byte: " + str(info_struct.dummy_byte) + "\n"
+    
+    text += "==== eMMC ====" + "\n"
+    text += "Block: " + str(info_struct.blk) + "\n"
+    text += "Reserved: " + str(info_struct.rsv) + "\n"
 
-    print("==== SPI NOR ====")
-    print("ID: " + str(info_struct.spi_id))
-    print("Is uer config: " + str(info_struct.usr_cfg1))
-    print("Quad read cmd: " + str(info_struct.quad_cmd))
-    print("Read sts cmd: " + str(info_struct.read_sts_cmd))
-    print("Write sts cmd: " + str(info_struct.write_sts_cmd))
-    print("Sts value: " + str(info_struct.sts_val))
-    print("Dummy byte: " + str(info_struct.dummy_byte))
-
-    print("==== eMMC ====")
-    print("Block: " + str(info_struct.blk))
-    print("Reserved: " + str(info_struct.rsv))
-
-    print("==== SPI NAND ====")
-    print("Is uer config: " + str(info_struct.use_cfg2))
-    print("ID: " + str(info_struct.snand_id))
-    print("Page size: " + str(info_struct.snand_page_size))
-    print("Spare size: " + str(info_struct.snand_oob))
-    print("Quad read cmd: " + str(info_struct.snand_quad_cmd))
-    print("Read sts cmd: " + str(info_struct.snand_read_sts_cmd))
-    print("Write sts cmd: " + str(info_struct.snand_write_sts_cmd))
-    print("Sts value: " + str(info_struct.snand_sts_val))
-    print("Dummy byte: " + str(info_struct.snand_dummy_byte))
-    print("Block per flash: " + str(info_struct.snand_blk_cnt))
-    print("Page per block: " + str(info_struct.snand_page_per_blk))
+    text += "==== SPI NAND ====" + "\n"
+    text += "Is uer config: " + str(info_struct.use_cfg2) + "\n"
+    text += "ID: " + str(info_struct.snand_id) + "\n"
+    text += "Page size: " + str(info_struct.snand_page_size) + "\n"
+    text += "Spare size: " + str(info_struct.snand_oob) + "\n"
+    text += "Quad read cmd: " + str(info_struct.snand_quad_cmd) + "\n"
+    text += "Read sts cmd: " + str(info_struct.snand_read_sts_cmd) + "\n"
+    text += "Write sts cmd: " + str(info_struct.snand_write_sts_cmd) + "\n"
+    text += "Sts value: " + str(info_struct.snand_sts_val) + "\n"
+    text += "Dummy byte: " + str(info_struct.snand_dummy_byte) + "\n"
+    text += "Block per flash: " + str(info_struct.snand_blk_cnt) + "\n"
+    text += "Page per block: " + str(info_struct.snand_page_per_blk) + "\n"
+    
+    print(text)
 
     dev.set_align(info_struct.page_size * info_struct.page_per_blk,
                   info_struct.snand_page_size * info_struct.snand_page_per_blk)
@@ -1107,7 +1129,12 @@ def do_attach(ini_file_name, option=OPT_NONE) -> None:
     _XUsbComListNew = XUsbComList(attach_all=mp_mode)
     devices = _XUsbComListNew.get_dev()
 
-    data = bytearray(76)
+    data = bytearray(80)
+    # default SOM LED is PJ15
+    data[76] = 9
+    data[77] = 15
+    data[78] = 0
+    data[79] = 1
     # assign option file to set media info
     if option == OPT_SETINFO:
         try:
@@ -1122,6 +1149,16 @@ def do_attach(ini_file_name, option=OPT_NONE) -> None:
             sys.exit(err)
         # now generate info from info.json
         for key in d.keys():
+            if key == 'led':
+                for sub_key in d['led'].keys():
+                    if sub_key == 'port':
+                        data[76:77] = int(d['led']['port'], 0).to_bytes(1, byteorder="little")
+                    elif sub_key == 'bit':
+                        data[77:78] = int(d['led']['bit'], 0).to_bytes(1, byteorder="little")
+                    elif sub_key == 'on':
+                        data[78:79] = int(d['led']['on'], 0).to_bytes(1, byteorder="little")
+                    elif sub_key == 'off':
+                        data[79:80] = int(d['led']['off'], 0).to_bytes(1, byteorder="little")
             if key == 'spinand':
                 data[48] = 1
                 for sub_key in d['spinand'].keys():
@@ -1720,6 +1757,7 @@ def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("CONFIG", nargs='?', help="Config file", type=str, default='')
+    parser.add_argument("-m", "--massproduct", action='store_true', help="Open/Close Mass Production mode")
     parser.add_argument("-a", "--attach", action='store_true', help="Attach to MA35D1")
     parser.add_argument("-o", "--option", nargs='+', help="Option flag")
     parser.add_argument("-t", "--type", nargs='+', help="Type flag")
@@ -1731,10 +1769,13 @@ def main():
     group.add_argument("-w", "--write", nargs='+', help="Write flash")
     group.add_argument("-e", "--erase", nargs='+', help="Erase flash")
     group.add_argument("-s", "--storage", nargs='+', help="Export eMMC/SD as Mass Storage Class")
+    
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(0)
+        
+    global mp_mode
 
     args = parser.parse_args()
 
@@ -1752,6 +1793,10 @@ def main():
     #     img_type = IMG_DATA
 
     cfg_file = args.CONFIG
+
+    if args.massproduct:
+        mp_mode = True
+        #print(f'NuWriter mp_mode = {mp_mode}')
 
     if args.attach:
         if not cfg_file:

@@ -20,18 +20,27 @@ def extract_line(fname, pattern):
         f.write("\n")
         f.write(".L__aarch32_code:\n")
         f.write("\n")
+        f.write("    mov     r0,  #0\n");
+        f.write("    mov     r1,  #0\n");
+        f.write("    mov     r2,  #0\n");
+        f.write("    mov     r3,  #0\n");
+        f.write("    mov     r4,  #0\n");
+        f.write("    mov     r5,  #0\n");
+        f.write("    mov     r6,  #0\n");
+        f.write("    mov     r7,  #0\n");
+        f.write("    mov     r8,  #0\n");
+        f.write("    mov     r9,  #0\n");
+        f.write("    mov     r10, #0\n");
+        f.write("    mov     r11, #0\n");
+        f.write("    mov     r12, #0\n");
+        f.write("    mcr     p15, 0, r0, c1, c0, 0\n");
+        f.write("    isb\n");
+        f.write("    vmrs    r1, FPEXC\n");
+        f.write("    orr     r1, r1, #(1 << 30)\n");
+        f.write("    vmsr    FPEXC, r1\n");
+        f.write("    bl      system_vectors\n");
+
         # Append NOP to align vector table.
-        counter = (counter+5)*4
-        counter_align = (counter+32-1) & ~(32-1)
-        nop_num = (counter_align - counter) / 4
-        print hex(counter), hex(counter_align), nop_num
-        j = 0
-        while j < nop_num:
-            f.write("    nop\n")
-            j += 1
-        f.write("    ldr     r0, =ma35d1_start\n")
-        f.write("    mov     sp, r0\n")
-        f.write("    ldr     pc, =system_vectors\n")
         f.close()
 
 def formatfiles():

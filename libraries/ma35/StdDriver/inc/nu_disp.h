@@ -28,15 +28,6 @@ extern "C"
 
 typedef enum
 {
-    eDispLcd_1024x600   = 0,
-    eDispLcd_800x480    = 1,
-    eDispLcd_1920x1080  = 2,
-    eDispLcd_Cnt
-} E_DISP_LCD;
-
-
-typedef enum
-{
     ePolarity_Disable  = -1,
     ePolarity_Positive = 0,
     ePolarity_Negative = 1
@@ -56,6 +47,7 @@ typedef enum
 {
     eLayer_Video   = 0,
     eLayer_Overlay = 1,
+    eLayer_Cursor  = 2,
     eLayer_Cnt
 } E_DISP_LAYER;
 
@@ -134,6 +126,20 @@ typedef enum
     eBM_SATURATED_DEST_ALPHA
 } E_BLENDING_MODE;
 
+
+typedef enum
+{
+    eCURSOR_FMT_DISABLE = 0,
+    eCURSOR_FMT_MASKED,
+    eCURSOR_FMT_ARGB8888
+} E_CURSOR_FMT;
+
+typedef struct
+{
+    uint32_t  u32X;
+    uint32_t  u32Y;
+} S_COORDINATE;
+
 typedef struct
 {
     /*
@@ -173,11 +179,60 @@ typedef struct
     DISP_PANEL_CONF sPanelConf;
 } DISP_LCD_INFO;
 
+typedef struct
+{
+    E_CURSOR_FMT  eFmt;
+    uint32_t      u32FrameBuffer;
+
+    S_COORDINATE  sHotSpot;
+    S_COORDINATE  sInitPosition;
+
+    union
+    {
+        uint32_t u32BGColor;
+        struct
+        {
+            uint8_t B;
+            uint8_t G;
+            uint8_t R;
+        } S_BGCOLOR;
+    };
+
+    union
+    {
+        uint32_t u32FGColor;
+        struct
+        {
+            uint8_t B;
+            uint8_t G;
+            uint8_t R;
+        } S_FGCOLOR;
+    };
+
+} DISP_CURSOR_CONF;
+
 #define DISP_ENABLE_INT()     (DISP->DisplayIntrEnable |=  DISP_DisplayIntrEnable_DISP0_Msk)
 #define DISP_DISABLE_INT()    (DISP->DisplayIntrEnable &= ~DISP_DisplayIntrEnable_DISP0_Msk)
 #define DISP_GET_INTSTS()     (DISP->DisplayIntr & DISP_DisplayIntr_DISP0_Msk)
 
-const DISP_LCD_INFO *DISP_GetLCDInst(E_DISP_LCD eDispLcd);
+#define DISP_CURSOR_SET_FORMAT(f)  (DISP->CursorConfig = (DISP->CursorConfig & ~DISP_CursorConfig_FORMAT_Msk) | f )
+
+#define DISP_VIDEO_IS_UNDERFLOW()    ((DISP->FrameBufferConfig0 & DISP_FrameBufferConfig0_UNDERFLOW_Msk) ? 1 : 0 )
+#define DISP_OVERLAY_IS_UNDERFLOW()  ((DISP->OverlayConfig0 & DISP_OverlayConfig0_UNDERFLOW_Msk) ? 1 : 0)
+
+#define DISP_CURSOR_SET_POSITION(x,y) \
+                    ( DISP->CursorLocation = \
+                      ((x<<DISP_CursorLocation_X_Pos) & DISP_CursorLocation_X_Msk) | \
+                      ((y<<DISP_CursorLocation_Y_Pos) & DISP_CursorLocation_Y_Msk) )
+
+#define DISP_CURSOR_SET_BGCOLOR(r,g,b) \
+                    ( DISP->CursorBackground = \
+                      ((r<<DISP_CursorBackground_RED_Pos) & DISP_CursorBackground_RED_Msk) | \ ((g<<DISP_CursorBackground_GREEN_Pos) & DISP_CursorBackground_GREEN_Msk) | \ ((b<<DISP_CursorBackground_BLUE_Pos) & DISP_CursorBackground_BLUE_Msk) )
+
+#define DISP_CURSOR_SET_FGCOLOR(r,g,b) \
+                    ( DISP->CursorForeground = \
+                      ((r<<DISP_CursorForeground_RED_Pos) & DISP_CursorForeground_RED_Msk) | \ ((g<<DISP_CursorForeground_GREEN_Pos) & DISP_CursorForeground_GREEN_Msk) | \ ((b<<DISP_CursorForeground_BLUE_Pos) & DISP_CursorForeground_BLUE_Msk) )
+
 int32_t DISP_LCDInit(const DISP_LCD_INFO *psLCDInfo);
 int32_t DISP_LCDDeinit(void);
 int DISP_SetFBConfig(E_DISP_LAYER eLayer, E_FB_FMT eFbFmt, uint32_t u32ResWidth, uint32_t u32ResHeight, uint32_t u32DMAFBStartAddr);
@@ -190,7 +245,11 @@ void DISP_SetBlendValue(uint32_t u32GloAV_Src, uint32_t u32GloAV_Dst);
 void DISP_SetColorKeyValue(uint32_t u32ColorKeyLow, uint32_t u32ColorKeyHigh);
 int DISP_SetFBAddr(E_DISP_LAYER eLayer, uint32_t u32DMAFBStartAddr);
 int DISP_SetFBFmt(E_DISP_LAYER eLayer, E_FB_FMT eFbFmt, uint32_t u32Pitch);
-uint32_t DISP_LCDTIMING_GetFPS(const DISP_LCD_TIMING* psDispLCDTiming);
+uint32_t DISP_LCDTIMING_GetFPS(const DISP_LCD_TIMING *psDispLCDTiming);
+uint32_t DISP_LCDTIMING_SetFPS(uint32_t u32FPS);
+void DISP_SetCursorPosition(uint32_t u32X, uint32_t u32Y);
+void DISP_InitCursor(DISP_CURSOR_CONF *psCursorConf);
+
 
 /*@}*/ /* end of group DISP_EXPORTED_FUNCTIONS */
 

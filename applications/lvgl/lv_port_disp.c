@@ -65,6 +65,12 @@ static void nu_flush_full_refresh(lv_disp_drv_t *disp_drv, const lv_area_t *area
         /* Enable backlight at first flushing. */
         rt_device_control(lcd_device, RTGRAPHIC_CTRL_POWERON, RT_NULL);
         u32FirstFlush = 1;
+
+#if defined(NU_OVERLAY_COLOR_KEY)
+        int nu_disp_overlay_set_colkey(uint32_t u32ColKey);
+        nu_disp_overlay_set_colkey(NU_OVERLAY_COLOR_KEY);
+#endif
+
     }
 
     lv_disp_flush_ready(disp_drv);
@@ -97,6 +103,12 @@ static void nu_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t 
 
         /* Enable backlight at first flushing. */
         rt_device_control(lcd_device, RTGRAPHIC_CTRL_POWERON, RT_NULL);
+
+#if defined(NU_OVERLAY_COLOR_KEY)
+        int nu_disp_overlay_set_colkey(uint32_t u32ColKey);
+        nu_disp_overlay_set_colkey(NU_OVERLAY_COLOR_KEY);
+#endif
+
         u32FirstFlush = 1;
     }
     lv_disp_flush_ready(disp_drv);

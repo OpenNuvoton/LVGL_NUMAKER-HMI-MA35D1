@@ -46,7 +46,7 @@ struct regmap_range
 
 #define DEF_DA9062_PAGE0_SLAVEADDR    (0xB0>>1)
 
-static struct rt_i2c_bus_device *g_psNuEpwmCap = RT_NULL;
+static struct rt_i2c_bus_device *g_psNuDA9062 = RT_NULL;
 
 static const struct regmap_range da9062_aa_readable_ranges[] =
 {
@@ -124,7 +124,7 @@ static int da9062_i2c_write(uint8_t u8addr, uint8_t u8data)
     struct rt_i2c_msg msg;
     char au8TxData[2];
 
-    RT_ASSERT(g_psNuEpwmCap != NULL);
+    RT_ASSERT(g_psNuDA9062 != NULL);
 
     au8TxData[0] = u8addr;          //addr [ 7:0]
     au8TxData[1] = u8data;          //data [ 7:0]
@@ -134,7 +134,7 @@ static int da9062_i2c_write(uint8_t u8addr, uint8_t u8data)
     msg.buf   = (rt_uint8_t *)&au8TxData[0];     /* Slave register address */
     msg.len   = sizeof(au8TxData);               /* Number of bytes sent */
 
-    if (g_psNuEpwmCap && rt_i2c_transfer(g_psNuEpwmCap, &msg, 1) != 1)
+    if (g_psNuDA9062 && rt_i2c_transfer(g_psNuDA9062, &msg, 1) != 1)
     {
         rt_kprintf("[Failed] addr=%x, data=%d\n", u8addr, u8data);
         return -RT_ERROR;
@@ -148,7 +148,7 @@ static int da9062_i2c_read(uint8_t u8addr, uint8_t *pu8data)
     struct rt_i2c_msg msgs[2];
     char u8TxData;
 
-    RT_ASSERT(g_psNuEpwmCap != NULL);
+    RT_ASSERT(g_psNuDA9062 != NULL);
     RT_ASSERT(pu8data != NULL);
 
     u8TxData      = u8addr;        //addr [ 7:0]
@@ -163,7 +163,7 @@ static int da9062_i2c_read(uint8_t u8addr, uint8_t *pu8data)
     msgs[1].buf   = (rt_uint8_t *)pu8data ;      /* Read data pointer */
     msgs[1].len   = 1;                           /* Number of bytes read */
 
-    if (rt_i2c_transfer(g_psNuEpwmCap, &msgs[0], 2) != 2)
+    if (rt_i2c_transfer(g_psNuDA9062, &msgs[0], 2) != 2)
     {
         return -RT_ERROR;
     }
@@ -206,8 +206,8 @@ int rt_hw_da9062_init(const char *i2c_dev)
     RT_ASSERT(i2c_dev != RT_NULL);
 
     /* Find I2C bus */
-    g_psNuEpwmCap = (struct rt_i2c_bus_device *)rt_device_find(i2c_dev);
-    if (g_psNuEpwmCap == RT_NULL)
+    g_psNuDA9062 = (struct rt_i2c_bus_device *)rt_device_find(i2c_dev);
+    if (g_psNuDA9062 == RT_NULL)
     {
         LOG_E("Can't found I2C bus - %s..!\n", i2c_dev);
         goto exit_rt_hw_da9062_init;
@@ -220,14 +220,11 @@ exit_rt_hw_da9062_init:
     return -RT_ERROR;
 }
 
-static int da9062_dump(int argc, char **argv)
+int da9062_dump(void)
 {
     rt_hw_da9062_init("i2c0");
-    da9062_regs_dump();
+    return da9062_regs_dump();
 }
-
-#ifdef FINSH_USING_MSH
-    MSH_CMD_EXPORT(da9062_dump, dump da9062 registers);
-#endif
+MSH_CMD_EXPORT(da9062_dump, dump da9062 registers);
 
 #endif //#if defined(NU_PKG_USING_DA9062)

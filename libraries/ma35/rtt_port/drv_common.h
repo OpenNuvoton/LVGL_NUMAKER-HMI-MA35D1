@@ -61,6 +61,24 @@ rt_inline rt_uint32_t nu_cpu_dcache_line_size(void)
 extern void rt_hw_cpu_dcache_clean(void *addr, int size);
 extern void rt_hw_cpu_dcache_clean_inv(void *addr, int size);
 extern void rt_hw_cpu_dcache_invalidate(void *addr, int size);
+
+#define STR2(x) #x
+#define STR(x) STR2(x)
+#define INCBIN(name, file) \
+    __asm__(".section .rodata\n" \
+            ".global incbin_" STR(name) "_start\n" \
+            ".balign 16\n" \
+            "incbin_" STR(name) "_start:\n" \
+            ".incbin \"" file "\"\n" \
+            \
+            ".global incbin_" STR(name) "_end\n" \
+            ".balign 1\n" \
+            "incbin_" STR(name) "_end:\n" \
+            ".byte 0\n" \
+    ); \
+    extern const __attribute__((aligned(32))) void* incbin_ ## name ## _start; \
+    extern const void* incbin_ ## name ## _end; \
+
 #else
 #define UNCACHEABLE        0
 #endif

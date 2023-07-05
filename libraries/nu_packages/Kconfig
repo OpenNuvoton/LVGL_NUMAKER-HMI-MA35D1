@@ -215,20 +215,42 @@ menu "Nuvoton Packages Config"
 
     config NU_PKG_USING_ADC_TOUCH
         bool "ADC touch function"
+        select RT_USING_TOUCH
         default n
-    
 
     if NU_PKG_USING_ADC_TOUCH
+        choice
+            prompt "Select TPC drivers"
+
+        config NU_PKG_USING_ADC_TOUCH_HW
+            bool "Using HW ADC touch"
+
         config NU_PKG_USING_ADC_TOUCH_SW
             bool "Using SW ADC touch"
             select RT_USING_ADC
-            default n     
+
+        config NU_PKG_USING_ADC_TOUCH_SERIAL
+            bool "Serial touch function"
+            select RT_USING_SERIAL
+
+        endchoice
+
+        if NU_PKG_USING_ADC_TOUCH_SERIAL
+            config NU_PKG_SERIAL_TOUCH_DEVNAME
+                string "uart1"
+                default "uart1"     
+        endif
     endif
 
     config NU_PKG_USING_SPINAND
         bool "SPI NAND flash."
         select BSP_USING_QSPI
         select RT_USING_MTD_NAND
+        default n
+
+    config NU_PKG_USING_RV3032C7
+        bool "Using RV3032-C7 RTC."
+        select RT_USING_RTC
         default n
 
 endmenu

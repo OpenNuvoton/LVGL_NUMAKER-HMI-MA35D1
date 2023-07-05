@@ -9,132 +9,172 @@
  */
 
 #include <rtthread.h>
+#include <rtdevice.h>
 #include <drivers/usb_host.h>
 #include "hid.h"
-
-#ifdef RT_USING_RTGUI
-#include <rtgui/event.h>
-#include <rtgui/rtgui_server.h>
-#include "drv_lcd.h"
-#endif
+#include "nu_disp.h"
 
 #if defined(RT_USBH_HID) && defined(RT_USBH_HID_MOUSE)
 static struct uprotocal mouse_protocal;
 
-#ifdef RT_USING_RTGUI
-#define LKEY_PRESS 0x01
-#define RKEY_PRESS 0x02
-#define MKEY_PRESS 0x04
 #define MOUSE_SCALING 0x02
+static rt_bool_t lkey_down = RT_FALSE;
 
-static rt_bool_t lkey_down=RT_FALSE;
-//static rt_bool_t rkey_down=RT_FALSE;
-//static rt_bool_t mkey_down=RT_FALSE;
-static struct rtgui_event_mouse emouse;
-#endif
-
-static rt_err_t rt_usbh_hid_mouse_callback(void* arg)
+typedef struct
 {
-    struct uhid* hid;
-#ifdef RT_USING_RTGUI
-    rt_uint16_t xoffset=0;
-    rt_uint16_t yoffset=0;
-#endif
-    hid = (struct uhid*)arg;
-
-    RT_DEBUG_LOG(RT_DEBUG_USB, ("hid 0x%x 0x%x\n",
-                                *(rt_uint32_t*)hid->buffer,
-                                *(rt_uint32_t*)(&hid->buffer[4])));
-#ifdef RT_USING_RTGUI
-    if(hid->buffer[1]!=0)
+    union
     {
-        if(hid->buffer[1]>127)
+        uint8_t B;   // Button
+        struct
         {
-            xoffset=(256-hid->buffer[1])*MOUSE_SCALING;
-            if(emouse.x>xoffset)
+            uint8_t BL: 1;
+            uint8_t BR: 1;
+            uint8_t BM: 1;
+            uint8_t DevSpecific: 5;
+        } S_B;
+    };
+    uint8_t X;   // Displacement
+    uint8_t Y;   // Displacement
+    uint8_t D;   // Displacement
+} S_UMOUSE_CXT;
+
+typedef struct
+{
+    rt_uint16_t x;
+    rt_uint16_t y;
+} S_MOUSE;
+static S_MOUSE emouse = {BSP_LCD_WIDTH/2, BSP_LCD_HEIGHT/2};
+
+static uint32_t u32HaveMouse = 0;
+
+void nu_touch_inputevent_cb(rt_int16_t x, rt_int16_t y, rt_uint8_t state);
+
+void mouse_cursor_hide(void)
+{
+    DISP_Trigger(eLayer_Cursor, 0);
+}
+
+void mouse_cursor_show(void)
+{
+    DISP_Trigger(eLayer_Cursor, 1);
+}
+
+static rt_err_t rt_usbh_hid_mouse_callback(void *arg)
+{
+    S_UMOUSE_CXT *psUMouseCxt;
+
+    struct uhid *hid;
+    rt_uint16_t xoffset = 0;
+    rt_uint16_t yoffset = 0;
+    hid = (struct uhid *)arg;
+    psUMouseCxt = (S_UMOUSE_CXT *)&hid->buffer[0];
+
+    if (!u32HaveMouse)
+    {
+        mouse_cursor_show();
+        u32HaveMouse = 1;
+    }
+
+    //rt_kprintf("hid 0x%x 0x%x 0x%x\n", psUMouseCxt->B, psUMouseCxt->X, psUMouseCxt->Y);
+
+    if (psUMouseCxt->X != 0)
+    {
+        if (psUMouseCxt->X > 127)
+        {
+            xoffset = (256 - psUMouseCxt->X) * MOUSE_SCALING;
+            if (emouse.x > xoffset)
             {
-                emouse.x-=xoffset;
+                emouse.x -= xoffset;
             }
             else
             {
-                emouse.x=0;
+                emouse.x = 0;
             }
         }
         else
         {
-            xoffset=(hid->buffer[1])*MOUSE_SCALING;
-            if((emouse.x+xoffset)<480)
+            xoffset = (psUMouseCxt->X) * MOUSE_SCALING;
+            if ((emouse.x + xoffset) < BSP_LCD_WIDTH)
             {
-                emouse.x+=xoffset;
+                emouse.x += xoffset;
             }
             else
             {
-                emouse.x=480;
+                emouse.x = BSP_LCD_WIDTH;
             }
         }
     }
-    if(hid->buffer[2]!=0)
+    if (psUMouseCxt->Y != 0)
     {
-
-        if(hid->buffer[2]>127)
+        if (psUMouseCxt->Y > 127)
         {
-            yoffset=(256-hid->buffer[2])*MOUSE_SCALING;
-            if(emouse.y>yoffset)
+            yoffset = (256 - psUMouseCxt->Y) * MOUSE_SCALING;
+            if (emouse.y > yoffset)
             {
-                emouse.y-=yoffset;
+                emouse.y -= yoffset;
             }
             else
             {
-                emouse.y=0;
+                emouse.y = 0;
             }
         }
         else
         {
-            yoffset=hid->buffer[2]*MOUSE_SCALING;
-            if(emouse.y+yoffset<272)
+            yoffset = psUMouseCxt->Y * MOUSE_SCALING;
+            if (emouse.y + yoffset < BSP_LCD_HEIGHT)
             {
-                emouse.y+=yoffset;
+                emouse.y += yoffset;
             }
             else
             {
-                emouse.y=272;
+                emouse.y = BSP_LCD_HEIGHT;
             }
         }
     }
-    if(xoffset!=0||yoffset!=0)
+    if (xoffset != 0 || yoffset != 0)
     {
-        cursor_set_position(emouse.x,emouse.y);
+        DISP_SetCursorPosition(emouse.x, emouse.y);
     }
-    if(hid->buffer[0]&LKEY_PRESS)
+    else
     {
-        if(lkey_down==RT_FALSE)
+        /* Workaround: Send down event before up event */
+        nu_touch_inputevent_cb(emouse.x, emouse.y, RT_TOUCH_EVENT_DOWN);
+        rt_thread_mdelay(50);
+        nu_touch_inputevent_cb(emouse.x, emouse.y, RT_TOUCH_EVENT_UP);
+        lkey_down = RT_FALSE;
+        return RT_EOK;
+    }
+
+    if (psUMouseCxt->S_B.BL)
+    {
+        if (lkey_down == RT_FALSE)
         {
-            // rt_kprintf("mouse left key press down\n");
-            emouse.button = (RTGUI_MOUSE_BUTTON_LEFT | RTGUI_MOUSE_BUTTON_DOWN);
-            rtgui_server_post_event(&emouse.parent, sizeof(struct rtgui_event_mouse));
-            lkey_down=RT_TRUE;
+            //rt_kprintf("mouse left key press down\n");
+            lkey_down = RT_TRUE;
         }
+        nu_touch_inputevent_cb(emouse.x, emouse.y, RT_TOUCH_EVENT_DOWN);
     }
-    else if(lkey_down==RT_TRUE)
+    else if (lkey_down == RT_TRUE)
     {
-        // rt_kprintf("mouse left key press up\n");
-        emouse.button = (RTGUI_MOUSE_BUTTON_LEFT | RTGUI_MOUSE_BUTTON_UP);
-        rtgui_server_post_event(&emouse.parent, sizeof(struct rtgui_event_mouse));
-        lkey_down=RT_FALSE;
+        //rt_kprintf("mouse left key press up\n");
+        lkey_down = RT_FALSE;
+        nu_touch_inputevent_cb(emouse.x, emouse.y, RT_TOUCH_EVENT_UP);
     }
-#endif
+
     return RT_EOK;
 }
 
-static rt_thread_t mouse_thread;
-static void mouse_task(void* param)
+static void mouse_task(void *param)
 {
-    struct uhintf* intf = (struct uhintf*)param;
+    struct uhintf *intf = (struct uhintf *)param;
+
     while (1)
     {
-        if (rt_usb_hcd_pipe_xfer(intf->device->hcd, ((struct uhid*)intf->user_data)->pipe_in,
-            ((struct uhid*)intf->user_data)->buffer, ((struct uhid*)intf->user_data)->pipe_in->ep.wMaxPacketSize,
-            USB_TIMEOUT_BASIC) == 0)
+        if (rt_usb_hcd_pipe_xfer(intf->device->hcd,
+                                 ((struct uhid *)intf->user_data)->pipe_in,
+                                 ((struct uhid *)intf->user_data)->buffer,
+                                 ((struct uhid *)intf->user_data)->pipe_in->ep.wMaxPacketSize,
+                                 USB_TIMEOUT_BASIC) == 0)
         {
             break;
         }
@@ -143,10 +183,10 @@ static void mouse_task(void* param)
     }
 }
 
-
-static rt_err_t rt_usbh_hid_mouse_init(void* arg)
+static rt_err_t rt_usbh_hid_mouse_init(void *arg)
 {
-    struct uhintf* intf = (struct uhintf*)arg;
+    rt_thread_t mouse_thread;
+    struct uhintf *intf = (struct uhintf *)arg;
 
     RT_ASSERT(intf != RT_NULL);
 
@@ -154,15 +194,10 @@ static rt_err_t rt_usbh_hid_mouse_init(void* arg)
 
     rt_usbh_hid_set_idle(intf, 0, 0);
 
-    mouse_thread = rt_thread_create("mouse0", mouse_task, intf, 1024, 8, 100);
+    mouse_thread = rt_thread_create("mouse0", mouse_task, intf, 2048, 5, 100);
     rt_thread_startup(mouse_thread);
 
     RT_DEBUG_LOG(RT_DEBUG_USB, ("start usb mouse\n"));
-#ifdef RT_USING_RTGUI
-    RTGUI_EVENT_MOUSE_BUTTON_INIT(&emouse);
-    emouse.wid = RT_NULL;
-    cursor_display(RT_TRUE);
-#endif
     return RT_EOK;
 }
 
@@ -174,7 +209,6 @@ static rt_err_t rt_usbh_hid_mouse_init(void* arg)
 uprotocal_t rt_usbh_hid_protocal_mouse(void)
 {
     mouse_protocal.pro_id = USB_HID_MOUSE;
-
     mouse_protocal.init = rt_usbh_hid_mouse_init;
     mouse_protocal.callback = rt_usbh_hid_mouse_callback;
 
