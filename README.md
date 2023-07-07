@@ -88,32 +88,14 @@ Support GCC compiler. More information of these compiler version as following:
 
 | Compiler | Tested version |
 | -- | -- |
-| GCC | Arm Embedded Toolchain 10.3-2021.10 (Env 1.3.5 embedded version)|
+| GCC | Arm Embedded Toolchain 10.3-2021.10 ([Env 1.3.5 embedded version](https://github.com/RT-Thread/env-windows/archive/refs/tags/v1.3.5.zip))|
 
 ## **Build RT-Thread**
 You can build rt-thread.bin for NuMaker-HMI-MA35D1 board. Steps as following. Notice, the building will include **ma35-rtp/rtthread.bin** file into **numaker-hmi-ma35d1/rtthread.bin** for heterogeneous multi-core demonstration.
 
 ```bash
-# cd rt-thread/bsp/nuvoton/numaker-hmi-ma35d1
-# menuconfig --generate
-# scons -c
-# pkgs --update
-Cloning into '<Path-to-rt-thread>\bsp\bsp\nuvoton\numaker-hmi-ma35d1\packages\LVGL-latest'...
-remote: Enumerating objects: 67821, done.
-remote: Counting objects: 100% (1085/1085), done.
-remote: Compressing objects: 100% (608/608), done.
-remote: Total 67821 (delta 512), reused 964 (delta 476), pack-reused 66736
-Receiving objects: 100% (67821/67821), 109.32 MiB | 572.00 KiB/s, done.
-Resolving deltas: 100% (52349/52349), done.
-Updating files: 100% (1248/1248), done.
-==============================>  LVGL latest is downloaded successfully.
-...
-==============================>  OPTPARSE latest is downloaded successfully.
-==============================>  wavplayer update done
-==============================>  ramdisk update done
-==============================>  optparse update done
-Operation completed successfully.
-
+# git clone https://github.com/OpenNuvoton/LVGL_NUMAKER-HMI-MA35D1
+# cd LVGL_NUMAKER-HMI-MA35D1
 # scons -j 16
 …
 …
@@ -124,7 +106,7 @@ arm-none-eabi-size rtthread.elf
 1208928   14828 15507944        16731700         ff4e34 rtthread.elf
 scons: done building targets.
 
-<Path-to-rt-thread>\bsp\nuvoton\numaker-hmi-ma35d1\rtthread.bin
+<Path-to-rt-thread>\rtthread.bin
 ```
 
 ## **Program firmware using NuWriter**
@@ -147,7 +129,7 @@ H: ON dip-switch
 You can run windows batch script to download rtthread.bin into memory, then run it. The path of batch script as below.
 
 ```bash
-<path-to-rtthread>\bsp\nuvoton\numaker-hmi-ma35d1\nuwriter_scripts\nuwriter_ddr_download_and_run.bat
+<path-to-rtthread>\nuwriter_scripts\nuwriter_ddr_download_and_run.bat
 ```
 
 <p align="center">
@@ -159,7 +141,7 @@ You can run windows batch script to download rtthread.bin into memory, then run 
 You can run windows batch script to download rtthread.bin into emmc flash, then run it. The path of batch script as below.
 
 ```bash
-<path-to-rtthread>\bsp\nuvoton\numaker-hmi-ma35d1\nuwriter_scripts\nuwriter_sd_programming.bat
+<path-to-rtthread>\nuwriter_scripts\nuwriter_sd_programming.bat
 ```
 
 <p align="center">
@@ -171,7 +153,7 @@ You can run windows batch script to download rtthread.bin into emmc flash, then 
 You can run windows batch script to download rtthread.bin into SPI-NAND flash, then run it. The path of batch script as below.
 
 ```bash
-<path-to-rtthread>\bsp\nuvoton\numaker-hmi-ma35d1\nuwriter_scripts\nuwriter_spinand_programming.bat
+<path-to-rtthread>\nuwriter_scripts\nuwriter_spinand_programming.bat
 ```
 
 <p align="center">
@@ -183,7 +165,7 @@ You can run windows batch script to download rtthread.bin into SPI-NAND flash, t
 You can run windows batch script to download rtthread.bin into Raw NAND flash, then run it. The path of batch script as below.
 
 ```bash
-<path-to-rtthread>\bsp\nuvoton\numaker-hmi-ma35d1\nuwriter_scripts\nuwriter_nand_programming.bat
+<path-to-rtthread>\nuwriter_scripts\nuwriter_nand_programming.bat
 ```
 
 <p align="center">
@@ -214,3 +196,4 @@ You can use Tera Term terminate emulator (or other software) to type commands of
 * [Download User Manual](https://www.nuvoton.com/resource-download.jsp?tp_GUID=UG132022101900252882)
 * [Download Datasheet](https://www.nuvoton.com/resource-download.jsp?tp_GUID=DA00-MA35D16)
 * [Download NuWriter](https://github.com/OpenNuvoton/MA35D1_NuWriter)
+* [Download Env for Window](https://github.com/RT-Thread/env-windows/archive/refs/tags/v1.3.5.zip)
