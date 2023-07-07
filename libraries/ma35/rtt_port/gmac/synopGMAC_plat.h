@@ -15,8 +15,8 @@
 #include "synopGMAC_types.h"
 #include "drv_common.h"
 
-#define DEFAULT_DELAY_VARIABLE  10
-#define DEFAULT_LOOP_VARIABLE   1000
+#define DEFAULT_DELAY_VARIABLE  10000
+#define DEFAULT_LOOP_VARIABLE   10000
 
 /* Error Codes */
 #define ESYNOPGMACNOERR   0

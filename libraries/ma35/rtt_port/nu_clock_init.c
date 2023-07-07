@@ -341,8 +341,6 @@ static void nu_clock_disp_init(void)
 #if defined(BSP_USING_DISP)
     CLK_EnableModuleClock(DCU_MODULE);
     CLK_SetModuleClock(DCU_MODULE, CLK_CLKSEL0_DCUSEL_EPLL_DIV2, MODULE_NoMsk);
-
-//    CLK_SetModuleClock(DCUP_MODULE, CLK_CLKSEL0_DCUPSEL_VPLL, MODULE_NoMsk);
 #endif
 }
 

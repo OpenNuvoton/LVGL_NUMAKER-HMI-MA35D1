@@ -36,6 +36,9 @@ void synopGMACWriteReg(u32 RegBase, u32 RegOffset, u32 RegData)
     TR("%s RegBase = 0x%08x RegOffset = 0x%08x RegData = 0x%08x\n", __FUNCTION__, (u32) RegBase, RegOffset, RegData);
 #endif
 
+    if (RegOffset == 0) // For gmacconfig, we need add a little delay time here.
+        plat_delay(DEFAULT_LOOP_VARIABLE);
+
     *((volatile u32 *)addr) = RegData;
 
     return;

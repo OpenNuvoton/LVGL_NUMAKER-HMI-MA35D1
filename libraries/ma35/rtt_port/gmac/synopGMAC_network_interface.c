@@ -607,16 +607,16 @@ void synopGMAC_set_mode(synopGMACdevice *gmacdev, int mode)
     synopGMAC_rx_disable(gmacdev);
     switch (mode)
     {
-    case SPEED1000:
+    case 0:
         synopGMACClearBits(gmacdev->MacBase, GmacConfig, GmacMiiGmii);
         gmacdev->Speed = SPEED1000;
         break;
-    case SPEED100:
+    case 1:
         synopGMACSetBits(gmacdev->MacBase, GmacConfig, GmacMiiGmii);
         synopGMACSetBits(gmacdev->MacBase, GmacConfig, GmacFESpeed100);
         gmacdev->Speed = SPEED100;
         break;
-    case SPEED10:
+    case 2:
         synopGMACSetBits(gmacdev->MacBase, GmacConfig, GmacMiiGmii);
         synopGMACClearBits(gmacdev->MacBase, GmacConfig, GmacFESpeed100);
         gmacdev->Speed = SPEED10;

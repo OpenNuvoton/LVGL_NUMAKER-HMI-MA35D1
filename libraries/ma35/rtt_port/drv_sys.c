@@ -23,7 +23,11 @@
 #include <rtdbg.h>
 
 #define DEF_RAISING_CPU_FREQUENCY
-//Dont enable #define DEF_RAISING_CPU_VOLTAGE
+
+#if defined(BSP_USING_PMIC)
+    //#define DEF_RAISING_CPU_FREQUENCY_1GHZ
+    #define DEF_RAISING_CPU_VOLTAGE
+#endif
 
 void machine_shutdown(void)
 {
@@ -250,27 +254,26 @@ void nu_clock_raise(void)
         return;
     }
 
-    CLK_SetPLLFreq(VPLL, PLL_OPMODE_INTEGER, u32PllRefClk, 102000000ul);
     CLK_SetPLLFreq(APLL, PLL_OPMODE_INTEGER, u32PllRefClk, 144000000ul);
     CLK_SetPLLFreq(EPLL, PLL_OPMODE_INTEGER, u32PllRefClk, 500000000ul);
 
     /* Waiting clock ready */
-    CLK_WaitClockReady(CLK_STATUS_VPLLSTB_Msk | CLK_STATUS_APLLSTB_Msk | CLK_STATUS_EPLLSTB_Msk);
+    CLK_WaitClockReady(CLK_STATUS_APLLSTB_Msk | CLK_STATUS_EPLLSTB_Msk);
 
 #if defined(DEF_RAISING_CPU_FREQUENCY)
     /* Switch clock source of CA35 to DDRPLL before raising CA-PLL */
     CLK->CLKSEL0 = (CLK->CLKSEL0 & (~CLK_CLKSEL0_CA35CKSEL_Msk)) | CLK_CLKSEL0_CA35CKSEL_DDRPLL;
-#if defined(DEF_RAISING_CPU_VOLTAGE)
-    if (ma35d1_set_cpu_voltage(CLK_GetPLLClockFreq(SYSPLL), 0x68))
+#if defined(DEF_RAISING_CPU_VOLTAGE) && defined(DEF_RAISING_CPU_FREQUENCY_1GHZ)
+    if (ma35d1_set_cpu_voltage(CLK_GetPLLClockFreq(SYSPLL), 0x64))  //1.30v
     {
         CLK_SetPLLFreq(CAPLL, PLL_OPMODE_INTEGER, u32PllRefClk, 1000000000ul);
     }
     else
 #endif
     {
-//#if defined(DEF_RAISING_CPU_VOLTAGE)
-        ma35d1_set_cpu_voltage(CLK_GetPLLClockFreq(SYSPLL), 0x5F);
-//#endif
+#if defined(DEF_RAISING_CPU_VOLTAGE)
+        ma35d1_set_cpu_voltage(CLK_GetPLLClockFreq(SYSPLL), 0x60);  //1.26v
+#endif
         CLK_SetPLLFreq(CAPLL, PLL_OPMODE_INTEGER, u32PllRefClk, 800000000ul);
     }
 

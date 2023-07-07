@@ -142,7 +142,7 @@ int rt_hw_max31875_init(const char *name, struct rt_sensor_config *cfg)
 
     g_sMax31875.read    = max31875_i2c_read_reg;
     g_sMax31875.write   = max31875_i2c_write_reg;
-    g_sMax31875.address = (uint32_t)(intf->user_data) & 0xff;
+    g_sMax31875.address = (uint32_t)(intf->arg) & 0xff;
 
     if ((ret = max31875_init(g_sMax31875.address)) != RT_EOK)
     {

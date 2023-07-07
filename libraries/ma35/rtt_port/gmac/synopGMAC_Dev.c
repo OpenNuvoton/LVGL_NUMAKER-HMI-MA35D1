@@ -1234,8 +1234,11 @@ void synopGMAC_tx_desc_init_ring(DmaDesc *desc, bool last_ring_desc)
 
     desc->buffer1 = 0;
     desc->buffer2 = 0;
-    //desc->data1 = 0;
-    //desc->data2 = 0;
+
+    desc->extstatus = 0;
+    desc->reserved1 = 0;
+    desc->timestamplow = 0;
+    desc->timestamphigh = 0;
 
     return;
 }

@@ -342,18 +342,28 @@ void nu_gmac_link_monitor(void *pvData)
     }
     else
     {
-        s32 data, speed;
-        data = synopGMAC_check_phy_init(adapter);
+        s32 data = synopGMAC_check_phy_init(adapter);
         if (gmacdev->LinkState != data)
         {
-            speed = data & 0x0f;
             gmacdev->LinkState = data;
             synopGMAC_mac_init(gmacdev);
-            synopGMAC_set_mode(gmacdev, speed);
+            LOG_I("Link is up in %s mode\n", (gmacdev->DuplexMode == FULLDUPLEX) ? "FULL DUPLEX" : "HALF DUPLEX");
+            if (gmacdev->Speed == SPEED1000)
+            {
+                LOG_I("Link is with 1000M Speed \r\n");
+                synopGMAC_set_mode(gmacdev, 0);
+            }
+            if (gmacdev->Speed == SPEED100)
+            {
+                LOG_I("Link is with 100M Speed \n");
+                synopGMAC_set_mode(gmacdev, 1);
+            }
+            if (gmacdev->Speed == SPEED10)
+            {
+                LOG_I("Link is with 10M Speed \n");
+                synopGMAC_set_mode(gmacdev, 2);
+            }
             eth_device_linkchange(&psNuGMAC->eth, RT_TRUE);
-            LOG_I("%s: Link is up in %s %s mode", psNuGMAC->name,  \
-                  (speed == SPEED1000) ? "1000M" : (speed == SPEED100) ? "100M" : (speed == SPEED10) ? "10M" : "",
-                  (gmacdev->DuplexMode == FULLDUPLEX) ? "FULL DUPLEX" : "HALF DUPLEX");
         }
     }
     NU_GMAC_TRACE("%s: Interrupt enable: %08x, status:%08x\n", psNuGMAC->name, synopGMAC_get_ie(gmacdev), synopGMACReadReg(gmacdev->DmaBase, DmaStatus));
@@ -369,10 +379,12 @@ static void nu_memmgr_init(GMAC_MEMMGR_T *psMemMgr)
     psMemMgr->psTXDescs = (DmaDesc *) rt_malloc_align(sizeof(DmaDesc) * psMemMgr->u32TxDescSize, nu_cpu_dcache_line_size());
     RT_ASSERT(psMemMgr->psTXDescs);
     LOG_D("[%s] First TXDescAddr= %08x", __func__, psMemMgr->psTXDescs);
+    invalidate_cpu_cache(psMemMgr->psTXDescs, sizeof(DmaDesc) * psMemMgr->u32TxDescSize);
 
     psMemMgr->psRXDescs = (DmaDesc *) rt_malloc_align(sizeof(DmaDesc) * psMemMgr->u32RxDescSize, nu_cpu_dcache_line_size());
     RT_ASSERT(psMemMgr->psRXDescs);
     LOG_D("[%s] First RXDescAddr= %08x", __func__, psMemMgr->psRXDescs);
+    invalidate_cpu_cache(psMemMgr->psRXDescs, sizeof(DmaDesc) * psMemMgr->u32RxDescSize);
 
     psMemMgr->psTXFrames = (PKT_FRAME_T *) rt_malloc_align(sizeof(PKT_FRAME_T) * psMemMgr->u32TxDescSize, nu_cpu_dcache_line_size());
     RT_ASSERT(psMemMgr->psTXFrames);
@@ -450,11 +462,11 @@ static rt_err_t nu_gmac_init(rt_device_t device)
 
     synopGMAC_pause_control(gmacdev); // This enables the pause control in Full duplex mode of operation
 
-#if defined(RT_LWIP_USING_HW_CHECKSUM)
+//#if defined(RT_LWIP_USING_HW_CHECKSUM)
     /*IPC Checksum offloading is enabled for this driver. Should only be used if Full Ip checksumm offload engine is configured in the hardware*/
-    synopGMAC_enable_rx_chksum_offload(gmacdev);    //Enable the offload engine in the receive path
-    synopGMAC_rx_tcpip_chksum_drop_enable(gmacdev); // This is default configuration, DMA drops the packets if error in encapsulated ethernet payload
-#endif
+    //synopGMAC_enable_rx_chksum_offload(gmacdev);    //Enable the offload engine in the receive path
+    //synopGMAC_rx_tcpip_chksum_drop_enable(gmacdev); // This is default configuration, DMA drops the packets if error in encapsulated ethernet payload
+//#endif
 
     /* Set all RX frame buffers. */
     count = 0;
@@ -482,6 +494,7 @@ static rt_err_t nu_gmac_init(rt_device_t device)
 
     synopGMAC_set_mac_addr(gmacdev, GmacAddr0High, GmacAddr0Low, &psNuGMAC->mac_addr[0]);
 
+    synopGMAC_set_mode(gmacdev, 0);
     LOG_D("Create %s link monitor timer.", psNuGMAC->name);
     /* Create timer to monitor link status. */
     psNuGMAC->link_timer = rt_timer_create("link_timer",
@@ -555,6 +568,7 @@ rt_err_t nu_gmac_tx(rt_device_t device, struct pbuf *p)
     synopGMACNetworkAdapter *adapter;
     synopGMACdevice *gmacdev;
     GMAC_MEMMGR_T *psgmacmemmgr;
+    DmaDesc *psDmaDesc;
 
     RT_ASSERT(device);
 
@@ -564,17 +578,22 @@ rt_err_t nu_gmac_tx(rt_device_t device, struct pbuf *p)
     gmacdev = (synopGMACdevice *) adapter->m_gmacdev;
     RT_ASSERT(gmacdev);
 
+    psDmaDesc = (DmaDesc *)((u32)gmacdev->TxNextDesc | UNCACHEABLE);
+
     psgmacmemmgr = (GMAC_MEMMGR_T *)adapter->m_gmacmemmgr;
     RT_ASSERT(psgmacmemmgr);
 
-    if (!synopGMAC_is_desc_owned_by_dma(gmacdev->TxNextDesc))
+    LOG_D("%s: %08x %08x.\n", psNuGMAC->name, psDmaDesc, psDmaDesc->status );
+    invalidate_cpu_cache(psDmaDesc, sizeof(DmaDesc));
+
+    if (!synopGMAC_is_desc_owned_by_dma(psDmaDesc))
     {
         u32 offload_needed;
-#if defined(RT_LWIP_USING_HW_CHECKSUM)
-        offload_needed = 1;
-#else
+//#if defined(RT_LWIP_USING_HW_CHECKSUM)
+//        offload_needed = 1;
+//#else
         offload_needed = 0;
-#endif
+//#endif
         u32 index = gmacdev->TxNext;
         u8 *pu8PktData = (u8 *)((u32)&psgmacmemmgr->psTXFrames[index] | UNCACHEABLE);
         struct pbuf *q;
@@ -770,11 +789,11 @@ int rt_hw_gmac_init(void)
 
     return 0;
 }
-INIT_APP_EXPORT(rt_hw_gmac_init);
+INIT_DEVICE_EXPORT(rt_hw_gmac_init);
 
 #if 0
 /*
-    Remeber src += lwipiperf_SRCS in components\net\lwip-*\SConscript
+    Remeber src += lwipiperf_SRCS in components\net\lwip\lwip-*\SConscript
 */
 #include "lwip/apps/lwiperf.h"
 
@@ -791,11 +810,14 @@ lwiperf_report(void *arg, enum lwiperf_report_type report_type,
                (int)report_type, ipaddr_ntoa(remote_addr), (int)remote_port, bytes_transferred, ms_duration, bandwidth_kbitpsec);
 }
 
-void lwiperf_example_init(void)
+int lwiperf_example_init(void)
 {
     lwiperf_start_tcp_server_default(lwiperf_report, NULL);
+
+    return 0;
 }
 MSH_CMD_EXPORT(lwiperf_example_init, start lwip tcp server);
+INIT_APP_EXPORT(lwiperf_example_init);
 #endif
 
 #endif /* if defined(BSP_USING_GMAC) */

@@ -11,7 +11,7 @@
 #define RT_NAME_MAX 8
 #define RT_USING_SMP
 #define RT_CPUS_NR 2
-#define RT_ALIGN_SIZE 32
+#define RT_ALIGN_SIZE 64
 #define RT_THREAD_PRIORITY_32
 #define RT_THREAD_PRIORITY_MAX 32
 #define RT_TICK_PER_SECOND 1000
@@ -212,19 +212,20 @@
 #define RT_LWIP_TCP
 #define RT_LWIP_RAW
 #define RT_MEMP_NUM_NETCONN 32
-#define RT_LWIP_PBUF_NUM 8192
+#define RT_LWIP_PBUF_NUM 16384
 #define RT_LWIP_RAW_PCB_NUM 32
 #define RT_LWIP_UDP_PCB_NUM 32
 #define RT_LWIP_TCP_PCB_NUM 32
-#define RT_LWIP_TCP_SEG_NUM 1024
-#define RT_LWIP_TCP_SND_BUF 8192
-#define RT_LWIP_TCP_WND 10240
-#define RT_LWIP_TCPTHREAD_PRIORITY 10
-#define RT_LWIP_TCPTHREAD_MBOX_SIZE 8192
+#define RT_LWIP_TCP_SEG_NUM 8192
+#define RT_LWIP_TCP_SND_BUF 32768
+#define RT_LWIP_TCP_WND 16384
+#define RT_LWIP_TCPTHREAD_PRIORITY 8
+#define RT_LWIP_TCPTHREAD_MBOX_SIZE 4096
 #define RT_LWIP_TCPTHREAD_STACKSIZE 4096
-#define RT_LWIP_ETHTHREAD_PRIORITY 12
+#define LWIP_NO_TX_THREAD
+#define RT_LWIP_ETHTHREAD_PRIORITY 6
 #define RT_LWIP_ETHTHREAD_STACKSIZE 4096
-#define RT_LWIP_ETHTHREAD_MBOX_SIZE 8192
+#define RT_LWIP_ETHTHREAD_MBOX_SIZE 4096
 #define RT_LWIP_REASSEMBLY_FRAG
 #define LWIP_NETIF_STATUS_CALLBACK 1
 #define LWIP_NETIF_LINK_CALLBACK 1
@@ -235,8 +236,6 @@
 #define LWIP_SO_LINGER 0
 #define RT_LWIP_NETIF_LOOPBACK
 #define LWIP_NETIF_LOOPBACK 1
-#define RT_LWIP_STATS
-#define RT_LWIP_USING_HW_CHECKSUM
 #define RT_LWIP_USING_PING
 
 /* Utilities */
@@ -259,28 +258,6 @@
 #define RT_USING_UTEST
 #define UTEST_THR_STACK_SIZE 4096
 #define UTEST_THR_PRIORITY 20
-
-/* RT-Thread Utestcases */
-
-#define RT_USING_UTESTCASES
-
-/* Utest Self Testcase */
-
-#define UTEST_SELF_PASS_TC
-
-/* Kernel Testcase */
-
-#define UTEST_MEMHEAP_TC
-#define UTEST_SMALL_MEM_TC
-
-/* CPP11 Testcase */
-
-
-/* Utest Serial Testcase */
-
-
-/* RTT Posix Testcase */
-
 
 /* RT-Thread online packages */
 
@@ -484,6 +461,7 @@
 #define BSP_USING_USBH
 #define BSP_USING_HSUSBH0
 #define BSP_USING_HSUSBH1
+#define BSP_USING_PMIC
 
 /* On-board Peripheral Drivers */
 
@@ -506,7 +484,5 @@
 #define NU_PKG_USING_NAU8822
 #define NU_PKG_USING_ADC_TOUCH
 #define NU_PKG_USING_ADC_TOUCH_HW
-#define UTEST_CMD_PREFIX "bsp.nuvoton.utest."
-#define BOARD_USE_UTEST
 
 #endif
