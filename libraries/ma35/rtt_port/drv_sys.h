@@ -93,4 +93,19 @@ E_SYS_USB0_ID nu_sys_usb0_role(void);
 void nu_sys_check_register(S_NU_REG *psNuReg);
 int nu_tempsen_get_value(double* pfTemperture);
 
+typedef enum
+{
+    evBootFrom_QSPI0_NOR = 0,
+    evBootFrom_QSPI0_NAND = 1,
+    evBootFrom_SD_eMMC0 = 2,
+    evBootFrom_SD_eMMC1 = 3,
+    evBootFrom_RAW_NAND = 4,
+    evBootFrom_USBD = 5,
+    evBootFrom_USBH0 = 6,
+    evBootFrom_USBH1 = 7,
+    evBootFrom_Invalid,
+    evBootFrom_Cnt = evBootFrom_Invalid
+} E_POR_BOOTSRC;
+E_POR_BOOTSRC nu_get_bootfrom_source(void);
+
 #endif

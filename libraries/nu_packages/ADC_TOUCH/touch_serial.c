@@ -21,7 +21,7 @@
 #define DEF_ADC_TOUCH_SMPL_TICK  40
 #define TOUCH_MQ_LENGTH   32
 
-#define SERIO_SERTH	0x3f
+#define SERIO_SERTH 0x3f
 #define SERTH_FORMAT_MAX_LENGTH 6
 #define SERTH_RESPONSE_BEGIN_BYTE 0x80
 #define SERTH_FORMAT_PRESSURE_BIT 0x40
@@ -57,10 +57,14 @@ struct nu_serial_touch
     int32_t x_range;
     int32_t y_range;
 
+    struct nu_adc_touch_data tp_data;
+    rt_tick_t last_point;
+    rt_tick_t last_up;
+
     int32_t idx;
-    uint8_t data[SERTH_FORMAT_MAX_LENGTH];
+    uint8_t data[SERTH_FORMAT_MAX_LENGTH + 2];
 };
-typedef struct nu_serial_touch* nu_serial_touch_t;
+typedef struct nu_serial_touch *nu_serial_touch_t;
 
 static rt_mq_t    g_pmqTouchXYZ;
 static struct nu_serial_touch s_NuSerialTouch = {0};
@@ -72,29 +76,34 @@ static rt_err_t serial_touch_rx_done(rt_device_t dev, rt_size_t size)
     return rt_sem_release(serial_touch_sem);
 }
 
-static rt_err_t serial_touch_process(uint8_t* buffer, int len)
+static rt_err_t serial_touch_process(uint8_t *buffer, int len)
 {
     int i = 0;
 
-    while ( i < len )
+    while (i < len)
     {
         s_NuSerialTouch.data[s_NuSerialTouch.idx] = buffer[i];
         if (SERTH_RESPONSE_BEGIN_BYTE & s_NuSerialTouch.data[0]) //=0x80 ?
         {
             if (++s_NuSerialTouch.idx == 5)
             {
-                struct nu_adc_touch_data tp_data;
+                struct nu_adc_touch_data *pTPData = &s_NuSerialTouch.tp_data;
 
-                tp_data.u32X  = (uint16_t)SERTH_GET_XC(s_NuSerialTouch.data, 0x1f, 0);
-                tp_data.u32Y  = (uint16_t)SERTH_GET_YC(s_NuSerialTouch.data, 0x1f, 0);
-                tp_data.u32Z0 = (SERTH_GET_TOUCHED(s_NuSerialTouch.data) || SERTH_GET_PRESSURED(s_NuSerialTouch.data)) ? 1000:0;
-                tp_data.u32Z1 = tp_data.u32Z0;
+                pTPData->u32X  = (uint16_t)SERTH_GET_XC(s_NuSerialTouch.data, 0x1f, 0);
+                pTPData->u32Y  = (uint16_t)SERTH_GET_YC(s_NuSerialTouch.data, 0x1f, 0);
+                pTPData->u32Z0 = (SERTH_GET_TOUCHED(s_NuSerialTouch.data) || SERTH_GET_PRESSURED(s_NuSerialTouch.data)) ? 1000 : 0;
+                pTPData->u32Z1 = pTPData->u32Z0;
 
                 //rt_kprintf("[%02X] -> ", s_NuSerialTouch.data[0]);
-                //rt_kprintf("(%d, %d, %d) -> ", tp_data.u32X, tp_data.u32Y, tp_data.u32Z0);
+                //rt_kprintf("(%d, %d, %d) -> \n", pTPData->u32X, pTPData->u32Y, pTPData->u32Z0);
 
-                if (rt_mq_send(g_pmqTouchXYZ, (const void *)&tp_data, sizeof(struct nu_adc_touch_data)) == RT_EOK)
+                if (rt_mq_send(g_pmqTouchXYZ, (const void *)pTPData, sizeof(struct nu_adc_touch_data)) == RT_EOK)
                 {
+                    s_NuSerialTouch.last_point = rt_tick_get();
+
+                    if (pTPData->u32Z0 == 0)
+                        s_NuSerialTouch.last_up = rt_tick_get();
+
                     if (s_NuSerialTouch.touch != RT_NULL)
                         rt_hw_touch_isr(s_NuSerialTouch.touch);
                 }
@@ -141,9 +150,34 @@ static void serial_touch_entry(void *parameter)
 
     while (1)
     {
-        if ((ret = rt_sem_take(serial_touch_sem, RT_WAITING_FOREVER )) == RT_EOK)
-            if ( (len=rt_device_read(serial, 0, &read_buf[0], sizeof(read_buf)) ) > 0 )
+#define DEF_UART_POLLING_T    200
+        if ((ret = rt_sem_take(serial_touch_sem, DEF_UART_POLLING_T)) == RT_EOK)
+        {
+            if ((len = rt_device_read(serial, 0, &read_buf[0], sizeof(read_buf))) > 0)
+            {
                 serial_touch_process(read_buf, len);
+            }
+        }
+        else if ((s_NuSerialTouch.last_point - s_NuSerialTouch.last_up) >= DEF_UART_POLLING_T)
+        {
+            /* HW issue: The serial touch can't report last up event. */
+            /* Avoid UP-event missing, we send a up event. */
+
+            struct nu_adc_touch_data *pTPData = &s_NuSerialTouch.tp_data;
+
+            pTPData->u32Z0 = 0;
+            pTPData->u32Z1 = 0;
+
+            if (rt_mq_send(g_pmqTouchXYZ, (const void *)pTPData, sizeof(struct nu_adc_touch_data)) == RT_EOK)
+            {
+                if (s_NuSerialTouch.touch != RT_NULL)
+                    rt_hw_touch_isr(s_NuSerialTouch.touch);
+            }
+
+            s_NuSerialTouch.last_up = s_NuSerialTouch.last_point;
+
+            rt_kprintf("[Serial touch] Re-send up-event done.\n");
+        }
     }
 
     ret = rt_device_close(serial);
@@ -198,11 +232,11 @@ int nu_adc_touch_serial_register(void)
     RT_ASSERT(g_pmqTouchXYZ);
 
     serial_touch_thread = rt_thread_create("serial_touch_thread",
-                                            serial_touch_entry,
-                                            RT_NULL,
-                                            2048,
-                                            5,
-                                            5);
+                                           serial_touch_entry,
+                                           RT_NULL,
+                                           2048,
+                                           5,
+                                           5);
     if (serial_touch_thread != RT_NULL)
         rt_thread_startup(serial_touch_thread);
 

@@ -28,10 +28,14 @@
     #define PATH_CALIBRATION_FILE "/mnt/filesystem/ts_calibration"
 #endif
 
+#define DEF_LCD_DEVNAME     "lcd"
+
 rt_err_t nu_adc_touch_disable(void);
 rt_err_t nu_adc_touch_enable(rt_touch_t psRtTouch);
 void nu_adc_touch_detect(rt_bool_t bStartDetect);
 int32_t nu_adc_touch_read_xyz(uint32_t *bufX, uint32_t *bufY, uint32_t *bufZ0, uint32_t *bufZ1, int32_t dataCnt);
+typedef void (*CalibrationDone)(void);
+static CalibrationDone s_pfnCalibrationDoneCB = RT_NULL;
 
 typedef struct
 {
@@ -277,9 +281,10 @@ static void nu_adc_touch_update_calmat(S_CALIBRATION_MATRIX *psNewCalMat)
     }
 }
 
-static void nu_adc_touch_reset_calmat(void)
+void nu_adc_touch_reset_calmat(CalibrationDone pfnCBDone)
 {
     rt_memcpy(&g_sCalMat, &g_sCalZero, sizeof(S_CALIBRATION_MATRIX));
+    s_pfnCalibrationDoneCB = pfnCBDone;
     g_u32Calibrated = 0;
 }
 
@@ -341,7 +346,13 @@ static void lcd_cleanscreen(void)
         if (rt_device_control(lcd_device, RTGRAPHIC_CTRL_PAN_DISPLAY, (void *)info.framebuffer) == RT_EOK)
         {
             /* Sync-type LCD panel, will fill to VRAM directly. */
-            rt_memset(info.framebuffer, 0, (info.pitch * info.height));
+            int i;
+            volatile uint32_t *pu32Start = (volatile uint32_t *)info.framebuffer;
+            for (i = 0; i < info.width * info.height; i++)
+            {
+                *pu32Start = 0xFF97CADB; //ARGB888
+                pu32Start++;
+            }
         }
         else
         {
@@ -426,7 +437,7 @@ static void nu_draw_bots(int x, int y)
             {
                 for (j = 0; j < DEF_DOT_NUMBER; j++)
                 {
-                    *pu32Start = 0xff00ff00; //Green, ARGB888
+                    *pu32Start = 0xFF001B48; //Green, ARGB888
                     pu32Start++;
                 }
                 if (bDrawDirect)
@@ -480,26 +491,33 @@ const static S_COORDINATE_POINT sDispPoints[DEF_CAL_POINT_NUM] =
 
 static int nu_adc_touch_readfile(void)
 {
-    int fd;
-
+    static int loaded = 0;
+    int fd = -1;
     S_CALIBRATION_MATRIX sCalMat;
 
-    if ((fd = open(PATH_CALIBRATION_FILE, O_RDONLY, 0)) < 0)
+    if (loaded)
+        return 0;
+
+    if (((fd = open(PATH_CALIBRATION_FILE, O_RDONLY, 0)) < 0) ||
+            (read(fd, &sCalMat, sizeof(S_CALIBRATION_MATRIX)) != sizeof(S_CALIBRATION_MATRIX)))
     {
         goto exit_nu_adc_touch_readfile;
     }
-    else if (read(fd, &sCalMat, sizeof(S_CALIBRATION_MATRIX)) == sizeof(S_CALIBRATION_MATRIX))
-    {
-        rt_kprintf("[%s] %s\n", __func__, PATH_CALIBRATION_FILE);
-    }
+
+    nu_adc_touch_update_calmat(&sCalMat);
+
+    rt_kprintf("[%s] Loaded %s.\n", __func__, PATH_CALIBRATION_FILE);
 
     close(fd);
 
-    nu_adc_touch_update_calmat(&sCalMat);
+    loaded = 1;
 
     return 0;
 
 exit_nu_adc_touch_readfile:
+
+    if (fd >= 0)
+        close(fd);
 
     return -1;
 }
@@ -534,7 +552,7 @@ static void nu_touch_do_calibration(rt_device_t pdev)
     S_CALIBRATION_MATRIX sCalMat;
     S_COORDINATE_POINT sADCPoints[DEF_CAL_POINT_NUM];
 
-    lcd_device = rt_device_find("lcd");
+    lcd_device = rt_device_find(DEF_LCD_DEVNAME);
     if (!lcd_device)
     {
         rt_kprintf("Not supported graphics ops\n");
@@ -555,6 +573,7 @@ static void nu_touch_do_calibration(rt_device_t pdev)
     }
 
     rt_device_control(lcd_device, RTGRAPHIC_CTRL_PAN_DISPLAY, info.framebuffer);
+
     rt_device_control(lcd_device, RTGRAPHIC_CTRL_POWERON, RT_NULL);
 
     for (i = 0; i < DEF_CAL_POINT_NUM; i++)
@@ -562,12 +581,12 @@ static void nu_touch_do_calibration(rt_device_t pdev)
         struct rt_touch_data sTouchPoint;
         int count = 0;
 
-        lcd_cleanscreen();
-
         /* Drain RX queue before doing calibrate. */
         while (adc_request_point(pdev, &sTouchPoint) == RT_EOK);
 
         rt_thread_mdelay(100);
+
+        lcd_cleanscreen();
 
         /* Ready to calibrate */
         nu_draw_bots(sDispPoints[i].x, sDispPoints[i].y);
@@ -583,7 +602,13 @@ static void nu_touch_do_calibration(rt_device_t pdev)
             {
                 sADCPoints[i].x += (int32_t)sTouchPoint.x_coordinate;
                 sADCPoints[i].y += (int32_t)sTouchPoint.y_coordinate;
-                rt_kprintf("[%d %d] - Disp:[%d, %d] -> ADC:[%d, %d]\n", i, count, sDispPoints[i].x, sDispPoints[i].y, sADCPoints[i].x, sADCPoints[i].y);
+                rt_kprintf("[%d %d] - Disp:[%d, %d] -> ADC:[%d, %d]\n",
+                           i,
+                           count,
+                           sDispPoints[i].x,
+                           sDispPoints[i].y,
+                           sADCPoints[i].x,
+                           sADCPoints[i].y);
                 count++;
             }
         }
@@ -618,6 +643,9 @@ static void nu_touch_do_calibration(rt_device_t pdev)
     rt_device_control(lcd_device, RTGRAPHIC_CTRL_POWEROFF, RT_NULL);
     rt_device_close(lcd_device);
 
+    if (s_pfnCalibrationDoneCB)
+        s_pfnCalibrationDoneCB();
+
     return;
 }
 
@@ -641,8 +669,6 @@ static void adc_touch_entry(void *parameter)
 
     if (rt_memcmp((void *)&g_sCalMat, (void *)&g_sCalZero, sizeof(S_CALIBRATION_MATRIX)) != 0)
         g_u32Calibrated = 1;
-
-    nu_adc_touch_readfile();
 
     result = rt_device_open(pdev, RT_DEVICE_FLAG_INT_RX);
     RT_ASSERT(result == RT_EOK);
@@ -671,6 +697,8 @@ static void adc_touch_entry(void *parameter)
             continue;
         }
 
+        nu_adc_touch_readfile();
+
         if (adc_request_point(pdev, &touch_point) == RT_EOK)
         {
             if (touch_point.event == RT_TOUCH_EVENT_DOWN
@@ -678,13 +706,6 @@ static void adc_touch_entry(void *parameter)
                     || touch_point.event == RT_TOUCH_EVENT_MOVE)
             {
                 nu_touch_inputevent_cb(touch_point.x_coordinate, touch_point.y_coordinate, touch_point.event);
-
-                rt_kprintf("x=%d y=%d event=%s%s%s\n",
-                           touch_point.x_coordinate,
-                           touch_point.y_coordinate,
-                           (touch_point.event == RT_TOUCH_EVENT_DOWN) ? "DOWN" : "",
-                           (touch_point.event == RT_TOUCH_EVENT_UP) ? "UP" : "",
-                           (touch_point.event == RT_TOUCH_EVENT_MOVE) ? "MOVE" : "");
             }
         }
     }
@@ -734,7 +755,7 @@ INIT_APP_EXPORT(nu_touch_autostart);
 static rt_err_t nu_touch_calibration(int argc, char **argv)
 {
     /* Clean calibration matrix data for getting raw adc value. */
-    nu_adc_touch_reset_calmat();
+    nu_adc_touch_reset_calmat(NULL);
 
     return 0;
 }

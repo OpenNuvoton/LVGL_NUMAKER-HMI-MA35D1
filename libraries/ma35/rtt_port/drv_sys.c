@@ -168,6 +168,25 @@ uint32_t nu_chipcfg_ddrsize(void)
     return ((u32ChipCfg & 0xF0000) != 0) ? (1 << ((u32ChipCfg & 0xF0000) >> 16)) << 20 : 0;
 }
 
+static const char *szBootFromTypeName [] =
+{
+    "QSPI0_NOR",
+    "QSPI0_NAND",
+    "SD_eMMC0",
+    "SD_eMMC1",
+    "RAW_NAND",
+    "USBD",
+    "USBH0",
+    "USBH1",
+    "Invalid"
+};
+
+#define BOOTFROMTYPE_SIZE    (sizeof(szBootFromTypeName)/sizeof(char*))
+void nu_sys_dump(void)
+{
+    LOG_I("Boot from: %s", szBootFromTypeName[nu_get_bootfrom_source()]);
+}
+
 void nu_chipcfg_dump(void)
 {
     uint32_t u32ChipCfg = *((vu32 *)REG_SYS_CHIPCFG);
@@ -177,6 +196,8 @@ void nu_chipcfg_dump(void)
     LOG_I("CHIPCFG: 0x%08x ", u32ChipCfg);
     LOG_I("DDR SDRAM Size: %d MB", u32ChipCfg_DDRSize);
     LOG_I("MCP DDR TYPE: %s", u32ChipCfg_DDRSize ? (u32ChipCfg_DDRType ? "DDR2" : "DDR3/3L") : "Unknown");
+
+    nu_sys_dump();
 }
 
 void nu_clock_dump(void)
@@ -202,6 +223,7 @@ void nu_clock_dump(void)
     LOG_I("PCLK3: %d Hz", CLK_GetPCLK3Freq());
     LOG_I("PCLK4: %d Hz", CLK_GetPCLK4Freq());
 }
+
 
 static const char *szClockName [] =
 {
@@ -292,6 +314,91 @@ void nu_clock_raise(void)
     MSH_CMD_EXPORT(nu_clock_isready, Check PLL clocks);
 #endif
 
+E_POR_BOOTSRC nu_get_bootfrom_source(void)
+{
+    /* check power-on-setting */
+    //  SYS_PWRONOTP.BTSRCSEL[11:10] or SYS_PWRONPIN.BTSRCSEL[3:2]
+    //    00 = Boot from SPI Flash (Default).
+    //    01 = Boot from SD/eMMC.
+    //    10 = Boot from NAND Flash.
+    //    11 = Boot from USB.
+
+    // If BTSRCSEL = 00, the Boot from SPI Flash.
+    //  SYS_PWRONOTP.MISCCFG[15:14] or SYS_PWRONPIN.MISCCFG[7:6]
+    //    00 = SPI-NAND Flash with 1-bit mode booting (Default).
+    //    10 = SPI-NOR Flash with 1-bit mode booting.
+
+    uint32_t u32PWRON = (uint32_t)SYS->PWRONOTP;
+    uint32_t u32BTSRCSEL, u32MISCCFG, u32NPAGESEL;
+    E_POR_BOOTSRC ret;
+
+    if ((u32PWRON & SYS_PWRONOTP_PWRONSRC_Msk) == SYS_PWRONOTP_PWRONSRC_Msk) // Using SYS_PWRONOTP
+    {
+        u32BTSRCSEL = (u32PWRON & SYS_PWRONOTP_BTSRCSEL_Msk) >> SYS_PWRONOTP_BTSRCSEL_Pos ;
+        u32MISCCFG = (u32PWRON & SYS_PWRONOTP_MISCCFG_Msk) >> SYS_PWRONOTP_MISCCFG_Pos;
+        u32NPAGESEL = (u32PWRON & SYS_PWRONOTP_NPAGESEL_Msk) >> SYS_PWRONOTP_NPAGESEL_Pos;
+    }
+    else
+    {
+        // Using SYS_PWRONPIN
+        u32BTSRCSEL = (SYS->PWRONPIN & SYS_PWRONPIN_BTSRCSEL_Msk) >> SYS_PWRONPIN_BTSRCSEL_Pos ;
+        u32MISCCFG = (SYS->PWRONPIN & SYS_PWRONPIN_MISCCFG_Msk) >> SYS_PWRONPIN_MISCCFG_Pos;
+        u32NPAGESEL = (u32PWRON & SYS_PWRONPIN_NPAGESEL_Msk) >> SYS_PWRONPIN_NPAGESEL_Pos;
+    }
+
+    switch (u32BTSRCSEL)
+    {
+    case 0: // Boot from SPI Flash (Default).
+        if (u32MISCCFG & 0x2)
+        {
+            ret = evBootFrom_QSPI0_NOR;
+        }
+        else
+        {
+            ret = evBootFrom_QSPI0_NAND;
+        }
+        break;
+
+    case 1: // Boot from SD/eMMC.
+        if (u32MISCCFG & 0x1)
+        {
+            ret = evBootFrom_SD_eMMC1;
+        }
+        else
+        {
+            ret = evBootFrom_SD_eMMC0;
+        }
+
+        break;
+
+    case 2: // Boot from NAND Flash.
+        ret = evBootFrom_RAW_NAND;
+        break;
+
+    case 3: // Boot from USB.
+        if (u32NPAGESEL & 0x1)
+        {
+            if (u32NPAGESEL & 0x2)
+            {
+                ret = evBootFrom_USBH1;
+            }
+            else
+            {
+                ret = evBootFrom_USBH0;
+            }
+        }
+        else
+        {
+            ret = evBootFrom_USBD;
+        }
+        break;
+
+    default:
+        break;
+    }
+
+    return ret;
+}
 
 void devmem(int argc, char *argv[])
 {

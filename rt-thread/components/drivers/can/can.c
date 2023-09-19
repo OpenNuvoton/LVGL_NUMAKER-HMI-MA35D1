@@ -154,6 +154,7 @@ rt_inline int _can_int_tx(struct rt_can_device *can, const struct rt_can_msg *da
 
         no = ((rt_uint32_t)tx_tosnd - (rt_uint32_t)tx_fifo->buffer) / sizeof(struct rt_can_sndbxinx_list);
         tx_tosnd->result = RT_CAN_SND_RESULT_WAIT;
+        rt_completion_init(&(tx_tosnd->completion));
         if (can->ops->sendmsg(can, data, no) != RT_EOK)
         {
             /* send failed. */
@@ -163,7 +164,6 @@ rt_inline int _can_int_tx(struct rt_can_device *can, const struct rt_can_msg *da
             rt_sem_release(&(tx_fifo->sem));
             goto err_ret;
         }
-
         can->status.sndchange = 1;
         rt_completion_wait(&(tx_tosnd->completion), RT_WAITING_FOREVER);
 
@@ -226,12 +226,14 @@ rt_inline int _can_int_tx_priv(struct rt_can_device *can, const struct rt_can_ms
         {
             rt_hw_interrupt_enable(level);
 
+            rt_completion_init(&(tx_fifo->buffer[no].completion));
             rt_completion_wait(&(tx_fifo->buffer[no].completion), RT_WAITING_FOREVER);
             continue;
         }
         tx_fifo->buffer[no].result = RT_CAN_SND_RESULT_WAIT;
         rt_hw_interrupt_enable(level);
 
+        rt_completion_init(&(tx_fifo->buffer[no].completion));
         if (can->ops->sendmsg(can, data, no) != RT_EOK)
         {
             continue;
@@ -317,7 +319,7 @@ static rt_err_t rt_can_open(struct rt_device *dev, rt_uint16_t oflag)
 
             tx_fifo->buffer = (struct rt_can_sndbxinx_list *)(tx_fifo + 1);
             rt_memset(tx_fifo->buffer, 0,
-                    can->config.sndboxnumber * sizeof(struct rt_can_sndbxinx_list));
+                      can->config.sndboxnumber * sizeof(struct rt_can_sndbxinx_list));
             rt_list_init(&tx_fifo->freelist);
             for (i = 0;  i < can->config.sndboxnumber; i++)
             {
@@ -528,7 +530,7 @@ static rt_err_t rt_can_control(struct rt_device *dev,
                 for (i = 0;  i < can->config.sndboxnumber; i++)
                 {
                     level = rt_hw_interrupt_disable();
-                    if(rt_list_isempty(&tx_fifo->buffer[i].list))
+                    if (rt_list_isempty(&tx_fifo->buffer[i].list))
                     {
                         rt_sem_release(&(tx_fifo->sem));
                     }
@@ -676,7 +678,7 @@ static void cantimeout(void *arg)
         can->status_indicate.ind(can, can->status_indicate.args);
     }
 #ifdef RT_CAN_USING_BUS_HOOK
-    if(can->bus_hook)
+    if (can->bus_hook)
     {
         can->bus_hook(can);
     }
@@ -869,7 +871,7 @@ void rt_hw_can_isr(struct rt_can_device *can, int event)
 
                 level = rt_hw_interrupt_disable();
                 /* get rx length */
-                rx_length = rt_list_len(&rx_fifo->uselist)* sizeof(struct rt_can_msg);
+                rx_length = rt_list_len(&rx_fifo->uselist) * sizeof(struct rt_can_msg);
                 rt_hw_interrupt_enable(level);
 
                 if (rx_length)

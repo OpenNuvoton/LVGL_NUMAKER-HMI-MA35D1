@@ -16,7 +16,7 @@
             "suspintvl": "1"
         },
         "secureboot": "no",
-        "entrypoint": "0x80400000",
+        "entrypoint": "0x80800000",
         "image":
         [
             {
@@ -27,7 +27,7 @@
             },
             {
               "offset": "0x4000",
-              "loadaddr": "0x80400000",
+              "loadaddr": "0x80800000",
               "type": "4",
               "file": "../rtthread.bin"
             }

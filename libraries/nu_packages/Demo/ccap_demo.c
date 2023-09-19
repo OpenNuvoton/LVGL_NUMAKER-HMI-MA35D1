@@ -18,8 +18,8 @@
 #include "ccap_demo.h"
 #include <dfs_posix.h>
 
-#define DBG_ENABLE
-#define DBG_LEVEL DBG_LOG
+#undef DBG_ENABLE
+#define DBG_LEVEL LOG_LVL_INFO
 #define DBG_SECTION_NAME  "ccap.demo"
 #define DBG_COLOR
 #include <rtdbg.h>
@@ -31,6 +31,8 @@
 #define DEF_CROP_PACKET_RECT
 
 #define DEF_DURATION         10
+#define DEF_FRAMERATE_DIV2
+
 #if defined(BSP_USING_CCAP0) && defined(BSP_USING_CCAP1)
     #define DEF_GRID_VIEW          1
     #define DEF_BINARIZATION_VIEW  DEF_GRID_VIEW
@@ -281,7 +283,7 @@ static rt_device_t ccap_sensor_init(ccap_grabber_context_t psGrabberContext, cca
 
     {
         int i32SenClk = psSensorModeInfo->u32SenClk;
-        if (DEF_GRID_VIEW && DEF_ENABLE_PLANAR_PIPE)
+        if ((i32SenClk > 45000000) && DEF_GRID_VIEW && DEF_ENABLE_PLANAR_PIPE)
             i32SenClk = 45000000; /* Bandwidth limitation: Slow down sensor clock */
 
         /* speed up pixel clock */
@@ -759,6 +761,14 @@ static void ccap_grabber(void *parameter)
         goto exit_ccap_grabber;
     }
 
+#if defined(DEF_FRAMERATE_DIV2)
+    /* Set frame rate / 2 */
+    if (rt_device_control(psDevCcap, CCAP_CMD_SET_FRAMERATE_NM, (void *)(1 << 16 | 2)) != RT_EOK)
+    {
+        LOG_W("Can't set frame rate ", psGrabberParam->devname_ccap);
+    }
+#endif
+
     /* Start to capture */
     if (rt_device_control(psDevCcap, CCAP_CMD_START_CAPTURE, RT_NULL) != RT_EOK)
     {
@@ -879,7 +889,9 @@ static void ccap_grabber(void *parameter)
         now = rt_tick_get();
         if ((now - last) >= (DEF_DURATION * 1000))
         {
-            LOG_I("%s: %d FPS", psGrabberParam->devname_ccap, sGrabberContext.u32FrameEnd / DEF_DURATION);
+            uint32_t u32CurrFPS = sGrabberContext.u32FrameEnd / DEF_DURATION;
+
+            LOG_I("%s: %d FPS", psGrabberParam->devname_ccap, u32CurrFPS);
             sGrabberContext.u32FrameEnd = 0;
             last = now;
         }

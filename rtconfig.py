@@ -41,11 +41,11 @@ if PLATFORM == 'gcc':
     OBJCPY = PREFIX + 'objcopy'
     STRIP = PREFIX + 'strip'
 
-    DEVICE = ' -march=armv8-a -mfpu=neon-vfpv4 -ftree-vectorize -ffast-math -mfloat-abi=softfp'
-    CFLAGS = DEVICE + ' -Wall -fno-zero-initialized-in-bss -Wno-unused-variable -Wno-unused-function -Wno-unused-but-set-variable  -mno-unaligned-access '
+    DEVICE = ' -march=armv8-a -mfpu=neon-vfpv4 -ftree-vectorize -ffast-math -mfloat-abi=softfp -funwind-tables -fno-strict-aliasing -mno-unaligned-access '
+    CFLAGS = DEVICE + ' -Wall -fno-zero-initialized-in-bss -Wno-unused-variable -Wno-unused-function -Wno-unused-but-set-variable '
     AFLAGS = ' -c' + DEVICE + ' -x assembler-with-cpp -D__ASSEMBLY__ -I.'
     LFLAGS = DEVICE + ' -nostartfiles  -Wl,--gc-sections,-cref,-Map=' + MAP_FILE + ',-cref,-u,system_vectors' + ' -T ' + LINK_FILE
-    CXXFLAGS = '  -march=armv8-a -mfpu=neon-vfpv4 -ftree-vectorize -std=c++11  -mno-unaligned-access '
+    CXXFLAGS = DEVICE + ' -std=c++11 '
 
     M_CFLAGS = CFLAGS + ' -mlong-calls -fPIC '
     M_CXXFLAGS = CXXFLAGS + ' -mlong-calls -fPIC'

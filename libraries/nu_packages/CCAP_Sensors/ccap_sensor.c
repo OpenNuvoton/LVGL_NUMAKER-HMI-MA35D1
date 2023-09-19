@@ -14,8 +14,8 @@
 
 #include "ccap_sensor.h"
 
-#define DBG_ENABLE
-#define DBG_LEVEL DBG_LOG
+//#undef DBG_ENABLE
+#define DBG_LEVEL   LOG_LVL_INFO
 #define DBG_SECTION_NAME  "ccap.sensor"
 #define DBG_COLOR
 #include <rtdbg.h>

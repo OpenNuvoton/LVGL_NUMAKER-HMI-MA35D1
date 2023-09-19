@@ -6,8 +6,8 @@ from building import *
 cwd = GetCurrentDir()
 src = []
 
+src += ['Nuvoton/MA35D1/Source/system_ma35d1_subm.c']
 if GetDepend('USE_MA35D1_SUBM'):
-    src += ['Nuvoton/MA35D1/Source/system_ma35d1_subm.c']
     if rtconfig.CROSS_TOOL == 'gcc':
         src = src + ['Nuvoton/MA35D1/Source/GCC/startup_ma35d1_subm.S']
     elif rtconfig.CROSS_TOOL == 'keil':

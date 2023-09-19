@@ -137,8 +137,19 @@ extern int32_t g_CCAP_i32ErrCode;
  */
 #define CCAP_GET_INT_STS(ccap) (ccap->INT)
 
+/**
+* @brief     Set Camera Capture Interface Frame Rate Scale Down Divider
+*
+* @param[in] u8N:              N.   It could be 0x1 ~ 0x63
+*            u8M:              M.   It could be 0x1 ~ 0x63
+*/
+#define CCAP_SET_FR(ccap, N, M)    (ccap->FRCTL = (N << CCAP_FRCTL_FRN_Pos) | (((M) & 0x3F) << CCAP_FRCTL_FRM_Pos))
+
+
 #define CCAP_SET_CTL(ccap, u32IntMask) (ccap->CTL |= u32IntMask)
 #define CCAP_CLR_CTL(ccap, u32IntMask) (ccap->CTL &= ~u32IntMask)
+
+
 
 void CCAP_Open(CCAP_T *ccap, uint32_t u32InFormat, uint32_t u32OutFormat);
 void CCAP_SetCroppingWindow(CCAP_T *ccap, uint32_t u32VStart, uint32_t u32HStart, uint32_t u32Height, uint32_t u32Width);

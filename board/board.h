@@ -17,8 +17,8 @@
 #include "drv_sys.h"
 #include "nutool_pincfg.h"
 
-#define BOARD_SDRAM_START   0x80400000
-#define BOARD_SDRAM_SIZE    0x0FC00000
+#define BOARD_SDRAM_START   0x80800000
+#define BOARD_SDRAM_SIZE    0x0F800000
 
 #define BOARD_HEAP_END      ((void*)(BOARD_SDRAM_START+BOARD_SDRAM_SIZE))
 #define BOARD_HEAP_START    ((void *)&__bss_end)

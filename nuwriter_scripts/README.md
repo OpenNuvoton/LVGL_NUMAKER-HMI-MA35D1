@@ -35,22 +35,79 @@ NuWriter must install **WinUSB4NuVCOM.exe** on the computer.
 
 If your NuWriter_MA35 python running is ready, you can do following batch script files for Window directly.
 
+<p align="center">
+<img src="./in-system-programming.png" alt="fishy" class="bg-primary">
+</p>
+
 ### **nuwriter_ddr_download_and_run.bat**
 
-Download rtthread.bin binary file into DDR. The address is 0x80400000.
+Download rtthread.bin binary file into DDR. The address is 0x80800000.
 
-### **nuwriter_sd_programming.bat**
+### **nuwriter_program_sd.bat**
 
-Program header, DDR timing setting and rtthread.bin binary file into SD card or EMMC.
+Program header0, DDR timing setting and rtthread.bin binary file into SD card or EMMC.
 
-### **nuwriter_spinand_programming.bat**
+### **nuwriter_program_spinand.bat**
 
-Program header, DDR timing setting and rtthread.bin binary file into SPI NAND flash.
+Program header0, DDR timing setting and rtthread.bin binary file into SPI NAND flash.
 
-### **nuwriter_nand_programming.bat**
+### **nuwriter_program_rawnand.bat**
 
-Program header, DDR timing setting and rtthread.bin binary file into NAND flash.
+Program header0, DDR timing setting and rtthread.bin binary file into NAND flash.
 
+### **nuwriter_program_sd_pack1.bat**
+
+Program header1, DDR timing setting and rtthread.bin binary file into SD card or EMMC.
+
+### **nuwriter_program_spinand_pack1.bat**
+
+Program header1, DDR timing setting and rtthread.bin binary file into SPI NAND flash.
+
+### **nuwriter_program_rawnand_pack1.bat**
+
+Program header1, DDR timing setting and rtthread.bin binary file into NAND flash.
+
+### **nuwriter_program_spinor_pack1.bat**
+
+Program header1, DDR timing setting and rtthread.bin binary file into SPI NOR flash.
+
+## **In-system Programming**
+
+- Provide firmware updating way in rt-thread system.
+- An in-system programming utility for rt-thread called nuwriter available for firmware updating.
+
+```bash
+msh />nuwriter
+usage: nuwriter [option] [target] ...
+
+usage options:
+  -h,              --help          Print defined help message.
+  -f URI,          --file=URI      Specify NuWriter Pack file.(local).
+  -d Device name,  --device=device Specify device name.
+  -p,              --program       Execute program.
+  -r,              --readback      Read back from storage.
+
+For examples,
+nuwriter -f /mnt/udisk/pack.bin
+nuwriter -f /mnt/udisk/pack.bin -d sd1 --program
+nuwriter -f /mnt/udisk/pack.bin -d nand2 --program
+nuwriter -f /mnt/udisk/pack.bin -d rawnd2 --program
+nuwriter -f /mnt/udisk/pack.bin -d sf_whole --program
+nuwriter -f /nand0.bin -d nand0 --readback
+```
+
+- IBR compares version number of both header0 and header1 and load bigger version number firmware to run.
+- The headerX.bin image must be placed at first in packX.bin file.
+- SPI/RAW NAND flash need reserve **Enough Valid Blocks** for skipping bad-block mechanism.
+- Dual-headers must be placed in various storage device as below:
+
+|Boot Storage|header0 offset|header1 offset|Note|
+|-|-|-|-|
+|SD|Sector 2, 0x400|Sector 3, 0x600|<ul><li>Sector size is 512B</li><li>Sector 0 is MBR</li></ul>|
+|eMMC|Sector 2, 0x400|Sector 3, 0x600|<ul><li>Sector size is 512B</li><li>Sector 0 is MBR</li></ul>|
+|Raw NAND|Block 0, 0x0|Block 1, 0x20000|<ul><li>Block size = PSxPPB</li><li>Image start address must be block-alignment.</li></ul> |
+|SPI NAND|Block 0, 0x0|Block 1, 0x20000|<ul><li>Block size = PSxPPB</li><li>Image offset address must be block-alignment.</li><li>The page of block(PPB) SPI NAND flash must be 64, 128 or 256.</li></ul> |
+|SPINOR|Sector 0, 0x0|Sector 1, 0x1000|<ul><li>Block size = 64KB</li><li>Sector size = 4KB</li><li>SPI NOR flash need supports 4KB-sector erase size.</li></ul> |
 
 ## **Bash Scripts for Linux**
 
@@ -63,20 +120,23 @@ If not, the **install_linux.sh** will help user to install related python module
 
 ### **nuwriter_ddr_download_and_run.sh**
 
-Download rtthread.bin binary file into DDR. The address is 0x80400000.
+Download rtthread.bin binary file into DDR. The address is 0x80800000.
 
-### **nuwriter_sd_programming.sh**
+### **nuwriter_program_sd.sh**
 
-Program header, DDR timing setting and rtthread.bin binary file into SD card or EMMC.
+Program header0, DDR timing setting and rtthread.bin binary file into SD card or EMMC.
 
-### **nuwriter_spinand_programming.sh**
+### **nuwriter_program_spinand.sh**
 
-Program header, DDR timing setting and rtthread.bin binary file into SPI NAND flash.
+Program header0, DDR timing setting and rtthread.bin binary file into SPI NAND flash.
 
-### **nuwriter_nand_programming.sh**
+### **nuwriter_program_rawnand.sh**
 
-Program header, DDR timing setting and rtthread.bin binary file into NAND flash.
+Program header0, DDR timing setting and rtthread.bin binary file into NAND flash.
 
+### **nuwriter_program_spinor.sh**
+
+Program header0, DDR timing setting and rtthread.bin binary file into SPI NOR flash.
 
 ## **Troubleshoot**
 
@@ -103,7 +163,7 @@ For example, the **nuwriter_ddr_download_and_run.bat** modification is as follow
 :forever_develop
 NuWriter_MA35.exe -a ddrimg\enc_ddr3_winbond_256mb.bin
 IF %ERRORLEVEL% EQU 0 (
-   NuWriter_MA35.exe -o execute -w ddr 0x80400000 ..\rtthread.bin
+   NuWriter_MA35.exe -o execute -w ddr 0x80800000 ..\rtthread.bin
 )
 pause
 goto :forever_develop

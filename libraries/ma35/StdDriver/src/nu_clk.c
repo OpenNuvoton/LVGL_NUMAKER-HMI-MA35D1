@@ -106,11 +106,6 @@ void CLK_Idle(void)
     /* Chip enter idle mode after CPU run WFI instruction */
     __WFI();
 }
-#else
-void SystemCoreClockUpdate(void)
-{
-
-}
 #endif
 
 /**
@@ -1367,6 +1362,8 @@ static const struct S_PLL_FREQ_MAP s_au32CAPLLMap[] =
     { 1000000000u, PLL_OPMODE_INTEGER, 0x000006FA, 0, 0 },  /* 1000 MHz */
     {  800000000u, PLL_OPMODE_INTEGER, 0x00000364, 0, 0 },  /*  800 MHz */
     {  700000000u, PLL_OPMODE_INTEGER, 0x000006AF, 0, 0 },  /*  700 MHz */
+    {  648000000u, PLL_OPMODE_INTEGER, 0x000006A2, 0, 0 },  /*  648 MHz */
+    {  600000000u, PLL_OPMODE_INTEGER, 0x00000696, 0, 0 }   /*  600 MHz */
 };
 #define ARRARSIZE_CAPLLPLLMAP  (sizeof(s_au32CAPLLMap)/sizeof(struct S_PLL_FREQ_MAP))
 

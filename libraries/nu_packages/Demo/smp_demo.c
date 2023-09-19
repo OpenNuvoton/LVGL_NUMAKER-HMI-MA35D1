@@ -60,7 +60,7 @@ void happy_memcpy(void *pdata)
     now = rt_tick_get();
     while (counter < DEF_TIMES)
     {
-        rt_memcpy(dstbuf, srcbuf, DEF_BUF_SIZE);
+        memcpy(dstbuf, srcbuf, DEF_BUF_SIZE);
         counter++;
     }
     last = rt_tick_get();

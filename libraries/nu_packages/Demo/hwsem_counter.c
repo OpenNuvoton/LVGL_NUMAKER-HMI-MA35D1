@@ -86,7 +86,7 @@ static int hwsem_counter_app(void)
 
     return 0;
 }
-INIT_APP_EXPORT(hwsem_counter_app);
+//INIT_APP_EXPORT(hwsem_counter_app);
 MSH_CMD_EXPORT(hwsem_counter_app, demo hwsem);
 
 #endif /* #if defined(BSP_USING_HWSEM)*/

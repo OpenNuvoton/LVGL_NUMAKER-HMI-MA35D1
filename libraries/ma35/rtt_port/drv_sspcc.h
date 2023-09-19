@@ -15,6 +15,10 @@
 
 #include "rtthread.h"
 
+//#define DEF_SSPCC_DEBUG
+
+#if defined(DEF_SSPCC_DEBUG)
+
 #define SSPCC_SET_REALM(IP, REALM) \
         do { \
             rt_kprintf("Set %s realm to %s(%d)\n", #IP, #REALM, REALM); \
@@ -28,6 +32,20 @@
             SSPCC_SetRealm_GPIO((uint32_t)PORT, PIN, REALM); \
             rt_kprintf("Get %s%s realm is %d ....%s\n", #PORT, #PIN, SSPCC_GetRealm_GPIO((uint32_t)PORT, PIN), (SSPCC_GetRealm_GPIO((uint32_t)PORT, PIN)==REALM)?"Success":"Failure"); \
         } while(0)
+
+#else
+
+#define SSPCC_SET_REALM(IP, REALM) \
+        do { \
+            SSPCC_SetRealm(IP, REALM); \
+        } while(0)
+
+#define SSPCC_SET_GPIO_REALM(PORT, PIN, REALM) \
+        do { \
+            SSPCC_SetRealm_GPIO((uint32_t)PORT, PIN, REALM); \
+        } while(0)
+
+#endif
 
 rt_err_t nu_sspcc_init(void);
 

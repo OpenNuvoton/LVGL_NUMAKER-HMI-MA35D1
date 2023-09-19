@@ -101,7 +101,14 @@ _start:
     add     x0, x0, #4
     str     w1, [x0]
 #endif
+
+#ifdef CONFIG_RT_USING_SMP
     b       .L__cpus_trans_state
+#else
+.L__cpu_1_Loop:
+    wfe
+    b       .L__cpu_1_Loop
+#endif
 
 .L__cpu_0:
 

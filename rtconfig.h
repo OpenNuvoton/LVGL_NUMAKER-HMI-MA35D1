@@ -29,6 +29,7 @@
 /* kservice optimization */
 
 #define RT_KSERVICE_USING_STDLIB
+#define RT_KSERVICE_USING_TINY_SIZE
 #define RT_DEBUG
 #define RT_DEBUG_COLOR
 
@@ -102,8 +103,9 @@
 #define RT_DFS_ELM_LFN_UNICODE_0
 #define RT_DFS_ELM_LFN_UNICODE 0
 #define RT_DFS_ELM_MAX_LFN 255
-#define RT_DFS_ELM_DRIVES 8
-#define RT_DFS_ELM_MAX_SECTOR_SIZE 512
+#define RT_DFS_ELM_DRIVES 10
+#define RT_DFS_ELM_MAX_SECTOR_SIZE 4096
+#define RT_DFS_ELM_USE_ERASE
 #define RT_DFS_ELM_REENTRANT
 #define RT_DFS_ELM_MUTEX_TIMEOUT 3000
 #define RT_USING_DFS_DEVFS
@@ -236,6 +238,7 @@
 #define LWIP_SO_LINGER 0
 #define RT_LWIP_NETIF_LOOPBACK
 #define LWIP_NETIF_LOOPBACK 1
+#define RT_LWIP_USING_HW_CHECKSUM
 #define RT_LWIP_USING_PING
 
 /* Utilities */
@@ -272,6 +275,9 @@
 /* Wiced WiFi */
 
 
+/* CYW43012 WiFi */
+
+
 /* IoT Cloud */
 
 
@@ -296,7 +302,7 @@
 #define PKG_LVGL_DISP_REFR_PERIOD 16
 #define PKG_LVGL_USING_DEMOS
 #define PKG_LVGL_USING_V08035
-#define PKG_LVGL_VER_NUM 0x08035
+#define PKG_LVGL_VER_NUM 0x080305
 
 /* u8g2: a monochrome graphic library */
 

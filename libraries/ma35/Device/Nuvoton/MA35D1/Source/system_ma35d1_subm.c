@@ -17,7 +17,7 @@
 /*----------------------------------------------------------------------------
   Clock Variable definitions
  *----------------------------------------------------------------------------*/
-uint32_t SystemCoreClock  = __SYSTEM_CLOCK;    /*!< System Clock Frequency (Core Clock)*/
+uint32_t SystemCoreClock  = 180000000;    /*!< System Clock Frequency (Core Clock)*/
 uint32_t CyclesPerUs      = (__HSI / 1000000UL); /* Cycles per micro second */
 
 

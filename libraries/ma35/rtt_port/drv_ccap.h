@@ -32,6 +32,7 @@ typedef enum
     CCAP_CMD_SET_OPMODE,
     CCAP_CMD_SET_BASEADDR,
     CCAP_CMD_BINARIZATION_FLUSH, // Flush binarization data to specified buffer.
+    CCAP_CMD_SET_FRAMERATE_NM,
 } ccap_cmd;
 
 typedef struct

@@ -1210,8 +1210,11 @@ void synopGMAC_rx_desc_init_ring(DmaDesc *desc, bool last_ring_desc)
     desc->length = last_ring_desc ? RxDescEndOfRing : 0;
     desc->buffer1 = 0;
     desc->buffer2 = 0;
-    //desc->data1 = 0;
-    //desc->data2 = 0;
+    desc->extstatus = 0;
+    desc->reserved1 = 0;
+    desc->timestamplow = 0;
+    desc->timestamphigh = 0;
+
     return;
 }
 /**
@@ -1248,12 +1251,23 @@ s32 synopGMAC_init_tx_rx_desc_queue(synopGMACdevice *gmacdev)
     s32 i;
     for (i = 0; i < gmacdev -> TxDescCount; i++)
     {
-        synopGMAC_tx_desc_init_ring(gmacdev->TxDesc + i, i == gmacdev->TxDescCount - 1);
+#ifdef CACHE_ON
+        DmaDesc *txdesc = (DmaDesc *)((u32)(gmacdev->TxDesc) | UNCACHEABLE);
+#else
+        DmaDesc *txdesc = gmacdev->TxDesc;
+#endif
+        synopGMAC_tx_desc_init_ring(txdesc + i, i == gmacdev->TxDescCount - 1);
     }
     TR("At line %d\n", __LINE__);
     for (i = 0; i < gmacdev -> RxDescCount; i++)
     {
-        synopGMAC_rx_desc_init_ring(gmacdev->RxDesc + i, i == gmacdev->RxDescCount - 1);
+#ifdef CACHE_ON
+        DmaDesc *rxdesc = (DmaDesc *)((u32)(gmacdev->RxDesc) | UNCACHEABLE);
+#else
+        DmaDesc *rxdesc = gmacdev->RxDesc;
+#endif
+
+        synopGMAC_rx_desc_init_ring(rxdesc + i, i == gmacdev->RxDescCount - 1);
     }
 
     gmacdev->TxNext = 0;
@@ -1745,8 +1759,8 @@ s32 synopGMAC_get_rx_qptr(synopGMACdevice *gmacdev, u32 *Status, u32 *Buffer1, u
     //rxdesc->timestamphigh = 0;
     TR("%02d %08x %08x %08x %08x %08x\n", rxnext, (u32)rxdesc, rxdesc->status, rxdesc->length, rxdesc->buffer1, rxdesc->buffer2);
 
-    TR("%02d %08x %08x %08x %08x %08x\n", rxnext, (u32)rxdesc, rxdesc->status, rxdesc->length, rxdesc->buffer1, rxdesc->buffer2);
     (gmacdev->BusyRxDesc)--; //busy tx descriptor is reduced by one as it will be handed over to Processor now
+
     return (rxnext);
 
 }
@@ -2179,7 +2193,6 @@ void synopGMAC_write_wakeup_frame_register(synopGMACdevice *gmacdev, u32 *filter
 void synopGMAC_enable_rx_chksum_offload(synopGMACdevice *gmacdev)
 {
     synopGMACSetBits(gmacdev->MacBase, GmacConfig, GmacRxIpcOffload);
-    return;
 }
 /**
   * Disable the ip checksum offloading in receive path.
@@ -2201,7 +2214,6 @@ void synopGMAC_disable_rx_chksum_offload(synopGMACdevice *gmacdev)
 void synopGMAC_rx_tcpip_chksum_drop_enable(synopGMACdevice *gmacdev)
 {
     synopGMACClearBits(gmacdev->DmaBase, DmaControl, DmaDisableDropTcpCs);
-    return;
 }
 /**
   * Instruct the DMA not to drop the packets even if it fails tcp ip checksum.
@@ -2213,7 +2225,6 @@ void synopGMAC_rx_tcpip_chksum_drop_enable(synopGMACdevice *gmacdev)
 void synopGMAC_rx_tcpip_chksum_drop_disable(synopGMACdevice *gmacdev)
 {
     synopGMACSetBits(gmacdev->DmaBase, DmaControl, DmaDisableDropTcpCs);
-    return;
 }
 
 /**

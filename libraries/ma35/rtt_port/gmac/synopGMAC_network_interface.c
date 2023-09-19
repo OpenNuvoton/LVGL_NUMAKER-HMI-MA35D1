@@ -352,19 +352,27 @@ s32 synopGMAC_xmit_frames(synopGMACdevice *gmacdev, u8 *pkt_data, u32 pkt_len, u
 {
     s32 status = 0;
     u32 dma_addr = (u32)pkt_data;
+    s32 count = 0;
 
     /*Now we have skb ready and OS invoked this function. Lets make our DMA know about this*/
-    status = synopGMAC_set_tx_qptr(gmacdev, dma_addr, pkt_len, dma_addr, offload_needed, ts);
-    if (status < 0)
+    while (count < DEFAULT_LOOP_VARIABLE)
     {
-        TR0("%s No More Free Tx Descriptors\n", __FUNCTION__);
-        return -1;
+        status = synopGMAC_set_tx_qptr(gmacdev, dma_addr, pkt_len, dma_addr, offload_needed, ts);
+        if (status < 0)
+        {
+            count++;
+        }
+        else
+        {
+            /*Now force the DMA to start transmission*/
+            synopGMAC_resume_dma_tx(gmacdev);
+            return 0;
+        }
+        plat_delay(DEFAULT_DELAY_VARIABLE);
     }
 
-    /*Now force the DMA to start transmission*/
-    synopGMAC_resume_dma_tx(gmacdev);
-
-    return 0;
+    TR0("%s No More Free Tx Descriptors\n", __FUNCTION__);
+    return -1;
 }
 
 
@@ -516,59 +524,47 @@ s32 synop_handle_received_data(synopGMACdevice *gmacdev, PKT_FRAME_T **ppsPktFra
             }
             else     // No extended status. So relevant information is available in the status itself
             {
-                if (synopGMAC_is_rx_checksum_error(gmacdev, status) == RxNoChkError)
+                uint32_t u32Status;
+                static const char *s_szRxChkSumStatus[] =
                 {
-                    TR("Ip header and TCP/UDP payload checksum Bypassed <Chk Status = 4>  \n");
+                    "IEEE 802.3 type frame Length field is Less than 0x0600",
+                    "Payload & Ip header checksum bypassed (unsuppported payload)",
+                    "Reserved",
+                    "Neither IPv4 nor IPV6. So checksum bypassed",
+                    "No IPv4/IPv6 Checksum error detected",
+                    "Payload checksum error detected for Ipv4/Ipv6 frames",
+                    "Ip header checksum error detected for Ipv4 frames",
+                    "Payload & Ip header checksum error detected for Ipv4/Ipv6 frames"
+                };
+
+                u32Status = synopGMAC_is_rx_checksum_error(gmacdev, status);
+
+                if (RxNoChkError != u32Status)
+                {
+                    TR("%s %d\n", s_szRxChkSumStatus[u32Status], u32Status);
                 }
-                if (synopGMAC_is_rx_checksum_error(gmacdev, status) == RxIpHdrChkError)
+
+                switch (u32Status)
                 {
-                    //Linux Kernel doesnot care for ipv4 header checksum. So we will simply proceed by printing a warning ....
-                    TR(" Error in 16bit IPV4 Header Checksum <Chk Status = 6>  \n");
+                case RxIpHdrChkError:
                     gmacdev->synopGMACNetStats.rx_ip_header_errors++;
-                }
-                if (synopGMAC_is_rx_checksum_error(gmacdev, status) == RxLenLT600)
-                {
-                    TR("IEEE 802.3 type frame with Length field Lesss than 0x0600 <Chk Status = 0> \n");
-                }
-                if (synopGMAC_is_rx_checksum_error(gmacdev, status) == RxIpHdrPayLoadChkBypass)
-                {
-                    TR("Ip header and TCP/UDP payload checksum Bypassed <Chk Status = 1>\n");
-                }
-                if (synopGMAC_is_rx_checksum_error(gmacdev, status) == RxChkBypass)
-                {
-                    TR("Ip header and TCP/UDP payload checksum Bypassed <Chk Status = 3>  \n");
-                }
-                if (synopGMAC_is_rx_checksum_error(gmacdev, status) == RxPayLoadChkError)
-                {
-                    TR(" TCP/UDP payload checksum Error <Chk Status = 5>  \n");
+                    break;
+
+                case RxPayLoadChkError:
                     gmacdev->synopGMACNetStats.rx_ip_payload_errors++;
-                }
-                if (synopGMAC_is_rx_checksum_error(gmacdev, status) == RxIpHdrPayLoadChkError)
-                {
-                    //Linux Kernel doesnot care for ipv4 header checksum. So we will simply proceed by printing a warning ....
-                    TR(" Both IP header and Payload Checksum Error <Chk Status = 7>  \n");
+                    break;
+
+                case RxIpHdrPayLoadChkError:
                     gmacdev->synopGMACNetStats.rx_ip_header_errors++;
                     gmacdev->synopGMACNetStats.rx_ip_payload_errors++;
+                    break;
+
+                default:
+                    break;
                 }
             }
             *ppsPktFrame = (PKT_FRAME_T *)dma_addr1;
-#if 0
-#ifdef CACHE_ON
-            memcpy((void *)pu8rb, (void *)((u32)dma_addr1 | UNCACHEABLE), len);
-#else
-            memcpy((void *)pu8rb, (void *)((u32)dma_addr1), len);
-#endif
-            if (prevtx != NULL)
-            {
-#ifdef CACHE_ON
-                memcpy((void *)pu8rb + len, (void *)((u32)(dma_addr1 | UNCACHEABLE) + len), 4);
-#else
-                memcpy((void *)pu8rb + len, (void *)((u32)dma_addr1 + len), 4);
-#endif
-            }
-//            rb->rdy = 1;
-//            rb->len = len;
-#endif
+
             gmacdev->synopGMACNetStats.rx_packets++;
             gmacdev->synopGMACNetStats.rx_bytes += len;
             if (status & DescRxTSAvailable)

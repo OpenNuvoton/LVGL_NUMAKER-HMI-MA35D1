@@ -22,6 +22,6 @@ data.set 0x404601A0 %long 0x00000016
 data.set 0x404601A0 %long 0x00000088
 
 print "Set PC..."
-SetPC 0x80400000
+SetPC 0x80800000
 
 print "Ready..."

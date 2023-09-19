@@ -52,9 +52,7 @@ enum GMACPhyBase
 #define MACBASE 0x0000          // The Mac Base address offset is 0x0000
 #define DMABASE 0x1000          // Dma base address starts with an offset 0x1000
 
-
-#define TRANSMIT_DESC_SIZE  8192 //Tx Descriptors needed in the Descriptor pool/queue
-#define RECEIVE_DESC_SIZE   8192 //Rx Descriptors needed in the Descriptor pool/queue
+//#define DEF_ENABLE_JUMBO_FRAME    1
 
 #define ETHERNET_HEADER             14  //6 byte Dest addr, 6 byte Src addr, 2 byte length/type
 #define ETHERNET_CRC                 4  //Ethernet CRC
@@ -62,15 +60,26 @@ enum GMACPhyBase
 #define ETHERNET_PACKET_COPY       250  // Maximum length when received data is copied on to a new skb
 #define ETHERNET_PACKET_EXTRA       18  // Preallocated length for the rx packets is MTU + ETHERNET_PACKET_EXTRA
 #define VLAN_TAG                     4  //optional 802.1q VLAN Tag
-#define MIN_ETHERNET_PAYLOAD        46  //Minimum Ethernet payload size
-#define MAX_ETHERNET_PAYLOAD      1500  //Maximum Ethernet payload size
 #define JUMBO_FRAME_PAYLOAD       9000  //Jumbo frame payload size
+#define NORMAL_FRAME_PAYLOAD      1492  //Normal frame payload size
 
-#define PKT_FRAME_BUF_SIZE        1536  //(ETHERNET_HEADER + ETHERNET_CRC + MAX_ETHERNET_PAYLOAD + VLAN_TAG)+alignment
+#if defined(DEF_ENABLE_JUMBO_FRAME)
+    #define TRANSMIT_DESC_SIZE      3072 //Tx Descriptors needed in the Descriptor pool/queue
+    #define RECEIVE_DESC_SIZE       1024 //Rx Descriptors needed in the Descriptor pool/queue
+    #define MAX_ETHERNET_PAYLOAD    JUMBO_FRAME_PAYLOAD
+#else
+    #define TRANSMIT_DESC_SIZE      4096   //Tx Descriptors needed in the Descriptor pool/queue
+    #define RECEIVE_DESC_SIZE       8192  //Rx Descriptors needed in the Descriptor pool/queue
+    #define MAX_ETHERNET_PAYLOAD    NORMAL_FRAME_PAYLOAD
+#endif
+
+#define PLATFORM_ALIGNMENT_SIZE     64
+#define TOTAL_PACKET_BUFFER_USAGE   (ETHERNET_HEADER + VLAN_TAG + MAX_ETHERNET_PAYLOAD + ETHERNET_CRC)
+#define PKT_FRAME_BUF_SIZE          (((TOTAL_PACKET_BUFFER_USAGE) + (PLATFORM_ALIGNMENT_SIZE) - 1) & ~((PLATFORM_ALIGNMENT_SIZE) - 1))
 
 // This is the IP's phy address. This is unique address for every MAC in the universe
-#define DEFAULT_MAC0_ADDRESS {0x00, 0x55, 0x7B, 0xB5, 0x7D, 0xF7}
-#define DEFAULT_MAC1_ADDRESS {0x00, 0x55, 0x7B, 0xB5, 0x7D, 0xF8}
+#define DEFAULT_MAC0_ADDRESS       {0x00, 0x55, 0x7B, 0xB5, 0x7D, 0xF7}
+#define DEFAULT_MAC1_ADDRESS       {0x00, 0x55, 0x7B, 0xB5, 0x7D, 0xF8}
 /*
 DMA Descriptor Structure
 The structure is common for both receive and transmit descriptors

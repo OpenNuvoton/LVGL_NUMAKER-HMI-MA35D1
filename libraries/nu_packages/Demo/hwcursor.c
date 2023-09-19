@@ -20,10 +20,10 @@
 #include <sys/stat.h>
 #include <sys/statfs.h>
 
-#define DBG_ENABLE
-#define DBG_LEVEL DBG_LOG
-#define DBG_SECTION_NAME  "hwcursor"
+//#undef DBG_ENABLE
+#define DBG_LEVEL   LOG_LVL_INFO
 #define DBG_COLOR
+#define DBG_SECTION_NAME  "hwcursor"
 #include <rtdbg.h>
 
 /* Link to rtthread.bin in ma35-rtp folder. */

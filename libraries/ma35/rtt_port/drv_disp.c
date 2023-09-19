@@ -297,6 +297,7 @@ static rt_err_t disp_layer_open(rt_device_t dev, rt_uint16_t oflag)
     {
         DISP_SetTransparencyMode(eLayer_Video, eMASK);
         DISP_Trigger(eLayer_Video, 1);
+        DISP_ENABLE_INT();
     }
 
 #if defined(DISP_USING_OVERLAY) || defined(DISP_USING_CURSOR)
@@ -347,6 +348,7 @@ static rt_err_t disp_layer_close(rt_device_t dev)
 
     if (nu_fbdev[eLayer_Video].ref_count == 0)
     {
+        DISP_DISABLE_INT();
         DISP_Trigger(eLayer_Video, 0);
     }
 
@@ -487,9 +489,8 @@ static rt_err_t disp_layer_control(rt_device_t dev, int cmd, void *args)
 static rt_err_t disp_layer_init(rt_device_t dev)
 {
     nu_disp_t psDisp = (nu_disp_t)dev;
-    RT_ASSERT(psDisp != RT_NULL);
+    RT_ASSERT(psDisp);
 
-    rt_completion_init(&vsync_wq);
     return RT_EOK;
 }
 
@@ -591,12 +592,17 @@ int rt_hw_disp_init(void)
     RT_ASSERT(disp_lock);
 #endif
 
+    /* Initial vsync waitqueue instance */
+    rt_completion_init(&vsync_wq);
+
     /* Register ISR */
     rt_hw_interrupt_install(DISP_IRQn, nu_disp_isr, RT_NULL, "DISP");
 
-    /* Enable interrupt. */
+    /* Disable interrupt. */
+    DISP_DISABLE_INT();
+
+    /* Unmask interrupt. */
     rt_hw_interrupt_umask(DISP_IRQn);
-    DISP_ENABLE_INT();
 
     rt_kprintf("LCD panel timing is %d FPS.\n", DISP_LCDTIMING_GetFPS(&psDispLcdInstance->sLcdTiming));
 

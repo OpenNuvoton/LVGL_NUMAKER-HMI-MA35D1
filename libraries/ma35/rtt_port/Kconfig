@@ -1213,6 +1213,7 @@
             default y
         endif
 
+
     config BSP_USING_PMIC
         bool "Using PMIC"
         default n

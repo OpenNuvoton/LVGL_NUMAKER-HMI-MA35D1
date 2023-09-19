@@ -40,8 +40,8 @@
 #endif
 
 #if defined(BOARD_USING_STORAGE_SPIFLASH)
-    #define PARTITION_NAME_FILESYSTEM  "filesystem"
-    #define MOUNT_POINT_SPIFLASH0      "/mnt/"PARTITION_NAME_FILESYSTEM
+    #include "fal_cfg.h"
+    #define MOUNT_POINT_SPIFLASH0      "/mnt/"PARTITION_NAME_SF
 #endif
 
 #ifdef RT_USING_DFS_MNTTABLE
@@ -56,18 +56,31 @@ const void   *data;
 
 const struct dfs_mount_tbl mount_table[] =
 {
+#if defined(BOARD_USING_STORAGE_SPIFLASH)
+    { PARTITION_NAME_SF, MOUNT_POINT_SPIFLASH0, "elm", 0, RT_NULL },
+#endif
+
 #if defined(PKG_USING_DFS_YAFFS)
     { "nand1", "/mnt/nand1", "yaffs", 0, RT_NULL },
+
+#if defined(BSP_USING_NFI)
     { "rawnd1", "/mnt/nfi", "yaffs", 0, RT_NULL },
+#endif
+
 #elif defined(RT_USING_DFS_UFFS)
     { "nand1", "/mnt/nand1", "uffs", 0, RT_NULL },
 #endif
-    { "sd0", "/mnt/sd0", "elm", 0, RT_NULL },
+
+#if defined(BSP_USING_SDH0)
     { "sd0p0", "/mnt/sd0p0", "elm", 0, RT_NULL },
     { "sd0p1", "/mnt/sd0p1", "elm", 0, RT_NULL },
-    { "sd1", "/mnt/sd1", "elm", 0, RT_NULL },
+#endif
+
+#if defined(BSP_USING_SDH1)
     { "sd1p0", "/mnt/sd1p0", "elm", 0, RT_NULL },
     { "sd1p1", "/mnt/sd1p1", "elm", 0, RT_NULL },
+#endif
+
     {0},
 };
 #endif
@@ -239,13 +252,25 @@ int filesystem_init(void)
             mkdir_p("/download", 0x777);
             mkdir_p("/mnt/ram_usbd", 0x777);
             mkdir_p("/mnt/nand1", 0x777);
+
+#if defined(BSP_USING_NFI)
             mkdir_p("/mnt/nfi", 0x777);
-            mkdir_p("/mnt/sd0", 0x777);
+#endif
+
+#if defined(BOARD_USING_STORAGE_SPIFLASH)
+            mkdir_p(MOUNT_POINT_SPIFLASH0, 0x777);
+#endif
+
+#if defined(BSP_USING_SDH0)
             mkdir_p("/mnt/sd0p0", 0x777);
             mkdir_p("/mnt/sd0p1", 0x777);
-            mkdir_p("/mnt/sd1", 0x777);
+#endif
+
+#if defined(BSP_USING_SDH1)
             mkdir_p("/mnt/sd1p0", 0x777);
             mkdir_p("/mnt/sd1p1", 0x777);
+#endif
+
 #if defined(RT_USBH_MSTORAGE) && defined(UDISK_MOUNTPOINT)
             mkdir_p(UDISK_MOUNTPOINT, 0x777);
 #endif
@@ -278,10 +303,15 @@ int filesystem_init(void)
 
 #if defined(BOARD_USING_STORAGE_SPIFLASH)
     {
-        struct rt_device *psNorFlash = fal_blk_device_create(PARTITION_NAME_FILESYSTEM);
+        struct rt_device *psNorFlash = fal_blk_device_create(PARTITION_NAME_SF);
         if (!psNorFlash)
         {
-            rt_kprintf("Failed to create block device for %s.\n", PARTITION_NAME_FILESYSTEM);
+            rt_kprintf("Failed to create block device for %s.\n", PARTITION_NAME_SF);
+        }
+        psNorFlash = fal_blk_device_create(PARTITION_NAME_WHOLE);
+        if (!psNorFlash)
+        {
+            rt_kprintf("Failed to create block device for %s.\n", PARTITION_NAME_WHOLE);
         }
     }
 #endif

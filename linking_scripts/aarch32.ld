@@ -3,14 +3,15 @@ OUTPUT_ARCH(arm)
 
 SECTIONS
 {
-    ".usbhostlib" 0x28000000 (NOLOAD):
+    .no_cache_ram_region 0x80400000  (NOLOAD):
     {
-        . = ALIGN(4) ; 
+        . = ALIGN(4);
+        *(.noncacheable)
         *(.usbhostlib.*)
+        . = ALIGN(4);
     }
 
-    . = 0x80400000;
-
+    . = 0x80800000;
     __text_start = .;
     .text :
     {
@@ -49,6 +50,12 @@ SECTIONS
         KEEP(*(UtestTcTab))
         __rt_utest_tc_tab_end = .;
         . = ALIGN(4);
+
+        /* section information for cherryusb usb host class */
+        . = ALIGN(4);
+        __usbh_class_info_start__ = .;
+        KEEP(*(.usbh_class_info))
+        __usbh_class_info_end__ = .;
 
     } =0
     __text_end = .;

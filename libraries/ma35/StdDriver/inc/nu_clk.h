@@ -401,7 +401,7 @@ extern "C"
 #define SDH0_MODULE      ((0UL<<29)|(0UL<<26)         |(0x3UL<<22)       |(0x10UL<<17)      |(MODULE_NoMsk<<14)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(16UL<<0)) /*!< SDH0 Module */
 #define SDH1_MODULE      ((0UL<<29)|(0UL<<26)         |(0x3UL<<22)       |(0x12UL<<17)      |(MODULE_NoMsk<<14)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(17UL<<0)) /*!< SDH1 Module */
 #define NAND_MODULE      ((0UL<<29)|(MODULE_NoMsk<<26)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<14)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(18UL<<0)) /*!< NAND Module \hideinitializer */
-#define USBD_MODULE      ((0UL<<29)|(MODULE_NoMsk<<26)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<14)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(19UL<<0)) /*!< USBD Module \hideinitializer */
+#define HSUSBD_MODULE      ((0UL<<29)|(MODULE_NoMsk<<26)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<14)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(19UL<<0)) /*!< USBD Module \hideinitializer */
 #define USBH_MODULE      ((0UL<<29)|(MODULE_NoMsk<<26)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<14)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(20UL<<0)) /*!< USBH Module \hideinitializer */
 #define HUSBH0_MODULE    ((0UL<<29)|(MODULE_NoMsk<<26)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<14)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(21UL<<0)) /*!< HUSBH0 Module \hideinitializer */
 #define HUSBH1_MODULE    ((0UL<<29)|(MODULE_NoMsk<<26)|(MODULE_NoMsk<<22)|(MODULE_NoMsk<<17)|(MODULE_NoMsk<<14)|(MODULE_NoMsk<<10)|(MODULE_NoMsk<<5)|(22UL<<0)) /*!< HUSBH1 Module \hideinitializer */

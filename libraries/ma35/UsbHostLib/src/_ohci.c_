@@ -337,8 +337,8 @@ static uint32_t ed_make_info(UDEV_T *udev, EP_INFO_T *ep)
 
 static void write_td(TD_T *td, uint32_t info, uint8_t *buff, uint32_t data_len)
 {
-	uint32_t   baddr = ptr_to_u32(buff);
-	
+    uint32_t   baddr = ptr_to_u32(buff);
+
     td->Info = info;
     td->CBP  = (((baddr == 0) || !data_len) ? 0 : baddr);
     td->BE   = (((baddr == 0) || !data_len) ? 0 : baddr + data_len - 1);
@@ -1266,7 +1266,7 @@ static void dump_ohci_regs()
     USB_debug("    HcRhPortStatus0    = 0x%x\n", _ohci->HcRhPortStatus[0]);
     USB_debug("    HcRhPortStatus1    = 0x%x\n", _ohci->HcRhPortStatus[1]);
     USB_debug("    HcPhyControl       = 0x%x\n", _ohci->HcPhyControl);
-    USB_debug("    HcMiscControl      = 0x%x\n", _ohci->HcMiscControl);
+    //USB_debug("    HcMiscControl      = 0x%x\n", _ohci->HcMiscControl);
 }
 
 static void dump_ohci_ports()

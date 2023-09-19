@@ -34,7 +34,7 @@
 #include  "synopGMAC_Dev.h"
 #define TEST_RGMII
 //#define TEST_RMII
-#define CACHE_ON
+//#define CACHE_ON
 
 /** Tx/Rx buffer structure */
 typedef struct

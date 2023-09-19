@@ -615,6 +615,7 @@ static int ehci_ctrl_xfer(UTR_T *utr)
     }
 
     //dump_ehci_regs();
+    //dump_ehci_asynclist();
     /*  Start transfer */
     _ehci->UCMDR |= HSUSBH_UCMDR_ASEN_Msk;      /* start asynchronous transfer            */
     return 0;

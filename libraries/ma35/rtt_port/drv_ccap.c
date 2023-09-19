@@ -21,7 +21,7 @@
 #include "drv_common.h"
 
 #define LOG_TAG    "drv.ccap"
-#define DBG_ENABLE
+//#undef DBG_ENABLE
 #define DBG_SECTION_NAME   LOG_TAG
 #define DBG_LEVEL   LOG_LVL_INFO
 #define DBG_COLOR
@@ -90,6 +90,18 @@ static void nu_ccap_isr(int vector, void *param)
     {
         base->INT |= CCAP_INT_VINTF_Msk;     /* Clear Frame end interrupt */
         u32EvtMsk |= NU_CCAP_FRAME_END;
+
+        if (ccap->sConfig.sPipeInfo_Packet.pu8FarmAddr)
+        {
+            rt_hw_cpu_dcache_invalidate((void *)ccap->sConfig.sPipeInfo_Packet.pu8FarmAddr,
+                                        (ccap->sConfig.u32Stride_Packet * ccap->sConfig.sPipeInfo_Packet.u32Height));
+        }
+
+        if (ccap->sConfig.sPipeInfo_Planar.pu8FarmAddr)
+        {
+            rt_hw_cpu_dcache_invalidate((void *)ccap->sConfig.sPipeInfo_Planar.pu8FarmAddr,
+                                        (ccap->sConfig.u32Stride_Planar * ccap->sConfig.sPipeInfo_Planar.u32Height));
+        }
     }
 
     if ((u32CapInt & (CCAP_INT_ADDRMIEN_Msk | CCAP_INT_ADDRMINTF_Msk)) == (CCAP_INT_ADDRMIEN_Msk | CCAP_INT_ADDRMINTF_Msk))
@@ -110,6 +122,7 @@ static void nu_ccap_isr(int vector, void *param)
 
     if (ccap->sConfig.pfnEvHndler && u32EvtMsk)
         ccap->sConfig.pfnEvHndler(ccap->sConfig.pvData, u32EvtMsk);
+
 
     base->CTL = base->CTL | CCAP_CTL_UPDATE;
 }
@@ -493,6 +506,15 @@ static rt_err_t ccap_control(rt_device_t dev, int cmd, void *args)
                     pu8BVFarmAddr += (psBinConf->u32Stride_Dst - w);
             }
         }
+    }
+    break;
+
+    case CCAP_CMD_SET_FRAMERATE_NM:
+    {
+        uint32_t u32N = (((uint32_t)args >> 16) & 0x3F);
+        uint32_t u32M = (((uint32_t)args >> 0) & 0x3F);
+
+        CCAP_SET_FR(psNuCcap->base, u32N, u32M);
     }
     break;
 

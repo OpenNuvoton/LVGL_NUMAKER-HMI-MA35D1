@@ -21,7 +21,7 @@
 
 /* Private define ---------------------------------------------------------------*/
 #define LOG_TAG    "drv.i2c"
-#define DBG_ENABLE
+//#undef DBG_ENABLE
 #define DBG_SECTION_NAME   LOG_TAG
 #define DBG_LEVEL DBG_INFO
 #define DBG_COLOR

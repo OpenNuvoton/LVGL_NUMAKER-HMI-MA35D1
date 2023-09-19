@@ -26,8 +26,8 @@
 #define DBG_COLOR
 #include <rtdbg.h>
 
-#define PATH_H264_INCBIN          "./default.264"
-#define PATH_JPEG_INCBIN          "./default.jpg"
+#define PATH_H264_INCBIN          ".//default.264"
+#define PATH_JPEG_INCBIN          ".//default.jpg"
 
 INCBIN(vde_h264, PATH_H264_INCBIN);
 INCBIN(vde_jpeg, PATH_JPEG_INCBIN);

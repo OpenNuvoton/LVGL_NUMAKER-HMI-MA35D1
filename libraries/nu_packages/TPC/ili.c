@@ -14,7 +14,6 @@
 #include <nu_bitutil.h>
 
 #define DBG_TAG "ili_tpc"
-//#define DBG_LVL DBG_LOG
 #define DBG_LVL DBG_INFO
 #include <rtdbg.h>
 
