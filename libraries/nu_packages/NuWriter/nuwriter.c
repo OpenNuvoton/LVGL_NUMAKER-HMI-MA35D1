@@ -798,7 +798,7 @@ static int nuwriter_get_bootinfo(S_BOOT_INFO_T *psUserBootInfo)
     void *pvUnitBuf = RT_NULL;
     uint32_t u32UnitSize, u32NewerVerNum = 0;
 
-    bootsrc = evBootFrom_QSPI0_NOR;
+    //bootsrc = evBootFrom_QSPI0_NOR;
     switch (bootsrc)
     {
     case evBootFrom_USBD:
