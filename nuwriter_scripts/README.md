@@ -35,10 +35,6 @@ NuWriter must install **WinUSB4NuVCOM.exe** on the computer.
 
 If your NuWriter_MA35 python running is ready, you can do following batch script files for Window directly.
 
-<p align="center">
-<img src="./in-system-programming.png" alt="fishy" class="bg-primary">
-</p>
-
 ### **nuwriter_ddr_download_and_run.bat**
 
 Download rtthread.bin binary file into DDR. The address is 0x80800000.
@@ -70,44 +66,6 @@ Program header1, DDR timing setting and rtthread.bin binary file into NAND flash
 ### **nuwriter_program_spinor_pack1.bat**
 
 Program header1, DDR timing setting and rtthread.bin binary file into SPI NOR flash.
-
-## **In-system Programming**
-
-- Provide firmware updating way in rt-thread system.
-- An in-system programming utility for rt-thread called nuwriter available for firmware updating.
-
-```bash
-msh />nuwriter
-usage: nuwriter [option] [target] ...
-
-usage options:
-  -h,              --help          Print defined help message.
-  -f URI,          --file=URI      Specify NuWriter Pack file.(local).
-  -d Device name,  --device=device Specify device name.
-  -p,              --program       Execute program.
-  -r,              --readback      Read back from storage.
-
-For examples,
-nuwriter -f /mnt/udisk/pack.bin
-nuwriter -f /mnt/udisk/pack.bin -d sd1 --program
-nuwriter -f /mnt/udisk/pack.bin -d nand2 --program
-nuwriter -f /mnt/udisk/pack.bin -d rawnd2 --program
-nuwriter -f /mnt/udisk/pack.bin -d sf_whole --program
-nuwriter -f /nand0.bin -d nand0 --readback
-```
-
-- IBR compares version number of both header0 and header1 and load bigger version number firmware to run.
-- The headerX.bin image must be placed at first in packX.bin file.
-- SPI/RAW NAND flash need reserve **Enough Valid Blocks** for skipping bad-block mechanism.
-- Dual-headers must be placed in various storage device as below:
-
-|Boot Storage|header0 offset|header1 offset|Note|
-|-|-|-|-|
-|SD|Sector 2, 0x400|Sector 3, 0x600|<ul><li>Sector size is 512B</li><li>Sector 0 is MBR</li></ul>|
-|eMMC|Sector 2, 0x400|Sector 3, 0x600|<ul><li>Sector size is 512B</li><li>Sector 0 is MBR</li></ul>|
-|Raw NAND|Block 0, 0x0|Block 1, 0x20000|<ul><li>Block size = PSxPPB</li><li>Image start address must be block-alignment.</li></ul> |
-|SPI NAND|Block 0, 0x0|Block 1, 0x20000|<ul><li>Block size = PSxPPB</li><li>Image offset address must be block-alignment.</li><li>The page of block(PPB) SPI NAND flash must be 64, 128 or 256.</li></ul> |
-|SPINOR|Sector 0, 0x0|Sector 1, 0x1000|<ul><li>Block size = 64KB</li><li>Sector size = 4KB</li><li>SPI NOR flash need supports 4KB-sector erase size.</li></ul> |
 
 ## **Bash Scripts for Linux**
 
@@ -170,5 +128,6 @@ goto :forever_develop
 ```
 
 ## **See also**
+[In-system Firmware Updating](In-system_firmware_updating.md)
 
 [NuWriter Repository](https://github.com/OpenNuvoton/MA35D1_NuWriter)
