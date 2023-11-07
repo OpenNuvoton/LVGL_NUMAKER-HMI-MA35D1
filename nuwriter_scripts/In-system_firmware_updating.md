@@ -5,7 +5,7 @@
 - IBR compares version number of both header0 and header1 and load bigger version number firmware to run.
 
 <p align="center">
-<img src="./rtthread_layout.png" alt="fishy" class="bg-primary">
+<img src="./figures/rtthread_layout.png" alt="fishy" class="bg-primary">
 </p>
 
 ## **Important**

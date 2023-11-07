@@ -2,15 +2,17 @@
 
 import os
 
-def extract_line(fname, pattern):
+def extract_line(fname, pattern, IsDebug):
     with open(fname, "r") as f:
         lines = f.readlines()
         f.close()
-    with open("entry_point.S", "w") as f:
+    with open("entry_point.S" if IsDebug == 0 else "debug_aarch32.S", "w") as f:
         counter=0
         f.write(".section \".text.entrypoint\"\n")
-        f.write(".globl system_vectors\n")
+        f.write(".global _start\n")
+        f.write(".global system_vectors\n")
         f.write("\n")
+
         f.write("ma35d1_start:\n")
         for line in lines:
             if pattern in line:
@@ -38,13 +40,17 @@ def extract_line(fname, pattern):
         f.write("    vmrs    r1, FPEXC\n");
         f.write("    orr     r1, r1, #(1 << 30)\n");
         f.write("    vmsr    FPEXC, r1\n");
-        f.write("    bl      system_vectors\n");
+        if IsDebug == 0:
+            f.write("    bl      system_vectors\n");
+        else:
+            f.write("    b      .\n");
 
         # Append NOP to align vector table.
         f.close()
 
 def formatfiles():
-    extract_line("preload.txt", ":\t")
+    extract_line("preload.txt", ":\t", 0)
+    extract_line("preload.txt", ":\t", 1)
 
 if __name__ == '__main__':
     formatfiles()

@@ -102,7 +102,7 @@ _start:
     str     w1, [x0]
 #endif
 
-#ifdef CONFIG_RT_USING_SMP
+#ifdef RT_USING_SMP
     b       .L__cpus_trans_state
 #else
 .L__cpu_1_Loop:

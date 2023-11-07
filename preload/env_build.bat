@@ -5,3 +5,7 @@
 
 make
 python transcode.py
+arm-none-eabi-gcc -march=armv8-a -mfpu=neon-vfpv4 -ftree-vectorize -ffast-math -mfloat-abi=softfp -x assembler-with-cpp -D__ASSEMBLY__ -nostartfiles debug_aarch32.S -o debug_aarch32.o
+arm-none-eabi-objdump -d debug_aarch32.o > debug_aarch32.txt
+arm-none-eabi-objcopy -O binary debug_aarch32.o ../nuwriter_scripts/debug_aarch32.bin
+rm debug_aarch32.S *.o
