@@ -88,7 +88,6 @@ template_projects:
     - ma35-rtp
     - preload
     - nuwriter_scripts
-    - CVD
     - README.md
     - rtconfig.h
     - SConscript
