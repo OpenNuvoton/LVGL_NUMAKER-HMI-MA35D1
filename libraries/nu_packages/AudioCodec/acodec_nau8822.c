@@ -314,6 +314,13 @@ static rt_err_t nau8822_init(void)
 
     I2C_WriteNAU8822(6,  0x1AD);   /* Divide by 6, 16K */
     I2C_WriteNAU8822(7,  0x006);   /* 16K for internal filter coefficients */
+
+//R9 GPIO pin selection for jack detect function, jack detection enable, VREF jack enable
+//R13 bit mapped selection of which outputs are to be enabled when jack detect is in a logic 1 state
+//R13 bit mapped selection of which outputs are to be enabled when jack detect is in a logic 0 state
+    I2C_WriteNAU8822(9,  0x1D0);   /* jack detect 1 */
+    I2C_WriteNAU8822(13,  0x121);   /* jack detect 2 */
+
     I2C_WriteNAU8822(10, 0x008);   /* DAC soft mute is disabled, DAC oversampling rate is 128x */
     I2C_WriteNAU8822(14, 0x108);   /* ADC HP filter is disabled, ADC oversampling rate is 128x */
     I2C_WriteNAU8822(15, 0x1EF);   /* ADC left digital volume control */
@@ -321,6 +328,9 @@ static rt_err_t nau8822_init(void)
     I2C_WriteNAU8822(44, 0x033);   /* LMICN/LMICP is connected to PGA */
     I2C_WriteNAU8822(47, 0x100);   /* Gain value */
     I2C_WriteNAU8822(48, 0x100);   /* Gain value */
+
+    I2C_WriteNAU8822(49, 0x40);   /* Gain value */
+
     I2C_WriteNAU8822(50, 0x001);   /* Left DAC connected to LMIX */
     I2C_WriteNAU8822(51, 0x001);   /* Right DAC connected to RMIX */
 

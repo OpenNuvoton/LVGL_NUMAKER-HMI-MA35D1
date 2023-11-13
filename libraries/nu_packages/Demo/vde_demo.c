@@ -12,7 +12,7 @@
 
 #include <rtthread.h>
 
-#if defined(BSP_USING_VDE)
+#if 0   // defined(BSP_USING_VDE) //disable function due to code size.
 
 #include "vc8000_lib.h"
 #include "drv_common.h"

@@ -11,6 +11,7 @@
 ******************************************************************************/
 
 #include <rtthread.h>
+#include <rtdevice.h>
 
 #include "ccap_sensor.h"
 
@@ -327,7 +328,7 @@ static const sensor_priv adv728x_priv =
     .PwrDwnActLow    = RT_TRUE,
 };
 
-ccap_sensor_dev_t nu_create_adv728x(ccap_sensor_io *psIo, const char *szName)
+static ccap_sensor_dev_t nu_create_adv728x(ccap_sensor_io *psIo, const char *szName)
 {
     rt_err_t ret;
     ccap_sensor_dev *pdev = rt_malloc(sizeof(ccap_sensor_dev));
@@ -347,3 +348,10 @@ ccap_sensor_dev_t nu_create_adv728x(ccap_sensor_io *psIo, const char *szName)
 
     return pdev;
 }
+
+static int nu_sensor_adv728x_init(void)
+{
+    g_pfnSensorCreateList[evCCAPSNR_ADV728X] = nu_create_adv728x;
+    return 0;
+}
+INIT_BOARD_EXPORT(nu_sensor_adv728x_init);

@@ -1,14 +1,12 @@
 ﻿# RT-Thread building script for component
 
-from building import *
-
-
+import rtconfig
 Import('RTT_ROOT')
 from building import *
 
 cwd = GetCurrentDir()
-src = Glob('*.c') + Glob('*.cpp') + Glob('*.S')
 CPPPATH = [ cwd ]
+src = Glob('entry_point.S')
+group = DefineGroup('board', src, depend = ['USE_PRELOADER'], CPPPATH = CPPPATH)
 
-group = DefineGroup('board', src, depend = [''], CPPPATH = CPPPATH)
 Return('group')

@@ -67,7 +67,7 @@ void CLK_EnableCKO(uint32_t u32ClkSrc, uint32_t u32ClkDiv, uint32_t u32ClkDivBy1
     CLK_SetModuleClock(CLKO_MODULE, u32ClkSrc, 0UL);
 }
 
-#if defined(USE_MA35D1_SUBM)
+#if defined(USE_MA35_RTP)
 /**
   * @brief      Enter to Power-down mode
   * @param      None
@@ -860,7 +860,7 @@ uint32_t CLK_WaitClockReady(uint32_t u32ClkMask)
     return u32Ret;
 }
 
-#if defined(USE_MA35D1_SUBM)
+#if defined(USE_MA35_RTP)
 /**
   * @brief      Enable System Tick counter
   * @param[in]  u32ClkSrc is System Tick clock source. Including:

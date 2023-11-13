@@ -277,7 +277,7 @@ int rt_hw_hwsem_init(void)
 
     for (i = (HWSEM_START + 1); i < HWSEM_END; i++)
     {
-#if !defined(USE_MA35D1_SUBM)
+#if !defined(USE_MA35_RTP)
         /* Reset this module */
         nu_sys_ip_reset(nu_hwsem_arr[i].rstidx);
 #endif

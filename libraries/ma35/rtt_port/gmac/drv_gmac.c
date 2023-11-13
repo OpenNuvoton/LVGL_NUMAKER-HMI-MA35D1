@@ -374,8 +374,8 @@ void nu_gmac_link_monitor(void *pvData)
 }
 
 #ifndef CACHE_ON
-__attribute__((section(".noncacheable"))) __attribute__((aligned(64))) DmaDesc sTXDescs[TRANSMIT_DESC_SIZE];
-__attribute__((section(".noncacheable"))) __attribute__((aligned(64))) DmaDesc sRXDescs[RECEIVE_DESC_SIZE];
+    __attribute__((section(".noncacheable"))) __attribute__((aligned(64))) DmaDesc sTXDescs[TRANSMIT_DESC_SIZE];
+    __attribute__((section(".noncacheable"))) __attribute__((aligned(64))) DmaDesc sRXDescs[RECEIVE_DESC_SIZE];
 #endif
 
 static void nu_memmgr_init(GMAC_MEMMGR_T *psMemMgr)
@@ -702,24 +702,47 @@ exit_nu_gmac_rx:
 
 static void nu_gmac_assign_macaddr(nu_gmac_t psNuGMAC)
 {
-    static rt_uint32_t value = 0x94539452;
+    if ((psNuGMAC->base == GMAC0) && (SYS->MACAD0LSR != 0))
+    {
+        psNuGMAC->mac_addr[0] = (SYS->MACAD0LSR >> 0)  & 0xFF;
+        psNuGMAC->mac_addr[1] = (SYS->MACAD0LSR >> 8)  & 0xFF;
+        psNuGMAC->mac_addr[2] = (SYS->MACAD0LSR >> 16) & 0xFF;
+        psNuGMAC->mac_addr[3] = (SYS->MACAD0LSR >> 24) & 0xFF;
+        psNuGMAC->mac_addr[4] = (SYS->MACAD0HSR >> 0)  & 0xFF;
+        psNuGMAC->mac_addr[5] = (SYS->MACAD0HSR >> 8)  & 0xFF;
+    }
+    else if ((psNuGMAC->base == GMAC1) && (SYS->MACAD1LSR != 0))
+    {
+        psNuGMAC->mac_addr[0] = (SYS->MACAD1LSR >> 0)  & 0xFF;
+        psNuGMAC->mac_addr[1] = (SYS->MACAD1LSR >> 8)  & 0xFF;
+        psNuGMAC->mac_addr[2] = (SYS->MACAD1LSR >> 16) & 0xFF;
+        psNuGMAC->mac_addr[3] = (SYS->MACAD1LSR >> 24) & 0xFF;
+        psNuGMAC->mac_addr[4] = (SYS->MACAD1HSR >> 0)  & 0xFF;
+        psNuGMAC->mac_addr[5] = (SYS->MACAD1HSR >> 8)  & 0xFF;
+    }
+    else
+    {
+        static uint32_t seed_value = 0x94539452;
 
-    /* Assign MAC address */
-    psNuGMAC->mac_addr[0] = 0x82;
-    psNuGMAC->mac_addr[1] = 0x06;
-    psNuGMAC->mac_addr[2] = 0x21;
-    psNuGMAC->mac_addr[3] = (value >> 16) & 0xff;
-    psNuGMAC->mac_addr[4] = (value >> 8) & 0xff;
-    psNuGMAC->mac_addr[5] = (value) & 0xff;
+        /* Assign MAC address */
+        psNuGMAC->mac_addr[0] = 0x82;
+        psNuGMAC->mac_addr[1] = 0x06;
+        psNuGMAC->mac_addr[2] = 0x21;
+        psNuGMAC->mac_addr[3] = (seed_value >> 16) & 0xff;
+        psNuGMAC->mac_addr[4] = (seed_value >> 8) & 0xff;
+        psNuGMAC->mac_addr[5] = (seed_value) & 0xff;
 
-    LOG_I("MAC address: %02X:%02X:%02X:%02X:%02X:%02X\n", \
+        seed_value++;
+    }
+
+    LOG_I("[%s] MAC address: %02X:%02X:%02X:%02X:%02X:%02X\n", \
+          psNuGMAC->name,
           psNuGMAC->mac_addr[0], \
           psNuGMAC->mac_addr[1], \
           psNuGMAC->mac_addr[2], \
           psNuGMAC->mac_addr[3], \
           psNuGMAC->mac_addr[4], \
           psNuGMAC->mac_addr[5]);
-    value++;
 }
 
 int32_t nu_gmac_adapter_init(nu_gmac_t psNuGMAC)

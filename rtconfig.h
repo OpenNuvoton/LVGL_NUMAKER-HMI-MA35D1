@@ -4,7 +4,7 @@
 /* Automatically generated file; DO NOT EDIT. */
 /* RT-Thread Configuration */
 
-#define USE_MA35D1_AARCH32
+#define USE_MA35_AARCH32
 
 /* RT-Thread Kernel */
 
@@ -410,6 +410,7 @@
 #define BSP_USING_RTP
 #define RTP_USING_AT_STARTUP
 #define RT_USING_FPU
+#define USE_PRELOADER
 #define BSP_USE_STDDRIVER_SOURCE
 #define BSP_USING_PDMA
 #define BSP_USING_PDMA0
@@ -442,6 +443,9 @@
 #define BSP_USING_SDH
 #define BSP_USING_SDH0
 #define BSP_USING_SDH1
+#define BSP_USING_EPWM
+#define BSP_USING_EPWM1
+#define BSP_USING_EPWM1_PWM
 #define BSP_USING_SPI
 #define BSP_USING_SPI0_NONE
 #define BSP_USING_SPI1_NONE
@@ -463,7 +467,6 @@
 #define BSP_USING_HWSEM0
 #define BSP_USING_WHC
 #define BSP_USING_WHC0
-#define BSP_USING_VDE
 #define BSP_USING_USBH
 #define BSP_USING_HSUSBH0
 #define BSP_USING_HSUSBH1

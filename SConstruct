@@ -1,6 +1,9 @@
 import os
 import sys
 import rtconfig
+import subprocess
+import platform
+import uuid
 
 if os.getenv('RTT_ROOT'):
     RTT_ROOT = os.getenv('RTT_ROOT')
@@ -48,6 +51,37 @@ Export('SDK_LIB')
 
 # prepare building environment
 objs = PrepareBuilding(env, RTT_ROOT)
+
+# set spawn
+def ourspawn(sh, escape, cmd, args, e):
+    filename = str(uuid.uuid4())
+    newargs = ' '.join(args[1:])
+    cmdline = cmd + " " + newargs
+    if (len(cmdline) > 16 * 1024):
+        f = open(filename, 'w')
+        f.write(' '.join(args[1:]).replace('\\', '/'))
+        f.close()
+        # exec
+        cmdline = cmd + " @" + filename
+    proc = subprocess.Popen(cmdline, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell = False, env = e)
+    data, err = proc.communicate()
+    rv = proc.wait()
+    def res_output(_output, _s):
+        if len(_s):
+            if isinstance(_s, str):
+                _output(_s)
+            elif isinstance(_s, bytes):
+                _output(str(_s, 'UTF-8'))
+            else:
+                _output(str(_s))
+    res_output(sys.stderr.write, err)
+    res_output(sys.stdout.write, data)
+    if os.path.isfile(filename):
+        os.remove(filename)
+    return rv
+
+if platform.system() == 'Windows':
+    env['SPAWN'] = ourspawn
 
 nuvoton_library = 'ma35'
 rtconfig.BSP_LIBRARY_TYPE = nuvoton_library

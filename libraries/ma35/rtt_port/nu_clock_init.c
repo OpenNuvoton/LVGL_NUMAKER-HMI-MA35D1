@@ -306,7 +306,7 @@ void nu_clock_rtc_init(void)
 #endif
 }
 
-#if !defined(USE_MA35D1_SUBM)
+#if !defined(USE_MA35_RTP)
 
 static void nu_clock_usbd_init(void)
 {
@@ -390,7 +390,7 @@ static void nu_clock_vde_init(void)
 
 void nu_clock_init(void)
 {
-#if !defined(USE_MA35D1_SUBM)
+#if !defined(USE_MA35_RTP)
     nu_clock_base_init();
 
     nu_clock_gmac_init();

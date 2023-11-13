@@ -35,7 +35,7 @@ extern "C"
 #define HWSEM_LOCK_BY_A35       1ul     /*!<Semaphore lock by A35 \hideinitializer */
 #define HWSEM_LOCK_BY_M4        2ul     /*!<Semaphore lock by M4 \hideinitializer */
 
-#if defined(USE_MA35D1_SUBM)
+#if defined(USE_MA35_RTP)
 #define HWSEM_LOCK_BY_OWNER     HWSEM_LOCK_BY_M4
 #define INTSTS_CORE                         INTSTSM4
 #define INTEN_CORE                          INTENM4

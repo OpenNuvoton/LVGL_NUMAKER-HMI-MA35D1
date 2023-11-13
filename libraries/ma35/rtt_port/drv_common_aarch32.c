@@ -12,7 +12,7 @@
 
 #include <rtthread.h>
 
-#if defined(USE_MA35D1_AARCH32)
+#if defined(USE_MA35_AARCH32)
 
 #include <rthw.h>
 #include <stdio.h>
@@ -261,4 +261,4 @@ void rt_hw_secondary_cpu_idle_exec(void)
 
 #endif
 
-#endif /* #if defined(USE_MA35D1_AARCH32) */
+#endif /* #if defined(USE_MA35_AARCH32) */

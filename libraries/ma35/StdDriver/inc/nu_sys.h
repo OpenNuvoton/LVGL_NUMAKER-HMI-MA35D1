@@ -1788,7 +1788,7 @@ __STATIC_INLINE void SYS_LockReg(void);
   */
 __STATIC_INLINE void SYS_UnlockReg(void)
 {
-#if defined(USE_MA35D1_SUBM)
+#if defined(USE_MA35_RTP)
     do
     {
         SYS->RLKSUBM = 0x59UL;
@@ -1816,7 +1816,7 @@ __STATIC_INLINE void SYS_UnlockReg(void)
   */
 __STATIC_INLINE void SYS_LockReg(void)
 {
-#if defined(USE_MA35D1_SUBM)
+#if defined(USE_MA35_RTP)
     SYS->RLKSUBM = 0UL;
 #else
     SYS->RLKTZS = 0UL;
@@ -1831,7 +1831,7 @@ __STATIC_INLINE void SYS_LockReg(void)
   */
 __STATIC_INLINE uint32_t SYS_IsRegLocked(void)
 {
-#if defined(USE_MA35D1_SUBM)
+#if defined(USE_MA35_RTP)
     return (SYS->RLKSUBM == 0) ? 1 : 0;
 #else
     return (SYS->RLKTZS == 0) ? 1 : 0;

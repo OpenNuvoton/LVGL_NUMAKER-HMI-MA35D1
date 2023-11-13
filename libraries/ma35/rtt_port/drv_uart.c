@@ -750,7 +750,7 @@ static uint32_t nu_uart_flush(nu_uart_t psNuUart, uint32_t pdma_new_rxsize)
     if ( pdma_new_rxsize > 0 )
     {
         nu_pdma_desc_t psDesc = nu_pdma_get_channel_desc(psNuUart->pdma_chanid_rx);
-        #if !defined(USE_MA35D1_SUBM)
+        #if !defined(USE_MA35_RTP)
             uint8_t *pu8DmaBuf_noncache = (uint8_t *)(psDesc->DA + UNCACHEABLE);
         #else
             uint8_t *pu8DmaBuf_noncache = (uint8_t *)(psDesc->DA);

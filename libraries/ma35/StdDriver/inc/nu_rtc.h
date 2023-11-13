@@ -15,7 +15,7 @@ extern "C"
 
 #include "NuMicro.h"
 
-#if defined(USE_MA35D1_SUBM)
+#if defined(USE_MA35_RTP)
 #define REG_RTC_TALM     RTC->TALM_M
 #define REG_RTC_CALM     RTC->CALM_M
 #define REG_RTC_INTEN    RTC->INTEN_M

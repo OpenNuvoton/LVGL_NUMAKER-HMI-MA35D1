@@ -11,6 +11,7 @@
 ******************************************************************************/
 
 #include <rtthread.h>
+#include <rtdevice.h>
 
 #include "ccap_sensor.h"
 
@@ -378,7 +379,7 @@ static const sensor_priv hm1055_priv =
     .PwrDwnActLow    = RT_FALSE,
 };
 
-ccap_sensor_dev_t nu_create_hm1055(ccap_sensor_io *psIo, const char *szName)
+static ccap_sensor_dev_t nu_create_hm1055(ccap_sensor_io *psIo, const char *szName)
 {
     rt_err_t ret;
     ccap_sensor_dev_t pdev = rt_malloc(sizeof(ccap_sensor_dev));
@@ -399,3 +400,9 @@ ccap_sensor_dev_t nu_create_hm1055(ccap_sensor_io *psIo, const char *szName)
     return pdev;
 }
 
+static int nu_sensor_hm1055_init(void)
+{
+    g_pfnSensorCreateList[evCCAPSNR_HM1055] = nu_create_hm1055;
+    return 0;
+}
+INIT_BOARD_EXPORT(nu_sensor_hm1055_init);

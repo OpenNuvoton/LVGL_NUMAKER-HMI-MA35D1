@@ -13,9 +13,9 @@ if not GetDepend('BSP_USE_STDDRIVER_SOURCE'):
     if rtconfig.CROSS_TOOL == 'keil':
         if GetOption('target') == 'mdk5' and os.path.isfile('./lib/libstddriver_keil.lib'):
             libs += ['libstddriver_keil']
-    elif rtconfig.CROSS_TOOL == 'gcc' and os.path.isfile('./lib/libstddriver_gcc_CM4.a') and GetDepend('USE_MA35D1_SUBM'):
+    elif rtconfig.CROSS_TOOL == 'gcc' and os.path.isfile('./lib/libstddriver_gcc_CM4.a') and GetDepend('USE_MA35_RTP'):
         libs += ['libstddriver_gcc_CM4']
-    elif rtconfig.CROSS_TOOL == 'gcc' and os.path.isfile('./lib/libstddriver_gcc_CA35.a') and GetDepend('USE_MA35D1_AARCH32'):
+    elif rtconfig.CROSS_TOOL == 'gcc' and os.path.isfile('./lib/libstddriver_gcc_CA35.a') and GetDepend('USE_MA35_AARCH32'):
         libs += ['libstddriver_gcc_CA35']
 
 if not libs:

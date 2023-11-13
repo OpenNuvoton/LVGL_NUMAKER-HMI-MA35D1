@@ -322,7 +322,7 @@ void RTC_SetDateAndTime(S_RTC_TIME_DATA_T *sPt)
     }
     else
     {
-#if !defined(USE_MA35D1_SUBM)
+#if !defined(USE_MA35_RTP)
         /*-----------------------------------------------------------------------------------------------------*/
         /* Set RTC 24/12 hour setting and Day of the Week                                                      */
         /*-----------------------------------------------------------------------------------------------------*/
@@ -401,7 +401,7 @@ void RTC_SetAlarmDateAndTime(S_RTC_TIME_DATA_T *sPt)
     }
     else
     {
-#if !defined(USE_MA35D1_SUBM)
+#if !defined(USE_MA35_RTP)
         /*-----------------------------------------------------------------------------------------------------*/
         /* Set RTC 24/12 hour setting and Day of the Week                                                      */
         /*-----------------------------------------------------------------------------------------------------*/
@@ -507,7 +507,7 @@ void RTC_SetTime(uint32_t u32Hour, uint32_t u32Minute, uint32_t u32Second, uint3
     u32RegTIME |= ((u32Second / 10ul) << 4);
     u32RegTIME |= (u32Second % 10ul);
 
-#if !defined(USE_MA35D1_SUBM)
+#if !defined(USE_MA35_RTP)
     /*-----------------------------------------------------------------------------------------------------*/
     /* Set RTC 24/12 hour setting and Day of the Week                                                      */
     /*-----------------------------------------------------------------------------------------------------*/
@@ -580,7 +580,7 @@ void RTC_SetAlarmTime(uint32_t u32Hour, uint32_t u32Minute, uint32_t u32Second, 
     u32RegTALM |= ((u32Second / 10ul) << 4);
     u32RegTALM |= (u32Second % 10ul);
 
-#if !defined(USE_MA35D1_SUBM)
+#if !defined(USE_MA35_RTP)
     /*-----------------------------------------------------------------------------------------------------*/
     /* Set RTC 24/12 hour setting and Day of the Week                                                      */
     /*-----------------------------------------------------------------------------------------------------*/

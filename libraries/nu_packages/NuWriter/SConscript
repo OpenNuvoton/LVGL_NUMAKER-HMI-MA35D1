@@ -5,9 +5,9 @@ from building import *
 
 cwd = GetCurrentDir()
 group = []
-if GetDepend('SOC_SERIES_MA35D1'):
+if GetDepend('USE_MA35_AARCH32'):
 	src = Glob('*.c') + Glob('*.cpp')
 	CPPPATH = [cwd]
-	group = DefineGroup('nu_pkgs_nuwriter', src, depend = [''], CPPPATH = CPPPATH)
+	group = DefineGroup('nu_pkgs_nuwriter', src, depend = ['RT_USING_DFS'], CPPPATH = CPPPATH)
 
 Return('group')

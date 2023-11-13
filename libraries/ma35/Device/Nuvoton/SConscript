@@ -1,0 +1,8 @@
+# RT-Thread building script for bridge
+
+import os
+from building import *
+
+group = SConscript(os.path.join('MA35', 'SConscript'))
+
+Return('group')

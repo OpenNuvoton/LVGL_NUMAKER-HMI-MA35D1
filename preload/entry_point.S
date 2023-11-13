@@ -1,5 +1,6 @@
 .section ".text.entrypoint"
-.globl system_vectors
+.global _start
+.global system_vectors
 
 ma35d1_start:
     .word    0x10000014
@@ -8,15 +9,23 @@ ma35d1_start:
     .word    0xd342fc00
     .word    0x92400400
     .word    0xf1000c1f
-    .word    0x54000741
+    .word    0x54000be1
     .word    0xd539f220
     .word    0xb27a0000
     .word    0xd519f220
     .word    0xd5033fdf
     .word    0xd53800a1
     .word    0x92400421
-    .word    0xb4000041
-    .word    0x14000014
+    .word    0xb4000141
+    .word    0xd503205f
+    .word    0xd2800900
+    .word    0xf2a808c0
+    .word    0xf9400001
+    .word    0xf100003f
+    .word    0x54ffff60
+    .word    0x91001000
+    .word    0xb9000001
+    .word    0x14000012
     .word    0xd2800980
     .word    0xf2a808c0
     .word    0xaa1f03e1
@@ -24,7 +33,7 @@ ma35d1_start:
     .word    0xd282000a
     .word    0xd100054a
     .word    0xf100015f
-    .word    0x54000180
+    .word    0x54000140
     .word    0xd2800900
     .word    0xf2a808c0
     .word    0xaa1403e1
@@ -34,11 +43,40 @@ ma35d1_start:
     .word    0xb9400002
     .word    0xeb02003f
     .word    0x54fffea1
-    .word    0xd503207f
-    .word    0x17ffffff
     .word    0xd2836000
     .word    0xf2a016e0
     .word    0xd51be000
+    .word    0xd2820000
+    .word    0xf2aa1000
+    .word    0x52800069
+    .word    0xb9000009
+    .word    0xb9400409
+    .word    0x1200112a
+    .word    0x340001aa
+    .word    0x9102000b
+    .word    0x52800009
+    .word    0xb8004569
+    .word    0xb8004569
+    .word    0x5100054a
+    .word    0x35ffffca
+    .word    0xd2840001
+    .word    0xf2aa1001
+    .word    0x52800060
+    .word    0xb9000020
+    .word    0x52801000
+    .word    0xb9000420
+    .word    0xd2820000
+    .word    0xf2aa1000
+    .word    0xd2840001
+    .word    0xf2aa1001
+    .word    0x52800009
+    .word    0xb9008009
+    .word    0x52800029
+    .word    0xb9010009
+    .word    0x52803ce9
+    .word    0xb9000029
+    .word    0x52801009
+    .word    0xb9000429
     .word    0xd2a00600
     .word    0xd5181040
     .word    0xaa1f03e0

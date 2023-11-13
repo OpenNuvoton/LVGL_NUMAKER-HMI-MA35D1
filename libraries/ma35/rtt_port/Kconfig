@@ -7,22 +7,22 @@
 
     config BSP_USING_SSPCC
         bool
-        depends on SOC_SERIES_MA35D1 && !USE_MA35D1_SUBM
+        depends on SOC_SERIES_MA35D1 && !USE_MA35_RTP
         default y
 
     config BSP_USING_SSMCC
         bool
-        depends on SOC_SERIES_MA35D1 && !USE_MA35D1_SUBM
+        depends on SOC_SERIES_MA35D1 && !USE_MA35_RTP
         default y
 
     config BSP_USING_UMCTL2
         bool
-        depends on SOC_SERIES_MA35D1 && !USE_MA35D1_SUBM
+        depends on SOC_SERIES_MA35D1 && !USE_MA35_RTP
         default y
 
     config BSP_USING_RTP
         bool "Enable RTP core."
-        depends on SOC_SERIES_MA35D1 && !USE_MA35D1_SUBM
+        depends on SOC_SERIES_MA35D1 && !USE_MA35_RTP
         default y
 
     if BSP_USING_RTP
@@ -31,7 +31,7 @@
             default y
     endif
 
-    config USE_MA35D1_AARCH32
+    config USE_MA35_AARCH32
         bool
         select ARCH_ARM_CORTEX_A
         select RT_USING_GIC_V2
@@ -39,11 +39,11 @@
         select ARCH_ARMV8
         select RT_SMP_AUTO_BOOT
 
-    config USE_MA35D1_AARCH64
+    config USE_MA35_AARCH64
         bool
         select ARCH_ARMV8
 
-    if USE_MA35D1_AARCH64
+    if USE_MA35_AARCH64
         config BSP_USING_GIC
             bool
             default y
@@ -52,7 +52,7 @@
             default y
     endif
 
-    config USE_MA35D1_SUBM
+    config USE_MA35_RTP
         bool
         select ARCH_ARM_CORTEX_M4
 
@@ -61,8 +61,13 @@
 
     config USE_SECONDARY_CORE_AS_PRIMARY
         bool "Use secondary as primary cpu"
-        depends on !USE_MA35D1_SUBM
+        depends on !USE_MA35_RTP
         default n
+
+    config USE_PRELOADER
+        bool "Use Preloader"
+        depends on USE_MA35_AARCH32 && !USE_MA35_RTP
+        default y
 
     config BSP_USE_STDDRIVER_SOURCE
         bool "Build StdDriver source"
@@ -75,11 +80,11 @@
         if BSP_USING_PDMA
             config BSP_USING_PDMA0
                 bool "Enable PDMA0"
-                depends on !USE_MA35D1_SUBM
+                depends on !USE_MA35_RTP
 
             config BSP_USING_PDMA1
                 bool "Enable PDMA1"
-                depends on !USE_MA35D1_SUBM
+                depends on !USE_MA35_RTP
 
             config BSP_USING_PDMA2
                 bool "Enable PDMA2"
@@ -102,7 +107,7 @@
         bool "Enable Ethernet Gigabit MAC Controller(GMAC)"
         select RT_USING_LWIP
         select RT_USING_NETDEV
-        depends on !USE_MA35D1_SUBM
+        depends on !USE_MA35_RTP
 
         if BSP_USING_GMAC
             config BSP_USING_GMAC0
@@ -127,7 +132,7 @@
     menuconfig BSP_USING_ADC
         bool "Enable Analog-to-Digital Converter(ADC)"
         select RT_USING_ADC
-        depends on !USE_MA35D1_SUBM
+        depends on !USE_MA35_RTP
 
         if BSP_USING_ADC
             config BSP_USING_ADC_TOUCH
@@ -139,7 +144,7 @@
     menuconfig BSP_USING_CCAP
         bool "Enable Camera Capture Interface Controller(CCAP)"
         select RT_USING_PIN
-        depends on !USE_MA35D1_SUBM
+        depends on !USE_MA35_RTP
 
         if BSP_USING_CCAP
             config BSP_USING_CCAP0
@@ -169,7 +174,7 @@
 
         config BSP_USING_TMR0
             bool "Enable TIMER0"
-            depends on BSP_USING_TMR && !USE_MA35D1_SUBM
+            depends on BSP_USING_TMR && !USE_MA35_RTP
 
         if BSP_USING_TMR0
             choice
@@ -194,7 +199,7 @@
 
         config BSP_USING_TMR1
             bool "Enable TIMER1"
-            depends on BSP_USING_TMR && !USE_MA35D1_SUBM
+            depends on BSP_USING_TMR && !USE_MA35_RTP
 
         if BSP_USING_TMR1
             choice
@@ -474,7 +479,7 @@
         if BSP_USING_UART
             config BSP_USING_UART0
                 bool "Enable UART0"
-                depends on !USE_MA35D1_SUBM
+                depends on !USE_MA35_RTP
 
             config BSP_USING_UART0_TX_DMA
                 bool "Enable UART0 TX DMA"
@@ -691,7 +696,7 @@
         bool "Enable Secure Digital Host Controller(SDH)"
         select RT_USING_DFS
         select RT_USING_SDIO
-        depends on !USE_MA35D1_SUBM
+        depends on !USE_MA35_RTP
 
         if BSP_USING_SDH
             config BSP_USING_SDH0
@@ -726,7 +731,7 @@
 
             config BSP_USING_EPWM0
                 bool "Enable EPWM0"
-                depends on BSP_USING_EPWM && !USE_MA35D1_SUBM
+                depends on BSP_USING_EPWM && !USE_MA35_RTP
 
             config BSP_USING_EPWM_CAPTURE
                 bool
@@ -751,7 +756,7 @@
 
             config BSP_USING_EPWM1
                 bool "Enable EPWM1"
-                depends on BSP_USING_EPWM && !USE_MA35D1_SUBM
+                depends on BSP_USING_EPWM && !USE_MA35_RTP
 
             if BSP_USING_EPWM1
                 choice
@@ -773,7 +778,7 @@
 
             config BSP_USING_EPWM2
                 bool "Enable EPWM2"
-                depends on BSP_USING_EPWM && !USE_MA35D1_SUBM
+                depends on BSP_USING_EPWM && !USE_MA35_RTP
 
             if BSP_USING_EPWM2
                 choice
@@ -1068,7 +1073,7 @@
 
     config BSP_USING_DISP
         bool "Enable Display"
-        depends on !USE_MA35D1_SUBM
+        depends on !USE_MA35_RTP
         default y
 
         if BSP_USING_DISP
@@ -1143,13 +1148,13 @@
             config BSP_USING_WDT0
             bool "Enable WDT0"
             select RT_USING_WATCHDOG
-            depends on !USE_MA35D1_SUBM
+            depends on !USE_MA35_RTP
             default n
 
             config BSP_USING_WDT1
             bool "Enable WDT1"
             select RT_USING_WATCHDOG
-            depends on !USE_MA35D1_SUBM
+            depends on !USE_MA35_RTP
             default n
 
             config BSP_USING_WDT2
@@ -1179,18 +1184,18 @@
 
             config BSP_USING_WHC1
             bool "Enable WHC1"
-            depends on !USE_MA35D1_SUBM
+            depends on !USE_MA35_RTP
             default n
         endif
 
     config BSP_USING_VDE
         bool "Enable Video Decoding Engine(VDE)"
-        depends on !USE_MA35D1_SUBM
+        depends on !USE_MA35_RTP
         default n
 
     config BSP_USING_NFI
         bool "Enable Raw NAND flash Interface(NFI)"
-        depends on !USE_MA35D1_SUBM
+        depends on !USE_MA35_RTP
         default y
 
     config BSP_USING_EBI
@@ -1201,7 +1206,7 @@
         bool "Enable USB Host Controller(USBH)"
         select RT_USING_USB_HOST
         select RT_USBH_MSTORAGE
-        depends on !USE_MA35D1_SUBM
+        depends on !USE_MA35_RTP
 
         if BSP_USING_USBH
             config BSP_USING_HSUSBH0

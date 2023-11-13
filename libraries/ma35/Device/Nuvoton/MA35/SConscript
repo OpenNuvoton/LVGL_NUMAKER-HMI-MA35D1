@@ -1,0 +1,22 @@
+import rtconfig
+Import('RTT_ROOT')
+from building import *
+
+# get current directory
+cwd = GetCurrentDir()
+src = []
+
+src += ['Source/system_ma35.c']
+if GetDepend('USE_MA35_RTP') and GetDepend('SOC_SERIES_MA35D1'):
+    if rtconfig.CROSS_TOOL == 'gcc':
+        src = src + ['Source/GCC/startup_ma35_rtp.S']
+    elif rtconfig.CROSS_TOOL == 'keil':
+        src = src + ['Source/ARM/startup_ma35_rtp.s']
+    elif rtconfig.CROSS_TOOL == 'iar':
+        src = src + ['Source/IAR/startup_ma35_rtp.s']
+
+path = [cwd + '/Include',]
+
+group = DefineGroup('Drivers', src, depend = [''], CPPPATH = path)
+
+Return('group')

@@ -72,11 +72,13 @@ const struct dfs_mount_tbl mount_table[] =
 #endif
 
 #if defined(BSP_USING_SDH0)
+    { "sd0",   "/mnt/sd0",   "elm", 0, RT_NULL },
     { "sd0p0", "/mnt/sd0p0", "elm", 0, RT_NULL },
     { "sd0p1", "/mnt/sd0p1", "elm", 0, RT_NULL },
 #endif
 
 #if defined(BSP_USING_SDH1)
+    { "sd1",   "/mnt/sd1",   "elm", 0, RT_NULL },
     { "sd1p0", "/mnt/sd1p0", "elm", 0, RT_NULL },
     { "sd1p1", "/mnt/sd1p1", "elm", 0, RT_NULL },
 #endif
@@ -262,11 +264,13 @@ int filesystem_init(void)
 #endif
 
 #if defined(BSP_USING_SDH0)
+            mkdir_p("/mnt/sd0", 0x777);
             mkdir_p("/mnt/sd0p0", 0x777);
             mkdir_p("/mnt/sd0p1", 0x777);
 #endif
 
 #if defined(BSP_USING_SDH1)
+            mkdir_p("/mnt/sd1", 0x777);
             mkdir_p("/mnt/sd1p0", 0x777);
             mkdir_p("/mnt/sd1p1", 0x777);
 #endif

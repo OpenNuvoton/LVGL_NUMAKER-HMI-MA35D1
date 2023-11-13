@@ -20,6 +20,8 @@
 #define DBG_COLOR
 #include <rtdbg.h>
 
+nu_create_sensor_t g_pfnSensorCreateList[evCCAPSNR_CNT] = {0};
+
 rt_err_t ccap_sensor_i2c_write(struct rt_i2c_bus_device *i2cdev, rt_uint16_t addr, rt_uint8_t *puBuf, int i32BufLen)
 {
     struct rt_i2c_msg msg;
@@ -142,7 +144,7 @@ static rt_err_t ccap_sensor_setpower(ccap_sensor_dev *pdev, rt_bool_t bOn)
         return RT_EOK;
     }
     else
-        LOG_I("sensor power pin: %d, Active low: %s", psIo->PwrDwnPin, bOn ? "TRUE" : "FALSE");
+        LOG_I("sensor power pin: %d, Active low: %s", psIo->PwrDwnPin, psSensorPriv->PwrDwnActLow ? "TRUE" : "FALSE");
 
     rt_pin_mode(psIo->PwrDwnPin, PIN_MODE_OUTPUT);
 
@@ -407,20 +409,9 @@ rt_err_t nu_ccap_sensor_create(ccap_sensor_io *psIo, ccap_sensor_id evSensorId, 
 
     RT_ASSERT(psIo);
     RT_ASSERT((evSensorId >= 0) && (evSensorId < evCCAPSNR_CNT));
+    RT_ASSERT(g_pfnSensorCreateList[evSensorId] != RT_NULL);
 
-    switch (evSensorId)
-    {
-    case evCCAPSNR_HM1055:
-        pdev = nu_create_hm1055(psIo, szName);
-        break;
-
-    case evCCAPSNR_ADV728X:
-        pdev = nu_create_adv728x(psIo, szName);
-        break;
-
-    default:
-        break;
-    }
+    pdev = g_pfnSensorCreateList[evSensorId](psIo, szName);
 
     if (pdev != RT_NULL)
     {

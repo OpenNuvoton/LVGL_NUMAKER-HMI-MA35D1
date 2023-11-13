@@ -28,7 +28,7 @@
 #endif
 
 /* To select the first PDMA base */
-#if !defined(USE_MA35D1_SUBM)
+#if !defined(USE_MA35_RTP)
     #define DEF_PDMA_BASE_START   PDMA0_BASE
 #else
     #define DEF_PDMA_BASE_START   PDMA2_BASE
@@ -782,7 +782,7 @@ static void _nu_pdma_transfer(int i32ChannID, uint32_t u32Peripheral, nu_pdma_de
     PDMA_T *PDMA = NU_PDMA_GET_BASE(i32ChannID);
     nu_pdma_chn_t *psPdmaChann = &nu_pdma_chn_arr[i32ChannID - NU_PDMA_CH_Pos];
 
-#if !defined(USE_MA35D1_SUBM)
+#if !defined(USE_MA35_RTP)
     /* Writeback data in dcache to memory before transferring. */
     {
         static uint32_t bNonCacheAlignedWarning = 1;
